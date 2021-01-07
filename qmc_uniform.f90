@@ -3,9 +3,9 @@ subroutine uniform_montecarlo(a,nmax,energy)
   double precision, intent(in)  :: a
   integer         , intent(in)  :: nmax 
   double precision, intent(out) :: energy
-  
+
   integer*8 :: istep
-  
+
   double precision :: norm, r(3), w
 
   double precision, external :: e_loc, psi
