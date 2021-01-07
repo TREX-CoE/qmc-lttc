@@ -53,5 +53,5 @@ program variance_hydrogen
      s2 = s2 / norm
      print *, 'a = ', a(j), ' E = ', energy, ' s2 = ', s2
   end do
-  
+
 end program variance_hydrogen

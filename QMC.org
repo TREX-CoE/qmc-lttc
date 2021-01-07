@@ -1,9 +1,7 @@
 #+TITLE: Quantum Monte Carlo
 #+AUTHOR: Anthony Scemama, Claudia Filippi
 #+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
-
 #+STARTUP: latexpreview
-#+STARTUP: indent
 
 
 * Introduction
@@ -33,162 +31,160 @@ can be chosen.
 
 * Numerical evaluation of the energy
 
-  In this section we consider the Hydrogen atom with the following
-  wave function:
+In this section we consider the Hydrogen atom with the following
+wave function:
 
-  $$
-  \Psi(\mathbf{r}) = \exp(-a |\mathbf{r}|)
-  $$
+$$
+\Psi(\mathbf{r}) = \exp(-a |\mathbf{r}|)
+$$
 
-  We will first verify that $\Psi$ is an eigenfunction of the Hamiltonian
+We will first verify that $\Psi$ is an eigenfunction of the Hamiltonian
 
-  $$
-  \hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
-  $$
+$$
+\hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
+$$
 
-  when $a=1$, by checking that $\hat{H}\Psi(\mathbf{r}) = E\Psi(\mathbf{r})$ for
-  all $\mathbf{r}$: we will check that the local energy, defined as
+when $a=1$, by checking that $\hat{H}\Psi(\mathbf{r}) = E\Psi(\mathbf{r})$ for
+all $\mathbf{r}$: we will check that the local energy, defined as
 
-  $$
-  E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
-  $$
+$$
+E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
+$$
 
-  is constant.
+is constant.
 
   
 ** Local energy
 :PROPERTIES:
 :header-args:python: :tangle hydrogen.py
-:header-args:f90:    :tangle hydrogen.f90
+:header-args:f90: :tangle hydrogen.f90
 :END:
 *** Write a function which computes the potential at $\mathbf{r}$
-   The function accepts q 3-dimensional vector =r= as input arguments
-   and returns the potential.
+The function accepts a 3-dimensional vector =r= as input arguments
+and returns the potential.
 
-   $\mathbf{r}=\sqrt{x^2 + y^2 + z^2})$, so
-   $$
-   V(x,y,z) = -\frac{1}{\sqrt{x^2 + y^2 + z^2})$
-   $$
+$\mathbf{r}=\sqrt{x^2 + y^2 + z^2})$, so
+$$
+V(x,y,z) = -\frac{1}{\sqrt{x^2 + y^2 + z^2})$
+$$
 
-   #+BEGIN_SRC python 
+#+BEGIN_SRC python :results none
 import numpy as np
 
 def potential(r):
     return -1. / np.sqrt(np.dot(r,r))
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC f90 
+
+#+BEGIN_SRC f90 
 double precision function potential(r)
   implicit none
   double precision, intent(in) :: r(3)
   potential = -1.d0 / dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) )
 end function potential
-   #+END_SRC
+#+END_SRC
 
 *** Write a function which computes the wave function at $\mathbf{r}$
-   The function accepts a scalar =a= and a 3-dimensional vector =r= as
-   input arguments, and returns a scalar.
+The function accepts a scalar =a= and a 3-dimensional vector =r= as
+input arguments, and returns a scalar.
 
-   #+BEGIN_SRC python 
+#+BEGIN_SRC python :results none
 def psi(a, r):
     return np.exp(-a*np.sqrt(np.dot(r,r)))
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC f90 
+#+BEGIN_SRC f90 
 double precision function psi(a, r)
   implicit none
   double precision, intent(in) :: a, r(3)
   psi = dexp(-a * dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
 end function psi
-   #+END_SRC
+#+END_SRC
      
 *** Write a function which computes the local kinetic energy at $\mathbf{r}$
-   The function accepts =a= and =r= as input arguments and returns the
-   local kinetic energy.
+The function accepts =a= and =r= as input arguments and returns the
+local kinetic energy.
 
-   The local kinetic energy is defined as $$-\frac{1}{2}\frac{\Delta \Psi}{\Psi}$$.
+The local kinetic energy is defined as $$-\frac{1}{2}\frac{\Delta \Psi}{\Psi}$$.
      
-   $$
-   \Psi(x,y,z) = \exp(-a\,\sqrt{x^2 + y^2 + z^2}).
-   $$
+$$
+\Psi(x,y,z) = \exp(-a\,\sqrt{x^2 + y^2 + z^2}).
+$$
 
-   We differentiate $\Psi$ with respect to $x$:
+We differentiate $\Psi$ with respect to $x$:
      
-   $$
-   \frac{\partial \Psi}{\partial x}
-   = \frac{\partial \Psi}{\partial r} \frac{\partial r}{\partial x}   
-   = - \frac{a\,x}{|\mathbf{r}|} \Psi(x,y,z) 
-   $$
+$$
+\frac{\partial \Psi}{\partial x}
+= \frac{\partial \Psi}{\partial r} \frac{\partial r}{\partial x}   
+= - \frac{a\,x}{|\mathbf{r}|} \Psi(x,y,z) 
+$$
 
-   and we differentiate a second time:
+and we differentiate a second time:
 
-   $$
-   \frac{\partial^2 \Psi}{\partial x^2} =
-   \left( \frac{a^2\,x^2}{|\mathbf{r}|^2}  - \frac{a(y^2+z^2)}{|\mathbf{r}|^{3}} \right) \Psi(x,y,z).
-   $$
+$$
+\frac{\partial^2 \Psi}{\partial x^2} =
+\left( \frac{a^2\,x^2}{|\mathbf{r}|^2}  - \frac{a(y^2+z^2)}{|\mathbf{r}|^{3}} \right) \Psi(x,y,z).
+$$
 
-   The Laplacian operator $\Delta = \frac{\partial^2}{\partial x^2} +
-   \frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}$
-   applied to the wave function gives:
+The Laplacian operator $\Delta = \frac{\partial^2}{\partial x^2} +
+\frac{\partial^2}{\partial y^2} + \frac{\partial^2}{\partial z^2}$
+applied to the wave function gives:
 
-   $$
-   \Delta \Psi (x,y,z) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(x,y,z)
-   $$
+$$
+\Delta \Psi (x,y,z) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(x,y,z)
+$$
 
-   So the local kinetic energy is
-   $$
-   -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (x,y,z) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
-   $$
+So the local kinetic energy is
+$$
+-\frac{1}{2} \frac{\Delta \Psi}{\Psi} (x,y,z) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
+$$
      
-   #+BEGIN_SRC python 
+#+BEGIN_SRC python :results none
 def kinetic(a,r):
     return -0.5 * (a**2 - (2.*a)/np.sqrt(np.dot(r,r)))
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC f90 
+#+BEGIN_SRC f90 
 double precision function kinetic(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
   kinetic = -0.5d0 * (a*a - (2.d0*a) / &
        dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ) ) 
 end function kinetic
-   #+END_SRC
+#+END_SRC
 
 *** Write a function which computes the local energy at $\mathbf{r}$
-   The function accepts =x,y,z= as input arguments and returns the
-   local energy.
+The function accepts =x,y,z= as input arguments and returns the
+local energy.
    
-   $$
-   E_L(x,y,z) = -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (x,y,z) + V(x,y,z)
-   $$
+$$
+E_L(x,y,z) = -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (x,y,z) + V(x,y,z)
+$$
 
-   #+BEGIN_SRC python
+#+BEGIN_SRC python :results none
 def e_loc(a,r):
     return kinetic(a,r) + potential(r)
-   #+END_SRC
+#+END_SRC
 
-   #+BEGIN_SRC f90
+#+BEGIN_SRC f90
 double precision function e_loc(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
   double precision, external   :: kinetic, potential
   e_loc = kinetic(a,r) + potential(r)
 end function e_loc
-   #+END_SRC
+#+END_SRC
    
 ** Plot the local energy along the x axis
 :PROPERTIES:
 :header-args:python: :tangle plot_hydrogen.py
-:header-args:f90:    :tangle plot_hydrogen.f90
-:END:
-:LOGBOOK:
-CLOCK: [2021-01-03 Sun 17:48]
+:header-args:f90: :tangle plot_hydrogen.f90
 :END:
 
 For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
 local energy along the $x$ axis.
 
-#+begin_src python 
+#+begin_src python :results output
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -211,6 +207,8 @@ plt.legend()
 
 plt.savefig("plot_py.png")
 #+end_src
+
+#+RESULTS:
 
 [[./plot_py.png]]
 
@@ -275,36 +273,35 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 ** Compute numerically the average energy
 :PROPERTIES:
 :header-args:python: :tangle energy_hydrogen.py
-:header-args:f90:    :tangle energy_hydrogen.f90
+:header-args:f90: :tangle energy_hydrogen.f90
 :END:
 
-   We want to compute
+We want to compute
 
-   \begin{eqnarray}
-   E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} \\
-     & = & \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
-     & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
-   \end{eqnarray}
+\begin{eqnarray}
+E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} \\
+  & = & \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
+  & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
+\end{eqnarray}
 
-   If the space is discretized in small volume elements
-   $\delta x\, \delta y\, \delta z$, this last equation corresponds
-   to a weighted average of the local energy, where the weights are
-   the values of the square of the wave function at $(x,y,z)$
-   multiplied by the volume element:
+If the space is discretized in small volume elements $\delta
+\mathbf{r}$, this last equation corresponds to a weighted average of
+the local energy, where the weights are the values of the square of
+the wave function at $\mathbf{r}$ multiplied by the volume element:
      
-   $$
-   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \left[\Psi(\mathbf{r}_i)\right]^2 \delta x\, \delta y\, \delta z
-   $$
+$$
+E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
+w_i = \left[\Psi(\mathbf{r}_i)\right]^2 \delta \mathbf{r}
+$$
      
-   We now compute an numerical estimate of the energy in a grid of
-   $50\times50\times50$ points in the range    $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
+We now compute an numerical estimate of the energy in a grid of
+$50\times50\times50$ points in the range    $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
 
-   Note: the energy is biased because:
-   - The energy is evaluated only inside the box
-   - The volume elements are not infinitely small
-     
-   #+BEGIN_SRC python :results output :exports both
+Note: the energy is biased because:
+  - The energy is evaluated only inside the box
+  - The volume elements are not infinitely small
+
+    #+BEGIN_SRC python :results output :exports both
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -314,31 +311,32 @@ delta = (interval[1]-interval[0])**3
 r = np.array([0.,0.,0.])
 
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
-    E = 0.
-    norm = 0.
-    for x in interval:
-        r[0] = x
-        for y in interval:
-            r[1] = y
-            for z in interval:
-                r[2] = z
-                w = psi(a,r)
-                w = w * w * delta
-                E    += w * e_loc(a,r)
-                norm += w 
-    E = E / norm
-    print(f"a = {a} \t E = {E}")                
-                
-   #+end_src
-   
-   #+RESULTS:
-   : a = 0.1 	 E = -0.24518438948809218
-   : a = 0.2 	 E = -0.26966057967803525
-   : a = 0.5 	 E = -0.3856357612517407
-   : a = 0.9 	 E = -0.49435709786716214
-   : a = 1.0 	 E = -0.5
-   : a = 1.5 	 E = -0.39242967082602226
-   : a = 2.0 	 E = -0.08086980667844901
+      E = 0.
+      norm = 0.
+      for x in interval:
+            r[0] = x
+            for y in interval:
+                  r[1] = y
+                  for z in interval:
+                        r[2] = z
+                        w = psi(a,r)
+                        w = w * w * delta
+                        E    += w * e_loc(a,r)
+                        norm += w 
+      E = E / norm
+      print(f"a = {a} \t E = {E}")                
+
+    #+end_src
+
+    #+RESULTS:
+    : a = 0.1 	 E = -0.24518438948809218
+    : a = 0.2 	 E = -0.26966057967803525
+    : a = 0.5 	 E = -0.3856357612517407
+    : a = 0.9 	 E = -0.49435709786716214
+    : a = 1.0 	 E = -0.5
+    : a = 1.5 	 E = -0.39242967082602226
+    : a = 2.0 	 E = -0.08086980667844901
+
 
 #+begin_src f90 
 program energy_hydrogen
@@ -400,23 +398,23 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 ** Compute the variance of the local energy
 :PROPERTIES:
 :header-args:python: :tangle variance_hydrogen.py
-:header-args:f90:    :tangle variance_hydrogen.f90
+:header-args:f90: :tangle variance_hydrogen.f90
 :END:
 
-   The variance of the local energy measures the intensity of the
-   fluctuations of the local energy around the average. If the local
-   energy is constant (i.e. $\Psi$ is an eigenfunction of $\hat{H}$)
-   the variance is zero.
+The variance of the local energy measures the magnitude of the
+fluctuations of the local energy around the average. If the local
+energy is constant (i.e. $\Psi$ is an eigenfunction of $\hat{H}$)
+the variance is zero.
 
-   $$
-   \sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
-   E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
-   $$
+$$
+\sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
+E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
+$$
 
-   Compute an numerical estimate of the variance of the local energy
-   in a grid of $50\times50\times50$ points in the range    $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
+Compute a numerical estimate of the variance of the local energy
+in a grid of $50\times50\times50$ points in the range  $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
      
-   #+BEGIN_SRC python :results output :exports both
+#+BEGIN_SRC python :results output :exports both
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -450,20 +448,20 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 w = psi(a, r)
                 w = w * w * delta
                 El = e_loc(a, r)
-                s2   += w * (El - E)**2
+                s2 += w * (El - E)**2
     s2 = s2 / norm
     print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
                 
-   #+end_src
+#+end_src
 
-   #+RESULTS:
-   : a = 0.1 	 E = -0.24518439  	  \sigma^2 = 0.02696522
-   : a = 0.2 	 E = -0.26966058  	  \sigma^2 = 0.03719707
-   : a = 0.5 	 E = -0.38563576  	  \sigma^2 = 0.05318597
-   : a = 0.9 	 E = -0.49435710  	  \sigma^2 = 0.00577812
-   : a = 1.0 	 E = -0.50000000  	  \sigma^2 = 0.00000000
-   : a = 1.5 	 E = -0.39242967  	  \sigma^2 = 0.31449671
-   : a = 2.0 	 E = -0.08086981  	  \sigma^2 = 1.80688143
+#+RESULTS:
+: a = 0.1 	 E = -0.24518439  	  \sigma^2 = 0.02696522
+: a = 0.2 	 E = -0.26966058  	  \sigma^2 = 0.03719707
+: a = 0.5 	 E = -0.38563576  	  \sigma^2 = 0.05318597
+: a = 0.9 	 E = -0.49435710  	  \sigma^2 = 0.00577812
+: a = 1.0 	 E = -0.50000000  	  \sigma^2 = 0.00000000
+: a = 1.5 	 E = -0.39242967  	  \sigma^2 = 0.31449671
+: a = 2.0 	 E = -0.08086981  	  \sigma^2 = 1.80688143
 
 #+begin_src f90 
 program variance_hydrogen
@@ -521,7 +519,7 @@ program variance_hydrogen
      s2 = s2 / norm
      print *, 'a = ', a(j), ' E = ', energy, ' s2 = ', s2
   end do
-  
+
 end program variance_hydrogen
 #+end_src
 
@@ -543,15 +541,21 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 
 * Variational Monte Carlo
 
-  Instead of computing the average energy as a numerical integration
-  on a grid, we will do a Monte Carlo sampling, which is an extremely
-  efficient method to compute integrals in large dimensions.
+Instead of computing the average energy as a numerical integration
+on a grid, we will do a Monte Carlo sampling, which is an extremely
+efficient method to compute integrals when the number of dimensions is
+large.
 
-  Moreover, a Monte Carlo sampling will alow us to remove the bias due
-  to the discretization of space, and compute a statistical confidence
-  interval.
+Moreover, a Monte Carlo sampling will alow us to remove the bias due
+to the discretization of space, and compute a statistical confidence
+interval.
   
+
 ** Computation of the statistical error
+:PROPERTIES:
+:header-args:python: :tangle qmc_stats.py
+:header-args:f90: :tangle qmc_stats.f90
+:END:
 
 To compute the statistical error, you need to perform $M$
 independent Monte Carlo calculations. You will obtain $M$ different
@@ -579,7 +583,8 @@ $$
 Write a function returning the average and statistical error of an
 input array.
 
-#+BEGIN_SRC python :results output
+#+BEGIN_SRC python
+from math import sqrt
 def ave_error(arr):
     M = len(arr)
     assert (M>1)
@@ -588,28 +593,53 @@ def ave_error(arr):
     return (average, sqrt(variance/M))
 #+END_SRC
 
-#+RESULTS:
+#+BEGIN_SRC f90
+subroutine ave_error(x,n,ave,err)
+  implicit none
+  integer, intent(in)           :: n 
+  double precision, intent(in)  :: x(n) 
+  double precision, intent(out) :: ave, err
+  double precision :: variance
+  if (n == 1) then
+     ave = x(1)
+     err = 0.d0
+  else
+     ave = sum(x(:)) / dble(n)
+     variance = sum( (x(:) - ave)**2 ) / dble(n-1)
+     err = dsqrt(variance/dble(n))
+  endif
+end subroutine ave_error
+#+END_SRC
    
 ** Uniform sampling in the box
+:PROPERTIES:
+:header-args:python: :tangle qmc_uniform.py
+:header-args:f90: :tangle qmc_uniform.f90
+:END:
 
-   Write a function to perform a Monte Carlo calculation of the
-   average energy. At every Monte Carlo step,
+In this section we write a function to perform a Monte Carlo
+calculation of the average energy.
+At every Monte Carlo step:
 
-   - Draw 3 uniform random numbers in the interval $(-5,-5,-5) \le
-     (x,y,z) \le (5,5,5)$
-   - Compute $\Psi^2 \times E_L$ at this point and accumulate the
-     result in E
-   - Compute $\Psi^2$  at this point and accumulate the result in N
+- Draw 3 uniform random numbers in the interval $(-5,-5,-5) \le
+  (x,y,z) \le (5,5,5)$
+- Compute $\Psi^2 \times E_L$ at this point and accumulate the
+  result in E
+- Compute $\Psi^2$  at this point and accumulate the result in N
 
-   Once all the steps have been computed, return the average energy
-   computed on the Monte Carlo calculation.
+  Once all the steps have been computed, return the average energy
+  computed on the Monte Carlo calculation.
 
-   Then, write a loop to perform 30 Monte Carlo runs, and compute the
-   average energy and the associated statistical error.
+  In the main program, write a loop to perform 30 Monte Carlo runs,
+  and compute the average energy and the associated statistical error.
 
-   Compute the energy of the wave function with $a=0.9$.
+  Compute the energy of the wave function with $a=0.9$.
    
-   #+BEGIN_SRC python 
+
+  #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
 def MonteCarlo(a, nmax):
     E = 0.
     N = 0.
@@ -620,53 +650,103 @@ def MonteCarlo(a, nmax):
         N += w
         E += w * e_loc(a,r)
     return E/N
-   #+END_SRC
 
-   #+BEGIN_SRC python 
 a = 0.9
 nmax = 100000
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
-   #+END_SRC
+  #+END_SRC
 
-   #+RESULTS:
-   : E = -0.4952626284319677 +/- 0.0006877988969872546
+  #+RESULTS:
+  : E = -0.4956255109300764 +/- 0.0007082875482711226
    
+#+BEGIN_SRC f90
+subroutine uniform_montecarlo(a,nmax,energy)
+  implicit none
+  double precision, intent(in)  :: a
+  integer         , intent(in)  :: nmax 
+  double precision, intent(out) :: energy
+  
+  integer*8 :: istep
+  
+  double precision :: norm, r(3), w
+
+  double precision, external :: e_loc, psi
+
+  energy = 0.d0
+  norm   = 0.d0
+  do istep = 1,nmax
+     call random_number(r)
+     r(:) = -5.d0 + 10.d0*r(:)
+     w = psi(a,r)
+     w = w*w
+     norm = norm + w
+     energy = energy + w * e_loc(a,r)
+  end do
+  energy = energy / norm
+end subroutine uniform_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  integer         , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call uniform_montecarlo(a,nmax,X(irun))
+  enddo
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+end program qmc
+#+END_SRC
+
+#+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
+./qmc_uniform
+#+end_src
+
+#+RESULTS:
+:  E =  -0.49588321986667677      +/-   7.1758863546737969E-004
+
 ** Gaussian sampling 
 
-   We will now improve the sampling and allow to sample in the whole
-   3D space, correcting the bias related to the sampling in the box.
+We will now improve the sampling and allow to sample in the whole
+3D space, correcting the bias related to the sampling in the box.
 
-   Instead of drawing uniform random numbers, we will draw Gaussian
-   random numbers centered on 0 and with a variance of 1. Now the
-   equation for the energy is changed into
+Instead of drawing uniform random numbers, we will draw Gaussian
+random numbers centered on 0 and with a variance of 1. Now the
+equation for the energy is changed into
    
-   \[
-   E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
-   \]
-   with
-   \[
-   P(\mathbf{r}) = \frac{1}{(2 \pi)^{3/2}}\exp\left( -\frac{\mathbf{r}^2}{2} \right)
-   \]
+\[
+E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
+\]
+with
+\[
+P(\mathbf{r}) = \frac{1}{(2 \pi)^{3/2}}\exp\left( -\frac{\mathbf{r}^2}{2} \right)
+\]
 
-   As the coordinates are drawn with probability $P(\mathbf{r})$, the
-   average energy can be computed as
+As the coordinates are drawn with probability $P(\mathbf{r})$, the
+average energy can be computed as
 
-   $$
-   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r})} \delta x\, \delta y\, \delta z
-   $$
+$$
+E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
+w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
+$$
 
-   #+BEGIN_SRC python
+#+BEGIN_SRC python
 norm_gauss = 1./(2.*np.pi)**(1.5)
 def gaussian(r):
   return norm_gauss * np.exp(-np.dot(r,r)*0.5)
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
+#+RESULTS:
 
-   #+BEGIN_SRC python
+#+BEGIN_SRC python
 def MonteCarlo(a,nmax):
     E = 0.
     N = 0.
@@ -677,58 +757,58 @@ def MonteCarlo(a,nmax):
         N += w
         E += w * e_loc(a,r)
     return E/N
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
+#+RESULTS:
 
-   #+BEGIN_SRC python :results output
+#+BEGIN_SRC python :results output
 a = 0.9
 nmax = 100000
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
-   : E = -0.4952488228427792 +/- 0.00011913174676540714
+#+RESULTS:
+: E = -0.4952488228427792 +/- 0.00011913174676540714
    
 ** Sampling with $\Psi^2$
 
-   We will now use the square of the wave function to make the sampling:
+We will now use the square of the wave function to make the sampling:
 
-   \[
-   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
-   \]
+\[
+P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
+\]
 
-   Now, the expression for the energy will be simplified to the
-   average of the local energies, each with a weight of 1.
+Now, the expression for the energy will be simplified to the
+average of the local energies, each with a weight of 1.
 
-   $$
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)}
-   $$
+$$
+E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)}
+$$
    
-   To generate the probability density $\Psi^2$, we can use a drifted
-   diffusion scheme:
+To generate the probability density $\Psi^2$, we can use a drifted
+diffusion scheme:
 
-   \[
-   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \frac{\nabla
-   \Psi(r)}{\Psi(r)} + \eta \sqrt{\tau} 
-   \]
+\[
+\mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \frac{\nabla
+\Psi(r)}{\Psi(r)} + \eta \sqrt{\tau} 
+\]
 
-   where $\eta$ is a normally-distributed Gaussian random number.
+where $\eta$ is a normally-distributed Gaussian random number.
    
 
-   First, write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
+First, write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
    
-   #+BEGIN_SRC python
+#+BEGIN_SRC python
 def drift(a,r):
   ar_inv = -a/np.sqrt(np.dot(r,r))
   return r * ar_inv
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
+#+RESULTS:
 
-   #+BEGIN_SRC python 
+#+BEGIN_SRC python 
 def MonteCarlo(a,tau,nmax):
     E = 0.
     N = 0.
@@ -753,36 +833,36 @@ def MonteCarlo(a,tau,nmax):
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-        N += 1.
-        E += e_loc(a,r_old)
+            N += 1.
+            E += e_loc(a,r_old)
     return E/N
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
+#+RESULTS:
 
-   #+BEGIN_SRC python :results output
+#+BEGIN_SRC python :results output
 nmax = 100000
 tau = 0.1
 X = [MonteCarlo(a,tau,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
-   #+END_SRC
+#+END_SRC
 
-   #+RESULTS:
-   : E = -0.4951783346213532 +/- 0.00022067316984271938
+#+RESULTS:
+: E = -0.4951783346213532 +/- 0.00022067316984271938
    
   
 * Diffusion Monte Carlo
 
- We will now consider the H_2 molecule in a minimal basis composed of the
- $1s$ orbitals of the hydrogen atoms:
+We will now consider the H_2 molecule in a minimal basis composed of the
+$1s$ orbitals of the hydrogen atoms:
 
- $$
- \Psi(\mathbf{r}_1, \mathbf{r}_2) =
- \exp(-(\mathbf{r}_1 - \mathbf{R}_A)) + 
- $$
- where $\mathbf{r}_1$ and $\mathbf{r}_2$ denote the electron
- coordinates and \mathbf{R}_A$ and $\mathbf{R}_B$ the coordinates of
- the nuclei.
+$$
+\Psi(\mathbf{r}_1, \mathbf{r}_2) =
+\exp(-(\mathbf{r}_1 - \mathbf{R}_A)) + 
+$$
+where $\mathbf{r}_1$ and $\mathbf{r}_2$ denote the electron
+coordinates and \mathbf{R}_A$ and $\mathbf{R}_B$ the coordinates of
+the nuclei.
 
 

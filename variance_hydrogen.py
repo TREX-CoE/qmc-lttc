@@ -31,6 +31,6 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 w = psi(a, r)
                 w = w * w * delta
                 El = e_loc(a, r)
-                s2   += w * (El - E)**2
+                s2 += w * (El - E)**2
     s2 = s2 / norm
     print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
