@@ -1,7 +1,12 @@
 #+TITLE: Quantum Monte Carlo
 #+AUTHOR: Anthony Scemama, Claudia Filippi
-#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+# SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+# SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-bigblow.setup
 #+STARTUP: latexpreview
+
+#+HTML_HEAD: <link rel="stylesheet" title="Standard" href="https://orgmode.org/worg/style/worg.css" type="text/css" />
+#+HTML_HEAD: <link rel="alternate stylesheet" title="Zenburn" href="https://orgmode.org/worg/style/worg-zenburn.css" type="text/css" />
+#+HTML_HEAD: <link rel="alternate stylesheet" title="Classic" href="https://orgmode.org/worg/style/worg-classic.css" type="text/css" />
 
 
 * Introduction
@@ -14,10 +19,17 @@
   computes a statistical estimate of the expectation value of the energy
   associated with a given wave function.
   Finally, we introduce the diffusion Monte Carlo (DMC) method which
-  gives the exact energy of the H$_2$ molecule. 
+  gives the exact energy of the $H_2$ molecule. 
 
   Code examples will be given in Python and Fortran. Whatever language
   can be chosen.
+
+  We consider the stationary solution of the Schrödinger equation, so
+  the wave functions considered here are real: for an $N$ electron
+  system where the electrons move in the 3-dimensional space,
+  $\Psi : \mathbb{R}^{3N} \rightarrow \mathbb{R}$. In addition, $\Psi$
+  is defined everywhere, continuous and infinitely differentiable.
+  
 ** Python
 
 ** Fortran
@@ -45,7 +57,7 @@
   $$
 
   when $a=1$, by checking that $\hat{H}\Psi(\mathbf{r}) = E\Psi(\mathbf{r})$ for
-  all $\mathbf{r}$: we will check that the local energy, defined as
+  all $\mathbf{r}$. We will check that the local energy, defined as
 
   $$
   E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
@@ -54,6 +66,30 @@
   is constant.
 
   
+
+  The probabilistic /expected value/ of an arbitrary function $f(x)$
+  with respect to a probability density function $p(x)$ is given by
+
+  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx $$.
+
+  Recall that a probability density function $p(x)$ is non-negative
+  and integrates to one:
+
+  $$ \int_{-\infty}^\infty p(x)\,dx = 1 $$.
+
+    
+  The electronic energy of a system is the expectation value of the
+  local energy $E(\mathbf{r})$ with respect to the $3N$-dimensional
+  electron density given by the square of the wave function:
+
+  \begin{eqnarray}
+  E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} \\
+    & = & \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
+    & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
+    & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
+      =   \langle E_L \rangle_{\Psi^2}
+  \end{eqnarray}
+
 ** Local energy
    :PROPERTIES:
    :header-args:python: :tangle hydrogen.py
@@ -63,9 +99,9 @@
     The function accepts a 3-dimensional vector =r= as input arguments
     and returns the potential.
 
-    $\mathbf{r}=\sqrt{x^2 + y^2 + z^2})$, so
+    $\mathbf{r}=\sqrt{x^2 + y^2 + z^2}$, so
     $$
-    V(x,y,z) = -\frac{1}{\sqrt{x^2 + y^2 + z^2})$
+    V(x,y,z) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}
     $$
 
     #+BEGIN_SRC python :results none
@@ -175,7 +211,7 @@ double precision function e_loc(a,r)
 end function e_loc
     #+END_SRC
    
-** Plot the local energy along the x axis
+** Plot of the local energy along the $x$ axis
    :PROPERTIES:
    :header-args:python: :tangle plot_hydrogen.py
    :header-args:f90: :tangle plot_hydrogen.f90
@@ -184,7 +220,7 @@ end function e_loc
    For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
    local energy along the $x$ axis.
 
-   #+begin_src python :results output
+   #+BEGIN_SRC python :results none
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -270,72 +306,66 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    #+RESULTS:
    [[file:plot.png]]
 
-** Compute numerically the average energy
+** Compute numerically the expectation value of the energy
    :PROPERTIES:
    :header-args:python: :tangle energy_hydrogen.py
    :header-args:f90: :tangle energy_hydrogen.f90
    :END:
 
-   We want to compute
-
-   \begin{eqnarray}
-   E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} \\
-     & = & \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
-     & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
-   \end{eqnarray}
-
    If the space is discretized in small volume elements $\delta
-   \mathbf{r}$, this last equation corresponds to a weighted average of
-   the local energy, where the weights are the values of the square of
-   the wave function at $\mathbf{r}$ multiplied by the volume element:
+   \mathbf{r}$, the expression of \langle E_L \rangle_{\Psi^2}$ becomes
+   a weighted average of the local energy, where the weights are the
+   values of the probability density at $\mathbf{r}$ multiplied
+   by the volume element:
      
    $$
-   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
+   \langle E \rangle_{\Psi^2} \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
    w_i = \left[\Psi(\mathbf{r}_i)\right]^2 \delta \mathbf{r}
    $$
      
-   We now compute an numerical estimate of the energy in a grid of
-   $50\times50\times50$ points in the range    $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
+   In this section, we will compute a numerical estimate of the
+   energy in a grid of $50\times50\times50$ points in the range
+   $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
 
    Note: the energy is biased because:
-   - The energy is evaluated only inside the box
-   - The volume elements are not infinitely small
+   - The volume elements are not infinitely small (discretization error)
+   - The energy is evaluated only inside the box (incompleteness of the space)
 
-     #+BEGIN_SRC python :results output :exports both
+   #+BEGIN_SRC python :results none
 import numpy as np
 from hydrogen import e_loc, psi
 
- interval = np.linspace(-5,5,num=50)
- delta = (interval[1]-interval[0])**3
+interval = np.linspace(-5,5,num=50)
+delta = (interval[1]-interval[0])**3
 
- r = np.array([0.,0.,0.])
+r = np.array([0.,0.,0.])
 
- for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
-     E = 0.
-     norm = 0.
-       for x in interval:
-           r[0] = x
-             for y in interval:
-                 r[1] = y
-                   for z in interval:
-                       r[2] = z
-                       w = psi(a,r)
-                       w = w * w * delta
-                       E    += w * e_loc(a,r)
-                       norm += w 
-                       E = E / norm
-                       print(f"a = {a} \t E = {E}")                
+for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
+    E = 0.
+    norm = 0.
+      for x in interval:
+          r[0] = x
+            for y in interval:
+                r[1] = y
+                  for z in interval:
+                      r[2] = z
+                      w = psi(a,r)
+                      w = w * w * delta
+                      E    += w * e_loc(a,r)
+                      norm += w 
+    E = E / norm
+    print(f"a = {a} \t E = {E}")                
 
-     #+end_src
+   #+end_src
 
-     #+RESULTS:
-     : a = 0.1 	 E = -0.24518438948809218
-     : a = 0.2 	 E = -0.26966057967803525
-     : a = 0.5 	 E = -0.3856357612517407
-     : a = 0.9 	 E = -0.49435709786716214
-     : a = 1.0 	 E = -0.5
-     : a = 1.5 	 E = -0.39242967082602226
-     : a = 2.0 	 E = -0.08086980667844901
+   #+RESULTS:
+   : a = 0.1 	 E = -0.24518438948809218
+   : a = 0.2 	 E = -0.26966057967803525
+   : a = 0.5 	 E = -0.3856357612517407
+   : a = 0.9 	 E = -0.49435709786716214
+   : a = 1.0 	 E = -0.5
+   : a = 1.5 	 E = -0.39242967082602226
+   : a = 2.0 	 E = -0.08086980667844901
 
 
    #+begin_src f90 
@@ -367,7 +397,6 @@ program energy_hydrogen
               r(3) = x(l)
               w = psi(a(j),r)
               w = w * w * delta
-
               energy = energy + w * e_loc(a(j), r)
               norm   = norm   + w 
            end do
@@ -380,7 +409,7 @@ program energy_hydrogen
 end program energy_hydrogen
    #+end_src
 
-   To compile and run:
+   To compile the Fortran and run it:
 
    #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
@@ -401,20 +430,23 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    :header-args:f90: :tangle variance_hydrogen.f90
    :END:
 
-   The variance of the local energy measures the magnitude of the
-   fluctuations of the local energy around the average. If the local
-   energy is constant (i.e. $\Psi$ is an eigenfunction of $\hat{H}$)
-   the variance is zero.
+   The variance of the local energy is a functional of $\Psi$
+   which measures the magnitude of the fluctuations of the local
+   energy associated with $\Psi$ around the average:
 
    $$
    \sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
    E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
    $$
 
+   If the local energy is constant (i.e. $\Psi$ is an eigenfunction of
+   $\hat{H}$) the variance is zero, so the variance of the local
+   energy can be used as a measure of the quality of a wave function.
+
    Compute a numerical estimate of the variance of the local energy
    in a grid of $50\times50\times50$ points in the range  $(-5,-5,-5) \le \mathbf{r} \le (5,5,5)$.
      
-   #+BEGIN_SRC python :results output :exports both
+   #+begin_src python :results none
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -451,7 +483,6 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 s2 += w * (El - E)**2
                 s2 = s2 / norm
                 print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
-                
    #+end_src
 
    #+RESULTS:
@@ -541,6 +572,8 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 
 * Variational Monte Carlo
 
+  Numerical integration with deterministic methods is very efficient
+  in low dimensions. When the number of dimensions becomes larger than 
   Instead of computing the average energy as a numerical integration
   on a grid, we will do a Monte Carlo sampling, which is an extremely
   efficient method to compute integrals when the number of dimensions is
@@ -582,7 +615,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    Write a function returning the average and statistical error of an
    input array.
 
-   #+BEGIN_SRC python
+   #+BEGIN_SRC python :results none
 from math import sqrt
 def ave_error(arr):
     M = len(arr)
@@ -638,23 +671,23 @@ end subroutine ave_error
 from hydrogen  import *
 from qmc_stats import *
 
-   def MonteCarlo(a, nmax):
-       E = 0.
-       N = 0.
-       for istep in range(nmax):
-           r = np.random.uniform(-5., 5., (3))
-           w = psi(a,r)
-           w = w*w
-           N += w
-           E += w * e_loc(a,r)
-       return E/N
+def MonteCarlo(a, nmax):
+     E = 0.
+     N = 0.
+     for istep in range(nmax):
+          r = np.random.uniform(-5., 5., (3))
+          w = psi(a,r)
+          w = w*w
+          N += w
+          E += w * e_loc(a,r)
+   return E/N
 
-   a = 0.9
-   nmax = 100000
-   X = [MonteCarlo(a,nmax) for i in range(30)]
-   E, deltaE = ave_error(X)
-   print(f"E = {E} +/- {deltaE}")
-     #+END_SRC
+a = 0.9
+nmax = 100000
+X = [MonteCarlo(a,nmax) for i in range(30)]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+   #+END_SRC
 
    #+RESULTS:
    : E = -0.4956255109300764 +/- 0.0007082875482711226
@@ -868,7 +901,12 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
 
    #+RESULTS:
    :  E =  -0.49606057056767766      +/-   1.3918807547836872E-004
+
 ** Sampling with $\Psi^2$
+   :PROPERTIES:
+   :header-args:python: :tangle vmc.py
+   :header-args:f90: :tangle vmc.f90
+   :END:
 
    We will now use the square of the wave function to make the sampling:
 
@@ -876,19 +914,79 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
    P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
    \]
 
-   Now, the expression for the energy will be simplified to the
-   average of the local energies, each with a weight of 1.
+   The expression for the energy will be simplified to the average of
+   the local energies, each with a weight of 1.
 
    $$
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)}
+   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
    $$
    
-   To generate the probability density $\Psi^2$, we can use a drifted
-   diffusion scheme:
+   To generate the probability density $\Psi^2$, we consider a
+   diffusion process characterized by a time-dependent density
+   $[\Psi(\mathbf{r},t)]^2$, which obeys the Fokker-Planck equation:
+
+   \[
+   \frac{\partial \Psi^2}{\partial t} = \sum_i D
+   \frac{\partial}{\partial \mathbf{r}_i} \left(
+   \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
+   [\Psi(\mathbf{r},t)]^2.
+   \]
+   
+   $D$ is the diffusion constant and $F_i$ is the i-th component of a
+   drift velocity caused by an external potential. For a stationary
+   density, \( \frac{\partial \Psi^2}{\partial t} = 0 \), so
+
+   \begin{eqnarray*}
+   0 & = & \sum_i D
+   \frac{\partial}{\partial \mathbf{r}_i} \left(
+   \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
+   [\Psi(\mathbf{r})]^2 \\
+   0 & = & \sum_i D
+   \frac{\partial}{\partial \mathbf{r}_i} \left(
+   \frac{\partial [\Psi(\mathbf{r})]^2}{\partial \mathbf{r}_i} -
+   F_i(\mathbf{r})\,[\Psi(\mathbf{r})]^2 \right) \\
+   0 & = &
+   \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} -
+   \frac{\partial   F_i   }{\partial \mathbf{r}_i}[\Psi(\mathbf{r})]^2  - 
+   \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
+   \end{eqnarray*}
+
+   we search for a drift function which satisfies 
+
+   \[
+   \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
+   [\Psi(\mathbf{r})]^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
+   \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
+   \]
+
+   to obtain a second derivative on the left, we need the drift to be
+   of the form
+   \[
+   F_i(\mathbf{r}) = g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
+   \]
+
+   \[
+   \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
+   [\Psi(\mathbf{r})]^2 \frac{\partial
+   g(\mathbf{r})}{\partial \mathbf{r}_i}\frac{\partial \Psi^2}{\partial \mathbf{r}_i} + 
+   [\Psi(\mathbf{r})]^2 g(\mathbf{r}) \frac{\partial^2
+   \Psi^2}{\partial \mathbf{r}_i^2} + 
+   \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} 
+   g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
+   \]
+   
+   $g = 1 / \Psi^2$ satisfies this equation, so 
+
+   \[
+   F(\mathbf{r}) = \frac{\nabla [\Psi(\mathbf{r})]^2}{[\Psi(\mathbf{r})]^2} = 2 \frac{\nabla
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} = 2 \nabla \left( \log \Psi(\mathbf{r}) \right)
+   \]
+
+   following drifted diffusion scheme:
 
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \frac{\nabla
-   \Psi(r)}{\Psi(r)} + \eta \sqrt{\tau} 
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \eta \sqrt{\tau} 
    \]
 
    where $\eta$ is a normally-distributed Gaussian random number.
@@ -902,7 +1000,66 @@ def drift(a,r):
   return r * ar_inv
    #+END_SRC
 
-   #+RESULTS:
+   #+BEGIN_SRC f90
+subroutine drift(a,r,b)
+  implicit none
+  double precision, intent(in)  :: a, r(3)
+  double precision, intent(out) :: b(3)
+  double precision :: ar_inv
+  ar_inv = -a / dsqrt(r(1)*r(1) + r(2)*r(2) + r(3)*r(3))
+  b(:) = r(:) * ar_inv
+end subroutine drift
+   #+END_SRC
+
+
+   Now we can write the Monte Carlo sampling
+   #+BEGIN_SRC f90
+subroutine variational_montecarlo(a,nmax,energy)
+  implicit none
+  double precision, intent(in)  :: a
+  integer         , intent(in)  :: nmax 
+  double precision, intent(out) :: energy
+
+  integer*8 :: istep
+
+  double precision :: norm, r(3), w
+
+  double precision, external :: e_loc, psi, gaussian
+
+  energy = 0.d0
+  norm   = 0.d0
+  do istep = 1,nmax
+     call random_gauss(r,3)
+     w = psi(a,r) 
+     w = w*w / gaussian(r)
+     norm = norm + w
+     energy = energy + w * e_loc(a,r)
+  end do
+  energy = energy / norm
+end subroutine variational_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  integer         , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call gaussian_montecarlo(a,nmax,X(irun))
+  enddo
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+end program qmc
+   #+END_SRC
+
+   #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
+./vmc
+   #+end_src
 
    #+BEGIN_SRC python 
 def MonteCarlo(a,tau,nmax):
@@ -932,11 +1089,8 @@ def MonteCarlo(a,tau,nmax):
             N += 1.
             E += e_loc(a,r_old)
     return E/N
-   #+END_SRC
 
-   #+RESULTS:
 
-   #+BEGIN_SRC python :results output
 nmax = 100000
 tau = 0.1
 X = [MonteCarlo(a,tau,nmax) for i in range(30)]
@@ -950,15 +1104,15 @@ print(f"E = {E} +/- {deltaE}")
   
 * Diffusion Monte Carlo
 
-We will now consider the H_2 molecule in a minimal basis composed of the
-$1s$ orbitals of the hydrogen atoms:
+  We will now consider the H_2 molecule in a minimal basis composed of the
+  $1s$ orbitals of the hydrogen atoms:
 
-$$
-\Psi(\mathbf{r}_1, \mathbf{r}_2) =
-\exp(-(\mathbf{r}_1 - \mathbf{R}_A)) + 
-$$
-where $\mathbf{r}_1$ and $\mathbf{r}_2$ denote the electron
-coordinates and \mathbf{R}_A$ and $\mathbf{R}_B$ the coordinates of
-the nuclei.
+  $$
+  \Psi(\mathbf{r}_1, \mathbf{r}_2) =
+  \exp(-(\mathbf{r}_1 - \mathbf{R}_A)) + 
+  $$
+  where $\mathbf{r}_1$ and $\mathbf{r}_2$ denote the electron
+  coordinates and $\mathbf{R}_A$ and $\mathbf{R}_B$ the coordinates of
+  the nuclei.
 
 
