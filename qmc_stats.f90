@@ -27,17 +27,17 @@ subroutine random_gauss(z,n)
      ! n is even
      do i=1,n,2
         z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) + dsin( two_pi*u(i+1) )
-        z(i)   = z(i) + dcos( two_pi*u(i+1) )
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
      end do
   else
      ! n is odd
      do i=1,n-1,2
         z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) + dsin( two_pi*u(i+1) )
-        z(i)   = z(i) + dcos( two_pi*u(i+1) )
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
      end do
      z(n)   = dsqrt(-2.d0*dlog(u(n))) 
-     z(n)   = z(n) + dcos( two_pi*u(n+1) )
+     z(n)   = z(n) * dcos( two_pi*u(n+1) )
   end if
 end subroutine random_gauss

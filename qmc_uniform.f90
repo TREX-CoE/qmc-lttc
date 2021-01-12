@@ -1,7 +1,7 @@
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
-  integer         , intent(in)  :: nmax 
+  integer*8       , intent(in)  :: nmax 
   double precision, intent(out) :: energy
 
   integer*8 :: istep
@@ -26,7 +26,7 @@ end subroutine uniform_montecarlo
 program qmc
   implicit none
   double precision, parameter :: a = 0.9
-  integer         , parameter :: nmax = 100000
+  integer*8       , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer :: irun

@@ -743,11 +743,18 @@ print(f"E = {E} +/- {deltaE}")
     : E = -0.4956255109300764 +/- 0.0007082875482711226
 
     *Fortran*
+#+begin_note
+When running Monte Carlo calculations, the number of steps is
+usually very large. We expect =nmax= to be possibly larger than 2
+billion, so we use 8-byte integers (=integer*8=) to represent it, as
+well as the index of the current step.
+#+end_note
+
     #+BEGIN_SRC f90
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
-  integer         , intent(in)  :: nmax 
+  integer*8       , intent(in)  :: nmax 
   double precision, intent(out) :: energy
 
   integer*8 :: istep
@@ -772,7 +779,7 @@ end subroutine uniform_montecarlo
 program qmc
   implicit none
   double precision, parameter :: a = 0.9
-  integer         , parameter :: nmax = 100000
+  integer*8       , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer :: irun
@@ -833,18 +840,18 @@ subroutine random_gauss(z,n)
      ! n is even
      do i=1,n,2
         z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) + dsin( two_pi*u(i+1) )
-        z(i)   = z(i) + dcos( two_pi*u(i+1) )
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
      end do
   else
      ! n is odd
      do i=1,n-1,2
         z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) + dsin( two_pi*u(i+1) )
-        z(i)   = z(i) + dcos( two_pi*u(i+1) )
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
      end do
      z(n)   = dsqrt(-2.d0*dlog(u(n))) 
-     z(n)   = z(n) + dcos( two_pi*u(n+1) )
+     z(n)   = z(n) * dcos( two_pi*u(n+1) )
   end if
 end subroutine random_gauss
    #+END_SRC
@@ -907,7 +914,7 @@ print(f"E = {E} +/- {deltaE}")
     #+END_SRC
 
     #+RESULTS:
-    : E = -0.49507506093129827 +/- 0.00014164037765553668
+    : E = -0.49511014287471955 +/- 0.00012402022172236656
 
    
     *Fortran*
@@ -916,14 +923,14 @@ double precision function gaussian(r)
   implicit none
   double precision, intent(in) :: r(3)
   double precision, parameter :: norm_gauss = 1.d0/(2.d0*dacos(-1.d0))**(1.5d0)
-  gaussian = norm_gauss * dexp( -0.5d0 * dsqrt(r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
+  gaussian = norm_gauss * dexp( -0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
 end function gaussian
 
 
 subroutine gaussian_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
-  integer         , intent(in)  :: nmax 
+  integer*8       , intent(in)  :: nmax 
   double precision, intent(out) :: energy
 
   integer*8 :: istep
@@ -947,7 +954,7 @@ end subroutine gaussian_montecarlo
 program qmc
   implicit none
   double precision, parameter :: a = 0.9
-  integer         , parameter :: nmax = 100000
+  integer*8       , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer :: irun
@@ -968,13 +975,9 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
     #+end_src
 
     #+RESULTS:
-    :  E =  -0.49606057056767766      +/-   1.3918807547836872E-004
+    :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004
 
 ** Sampling with $\Psi^2$
-   :PROPERTIES:
-   :header-args:python: :tangle vmc.py
-   :header-args:f90: :tangle vmc.f90
-   :END:
 
    We will now use the square of the wave function to make the sampling:
 
@@ -991,6 +994,10 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
    
    
 *** Importance sampling
+   :PROPERTIES:
+   :header-args:python: :tangle vmc.py
+   :header-args:f90: :tangle vmc.f90
+   :END:
 
     To generate the probability density $\Psi^2$, we consider a
     diffusion process characterized by a time-dependent density
@@ -1107,20 +1114,22 @@ end subroutine drift
      #+end_exercise
    
       *Python*
-      #+BEGIN_SRC python :results output :tangle vmc.py 
+      #+BEGIN_SRC python :results output
 from hydrogen  import *
 from qmc_stats import *
+
 def MonteCarlo(a,tau,nmax):
+    sq_tau = np.sqrt(tau)
+
+    # Initialization
     E = 0.
     N = 0.
-    sq_tau = np.sqrt(tau)
     r_old = np.random.normal(loc=0., scale=1.0, size=(3))
-    d_old = drift(a,r_old)
-    d2_old = np.dot(d_old,d_old)
-    psi_old = psi(a,r_old)
+
     for istep in range(nmax):
+        d_old = drift(a,r_old)
         chi = np.random.normal(loc=0., scale=1.0, size=(3))
-        r_new = r_old + tau * d_old + sq_tau * chi
+        r_new = r_old + tau * d_old + chi*sq_tau
         N += 1.
         E += e_loc(a,r_new)
         r_old = r_new
@@ -1129,37 +1138,41 @@ def MonteCarlo(a,tau,nmax):
 
 a = 0.9
 nmax = 100000
-tau = 0.001
+tau = 0.2
 X = [MonteCarlo(a,tau,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
       #+END_SRC
 
       #+RESULTS:
-      : E = -0.4112049153828464 +/- 0.00027934927432953063
-   
+      : E = -0.4858534479298907 +/- 0.00010203236131158794
+
       *Fortran*
       #+BEGIN_SRC f90
-subroutine variational_montecarlo(a,nmax,energy)
+subroutine variational_montecarlo(a,tau,nmax,energy)
   implicit none
-  double precision, intent(in)  :: a
-  integer         , intent(in)  :: nmax 
+  double precision, intent(in)  :: a, tau
+  integer*8       , intent(in)  :: nmax 
   double precision, intent(out) :: energy
 
   integer*8 :: istep
+  double precision :: norm, r_old(3), r_new(3), d_old(3), sq_tau, chi(3)
+  double precision, external :: e_loc
 
-  double precision :: norm, r(3), w
-
-  double precision, external :: e_loc, psi, gaussian
-
+  sq_tau = dsqrt(tau)
+  
+  ! Initialization
   energy = 0.d0
   norm   = 0.d0
+  call random_gauss(r_old,3)
+
   do istep = 1,nmax
-     call random_gauss(r,3)
-     w = psi(a,r) 
-     w = w*w / gaussian(r)
-     norm = norm + w
-     energy = energy + w * e_loc(a,r)
+     call drift(a,r_old,d_old)
+     call random_gauss(chi,3)
+     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
+     norm = norm + 1.d0
+     energy = energy + e_loc(a,r_new)
+     r_old(:) = r_new(:)
   end do
   energy = energy / norm
 end subroutine variational_montecarlo
@@ -1167,7 +1180,8 @@ end subroutine variational_montecarlo
 program qmc
   implicit none
   double precision, parameter :: a = 0.9
-  integer         , parameter :: nmax = 100000
+  double precision, parameter :: tau = 0.2
+  integer*8       , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer :: irun
@@ -1175,7 +1189,7 @@ program qmc
   double precision :: ave, err
 
   do irun=1,nruns
-     call gaussian_montecarlo(a,nmax,X(irun))
+     call variational_montecarlo(a,tau,nmax,X(irun))
   enddo
   call ave_error(X,nruns,ave,err)
   print *, 'E = ', ave, '+/-', err
@@ -1186,8 +1200,15 @@ end program qmc
 gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
 ./vmc
       #+end_src
+
+      #+RESULTS:
+      :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
      
 *** Metropolis algorithm
+   :PROPERTIES:
+   :header-args:python: :tangle vmc_metropolis.py
+   :header-args:f90: :tangle vmc_metropolis.f90
+   :END:
 
     Discretizing the differential equation to generate the desired
     probability density will suffer from a discretization error
@@ -1236,7 +1257,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
      #+end_exercise
    
       *Python*
-      #+BEGIN_SRC python 
+      #+BEGIN_SRC python :results output
 def MonteCarlo(a,tau,nmax):
     E = 0.
     N = 0.
@@ -1277,7 +1298,7 @@ print(f"E = {E} +/- {deltaE}")
       : E = -0.4951783346213532 +/- 0.00022067316984271938
    
       *Fortran*
-      #+BEGIN_SRC f90
+      #+BEGIN_SRC f90 
 subroutine variational_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
@@ -1324,9 +1345,15 @@ end program qmc
 gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
 ./vmc
       #+end_src
+
+      #+RESULTS:
      
   
 * TODO Diffusion Monte Carlo
+   :PROPERTIES:
+   :header-args:python: :tangle dmc.py
+   :header-args:f90: :tangle dmc.f90
+   :END:
 
   We will now consider the H_2 molecule in a minimal basis composed of the
   $1s$ orbitals of the hydrogen atoms:
