@@ -23,3 +23,12 @@ double precision function e_loc(a,r)
   double precision, external   :: kinetic, potential
   e_loc = kinetic(a,r) + potential(r)
 end function e_loc
+
+subroutine drift(a,r,b)
+  implicit none
+  double precision, intent(in)  :: a, r(3)
+  double precision, intent(out) :: b(3)
+  double precision :: ar_inv
+  ar_inv = -a / dsqrt(r(1)*r(1) + r(2)*r(2) + r(3)*r(3))
+  b(:) = r(:) * ar_inv
+end subroutine drift

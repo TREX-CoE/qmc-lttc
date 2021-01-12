@@ -306,6 +306,10 @@
 	/* font-lock-warning-face */
 	background-color: #e3e3f7;
     }
+    .exercise {
+	/* font-lock-warning-face */
+	background-color: #e3f7e3;
+    }
     .note {
 	/* font-lock-warning-face */
 	background-color: #f7f7d9;

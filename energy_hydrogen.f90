@@ -26,7 +26,6 @@ program energy_hydrogen
               r(3) = x(l)
               w = psi(a(j),r)
               w = w * w * delta
-
               energy = energy + w * e_loc(a(j), r)
               norm   = norm   + w 
            end do

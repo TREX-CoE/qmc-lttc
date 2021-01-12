@@ -26,7 +26,6 @@ program variance_hydrogen
               r(3) = x(l)
               w = psi(a(j),r)
               w = w * w * delta
-
               energy = energy + w * e_loc(a(j), r)
               norm   = norm   + w 
            end do
@@ -44,7 +43,6 @@ program variance_hydrogen
               r(3) = x(l)
               w = psi(a(j),r)
               w = w * w * delta
-
               s2 = s2 + w * ( e_loc(a(j), r) - energy )**2
               norm   = norm   + w 
            end do
