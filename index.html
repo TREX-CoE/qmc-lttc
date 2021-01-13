@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-13 Wed 17:12 -->
+<!-- 2021-01-13 Wed 17:16 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Quantum Monte Carlo</title>
@@ -257,63 +257,63 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0ce899e">1. Introduction</a></li>
-<li><a href="#org6b23ebf">2. Numerical evaluation of the energy</a>
+<li><a href="#org4a9ddbc">1. Introduction</a></li>
+<li><a href="#orge0ff9ff">2. Numerical evaluation of the energy</a>
 <ul>
-<li><a href="#org8338702">2.1. Local energy</a>
+<li><a href="#orgdeb59a5">2.1. Local energy</a>
 <ul>
-<li><a href="#org8336725">2.1.1. Exercise 1</a></li>
-<li><a href="#org41ed066">2.1.2. Exercise 2</a></li>
-<li><a href="#org97eddc2">2.1.3. Exercise 3</a></li>
-<li><a href="#orgfabc08a">2.1.4. Exercise 4</a></li>
+<li><a href="#orgaf7c81d">2.1.1. Exercise 1</a></li>
+<li><a href="#orgb1539ef">2.1.2. Exercise 2</a></li>
+<li><a href="#orgdd1b9ad">2.1.3. Exercise 3</a></li>
+<li><a href="#org5d94e2f">2.1.4. Exercise 4</a></li>
 </ul>
 </li>
-<li><a href="#org4f19dc5">2.2. Plot of the local energy along the \(x\) axis</a>
+<li><a href="#org42a6623">2.2. Plot of the local energy along the \(x\) axis</a>
 <ul>
-<li><a href="#orgcf92129">2.2.1. Exercise</a></li>
+<li><a href="#orgaead419">2.2.1. Exercise</a></li>
 </ul>
 </li>
-<li><a href="#orgf95b6ea">2.3. Numerical estimation of the energy</a>
+<li><a href="#org378ff7e">2.3. Numerical estimation of the energy</a>
 <ul>
-<li><a href="#org051e985">2.3.1. Exercise</a></li>
+<li><a href="#org75cd008">2.3.1. Exercise</a></li>
 </ul>
 </li>
-<li><a href="#org81be2eb">2.4. Variance of the local energy</a>
+<li><a href="#orgfc011fc">2.4. Variance of the local energy</a>
 <ul>
-<li><a href="#org8fdf2fb">2.4.1. Exercise</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org367e803">3. Variational Monte Carlo</a>
-<ul>
-<li><a href="#orgc5ae535">3.1. Computation of the statistical error</a>
-<ul>
-<li><a href="#org49ca469">3.1.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#org62371bd">3.2. Uniform sampling in the box</a>
-<ul>
-<li><a href="#org952f8d1">3.2.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#org3423e74">3.3. Gaussian sampling</a>
-<ul>
-<li><a href="#org98a43ad">3.3.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#orgb44eaed">3.4. Sampling with \(\Psi^2\)</a>
-<ul>
-<li><a href="#orgb9e3617">3.4.1. Importance sampling</a></li>
-<li><a href="#org9669b71">3.4.2. Metropolis algorithm</a></li>
+<li><a href="#org6d57935">2.4.1. Exercise</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgac06adb">4. <span class="todo TODO">TODO</span> Diffusion Monte Carlo</a>
+<li><a href="#orga306082">3. Variational Monte Carlo</a>
 <ul>
-<li><a href="#orgfc3b72d">4.1. Hydrogen atom</a></li>
-<li><a href="#org1f0b148">4.2. Dihydrogen</a></li>
+<li><a href="#org099cca1">3.1. Computation of the statistical error</a>
+<ul>
+<li><a href="#orgc19f8b1">3.1.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org1368841">3.2. Uniform sampling in the box</a>
+<ul>
+<li><a href="#org3d3960f">3.2.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org06f5918">3.3. Gaussian sampling</a>
+<ul>
+<li><a href="#org4d51250">3.3.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#orge173139">3.4. Sampling with \(\Psi^2\)</a>
+<ul>
+<li><a href="#orgc4e7b06">3.4.1. Importance sampling</a></li>
+<li><a href="#org6e6e902">3.4.2. Metropolis algorithm</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgbf88afc">4. <span class="todo TODO">TODO</span> Diffusion Monte Carlo</a>
+<ul>
+<li><a href="#org6800963">4.1. Hydrogen atom</a></li>
+<li><a href="#orgf162a0f">4.2. Dihydrogen</a></li>
 </ul>
 </li>
 </ul>
@@ -321,8 +321,8 @@ for the JavaScript code in this tag.
 </div>
 
 
-<div id="outline-container-org0ce899e" class="outline-2">
-<h2 id="org0ce899e"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org4a9ddbc" class="outline-2">
+<h2 id="org4a9ddbc"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 We propose different exercises to understand quantum Monte Carlo (QMC)
@@ -364,8 +364,8 @@ interpreted as a single precision value
 </div>
 
 
-<div id="outline-container-org6b23ebf" class="outline-2">
-<h2 id="org6b23ebf"><span class="section-number-2">2</span> Numerical evaluation of the energy</h2>
+<div id="outline-container-orge0ff9ff" class="outline-2">
+<h2 id="orge0ff9ff"><span class="section-number-2">2</span> Numerical evaluation of the energy</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 In this section we consider the Hydrogen atom with the following
@@ -439,13 +439,13 @@ E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle}
 \end{eqnarray*}
 </div>
 
-<div id="outline-container-org8338702" class="outline-3">
-<h3 id="org8338702"><span class="section-number-3">2.1</span> Local energy</h3>
+<div id="outline-container-orgdeb59a5" class="outline-3">
+<h3 id="orgdeb59a5"><span class="section-number-3">2.1</span> Local energy</h3>
 <div class="outline-text-3" id="text-2-1">
 </div>
 
-<div id="outline-container-org8336725" class="outline-4">
-<h4 id="org8336725"><span class="section-number-4">2.1.1</span> Exercise 1</h4>
+<div id="outline-container-orgaf7c81d" class="outline-4">
+<h4 id="orgaf7c81d"><span class="section-number-4">2.1.1</span> Exercise 1</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <div class="exercise">
 <p>
@@ -489,8 +489,8 @@ and returns the potential.
 </div>
 </div>
 
-<div id="outline-container-org41ed066" class="outline-4">
-<h4 id="org41ed066"><span class="section-number-4">2.1.2</span> Exercise 2</h4>
+<div id="outline-container-orgb1539ef" class="outline-4">
+<h4 id="orgb1539ef"><span class="section-number-4">2.1.2</span> Exercise 2</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <div class="exercise">
 <p>
@@ -525,8 +525,8 @@ input arguments, and returns a scalar.
 </div>
 </div>
 
-<div id="outline-container-org97eddc2" class="outline-4">
-<h4 id="org97eddc2"><span class="section-number-4">2.1.3</span> Exercise 3</h4>
+<div id="outline-container-orgdd1b9ad" class="outline-4">
+<h4 id="orgdd1b9ad"><span class="section-number-4">2.1.3</span> Exercise 3</h4>
 <div class="outline-text-4" id="text-2-1-3">
 <div class="exercise">
 <p>
@@ -607,8 +607,8 @@ So the local kinetic energy is
 </div>
 </div>
 
-<div id="outline-container-orgfabc08a" class="outline-4">
-<h4 id="orgfabc08a"><span class="section-number-4">2.1.4</span> Exercise 4</h4>
+<div id="outline-container-org5d94e2f" class="outline-4">
+<h4 id="org5d94e2f"><span class="section-number-4">2.1.4</span> Exercise 4</h4>
 <div class="outline-text-4" id="text-2-1-4">
 <div class="exercise">
 <p>
@@ -651,14 +651,14 @@ local energy.
 </div>
 </div>
 
-<div id="outline-container-org4f19dc5" class="outline-3">
-<h3 id="org4f19dc5"><span class="section-number-3">2.2</span> Plot of the local energy along the \(x\) axis</h3>
+<div id="outline-container-org42a6623" class="outline-3">
+<h3 id="org42a6623"><span class="section-number-3">2.2</span> Plot of the local energy along the \(x\) axis</h3>
 <div class="outline-text-3" id="text-2-2">
 </div>
 
 
-<div id="outline-container-orgcf92129" class="outline-4">
-<h4 id="orgcf92129"><span class="section-number-4">2.2.1</span> Exercise</h4>
+<div id="outline-container-orgaead419" class="outline-4">
+<h4 id="orgaead419"><span class="section-number-4">2.2.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <div class="exercise">
 <p>
@@ -775,8 +775,8 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 </div>
 </div>
 
-<div id="outline-container-orgf95b6ea" class="outline-3">
-<h3 id="orgf95b6ea"><span class="section-number-3">2.3</span> Numerical estimation of the energy</h3>
+<div id="outline-container-org378ff7e" class="outline-3">
+<h3 id="org378ff7e"><span class="section-number-3">2.3</span> Numerical estimation of the energy</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 If the space is discretized in small volume elements \(\mathbf{r}_i\)
@@ -806,8 +806,8 @@ The energy is biased because:
 </div>
 
 
-<div id="outline-container-org051e985" class="outline-4">
-<h4 id="org051e985"><span class="section-number-4">2.3.1</span> Exercise</h4>
+<div id="outline-container-org75cd008" class="outline-4">
+<h4 id="org75cd008"><span class="section-number-4">2.3.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <div class="exercise">
 <p>
@@ -917,8 +917,8 @@ a =    2.0000000000000000          E =   -8.0869806678448772E-002
 </div>
 </div>
 
-<div id="outline-container-org81be2eb" class="outline-3">
-<h3 id="org81be2eb"><span class="section-number-3">2.4</span> Variance of the local energy</h3>
+<div id="outline-container-orgfc011fc" class="outline-3">
+<h3 id="orgfc011fc"><span class="section-number-3">2.4</span> Variance of the local energy</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 The variance of the local energy is a functional of \(\Psi\)
@@ -940,8 +940,8 @@ energy can be used as a measure of the quality of a wave function.
 </p>
 </div>
 
-<div id="outline-container-org8fdf2fb" class="outline-4">
-<h4 id="org8fdf2fb"><span class="section-number-4">2.4.1</span> Exercise</h4>
+<div id="outline-container-org6d57935" class="outline-4">
+<h4 id="org6d57935"><span class="section-number-4">2.4.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <div class="exercise">
 <p>
@@ -1083,8 +1083,8 @@ a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.806881
 </div>
 
 
-<div id="outline-container-org367e803" class="outline-2">
-<h2 id="org367e803"><span class="section-number-2">3</span> Variational Monte Carlo</h2>
+<div id="outline-container-orga306082" class="outline-2">
+<h2 id="orga306082"><span class="section-number-2">3</span> Variational Monte Carlo</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Numerical integration with deterministic methods is very efficient
@@ -1100,8 +1100,8 @@ interval.
 </p>
 </div>
 
-<div id="outline-container-orgc5ae535" class="outline-3">
-<h3 id="orgc5ae535"><span class="section-number-3">3.1</span> Computation of the statistical error</h3>
+<div id="outline-container-org099cca1" class="outline-3">
+<h3 id="org099cca1"><span class="section-number-3">3.1</span> Computation of the statistical error</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 To compute the statistical error, you need to perform \(M\)
@@ -1141,8 +1141,8 @@ And the confidence interval is given by
 </p>
 </div>
 
-<div id="outline-container-org49ca469" class="outline-4">
-<h4 id="org49ca469"><span class="section-number-4">3.1.1</span> Exercise</h4>
+<div id="outline-container-orgc19f8b1" class="outline-4">
+<h4 id="orgc19f8b1"><span class="section-number-4">3.1.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-3-1-1">
 <div class="exercise">
 <p>
@@ -1191,8 +1191,8 @@ input array.
 </div>
 </div>
 
-<div id="outline-container-org62371bd" class="outline-3">
-<h3 id="org62371bd"><span class="section-number-3">3.2</span> Uniform sampling in the box</h3>
+<div id="outline-container-org1368841" class="outline-3">
+<h3 id="org1368841"><span class="section-number-3">3.2</span> Uniform sampling in the box</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 We will now do our first Monte Carlo calculation to compute the
@@ -1226,8 +1226,8 @@ statistical error.
 </p>
 </div>
 
-<div id="outline-container-org952f8d1" class="outline-4">
-<h4 id="org952f8d1"><span class="section-number-4">3.2.1</span> Exercise</h4>
+<div id="outline-container-org3d3960f" class="outline-4">
+<h4 id="org3d3960f"><span class="section-number-4">3.2.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <div class="exercise">
 <p>
@@ -1337,8 +1337,8 @@ E =  -0.49588321986667677      +/-   7.1758863546737969E-004
 </div>
 </div>
 
-<div id="outline-container-org3423e74" class="outline-3">
-<h3 id="org3423e74"><span class="section-number-3">3.3</span> Gaussian sampling</h3>
+<div id="outline-container-org06f5918" class="outline-3">
+<h3 id="org06f5918"><span class="section-number-3">3.3</span> Gaussian sampling</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 We will now improve the sampling and allow to sample in the whole
@@ -1434,8 +1434,8 @@ average energy can be computed as
 </div>
 
 
-<div id="outline-container-org98a43ad" class="outline-4">
-<h4 id="org98a43ad"><span class="section-number-4">3.3.1</span> Exercise</h4>
+<div id="outline-container-org4d51250" class="outline-4">
+<h4 id="org4d51250"><span class="section-number-4">3.3.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-3-3-1">
 <div class="exercise">
 <p>
@@ -1546,8 +1546,8 @@ E =  -0.49517104619091717      +/-   1.0685523607878961E-004
 </div>
 </div>
 
-<div id="outline-container-orgb44eaed" class="outline-3">
-<h3 id="orgb44eaed"><span class="section-number-3">3.4</span> Sampling with \(\Psi^2\)</h3>
+<div id="outline-container-orge173139" class="outline-3">
+<h3 id="orge173139"><span class="section-number-3">3.4</span> Sampling with \(\Psi^2\)</h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 We will now use the square of the wave function to make the sampling:
@@ -1572,8 +1572,8 @@ the local energies, each with a weight of 1.
 </div>
 
 
-<div id="outline-container-orgb9e3617" class="outline-4">
-<h4 id="orgb9e3617"><span class="section-number-4">3.4.1</span> Importance sampling</h4>
+<div id="outline-container-orgc4e7b06" class="outline-4">
+<h4 id="orgc4e7b06"><span class="section-number-4">3.4.1</span> Importance sampling</h4>
 <div class="outline-text-4" id="text-3-4-1">
 <p>
 To generate the probability density \(\Psi^2\), we consider a
@@ -1686,7 +1686,7 @@ variance \(\tau\,2D\).
 </div>
 
 <ol class="org-ol">
-<li><a id="org43b5cbc"></a>Exercise 1<br />
+<li><a id="org9d10285"></a>Exercise 1<br />
 <div class="outline-text-5" id="text-3-4-1-1">
 <div class="exercise">
 <p>
@@ -1722,7 +1722,7 @@ Write a function to compute the drift vector \(\frac{\nabla \Psi(\mathbf{r})}{\P
 </div>
 </li>
 
-<li><a id="orgeaad292"></a><span class="todo TODO">TODO</span> Exercise 2<br />
+<li><a id="orgc6b3c6b"></a><span class="todo TODO">TODO</span> Exercise 2<br />
 <div class="outline-text-5" id="text-3-4-1-2">
 <div class="exercise">
 <p>
@@ -1834,8 +1834,8 @@ E =  -0.48584030499187431      +/-   1.0411743995438257E-004
 </ol>
 </div>
 
-<div id="outline-container-org9669b71" class="outline-4">
-<h4 id="org9669b71"><span class="section-number-4">3.4.2</span> Metropolis algorithm</h4>
+<div id="outline-container-org6e6e902" class="outline-4">
+<h4 id="org6e6e902"><span class="section-number-4">3.4.2</span> Metropolis algorithm</h4>
 <div class="outline-text-4" id="text-3-4-2">
 <p>
 Discretizing the differential equation to generate the desired
@@ -1896,7 +1896,7 @@ the simulation.
 </div>
 
 <ol class="org-ol">
-<li><a id="org8c3385f"></a>Exercise<br />
+<li><a id="orgb2a508c"></a>Exercise<br />
 <div class="outline-text-5" id="text-3-4-2-1">
 <div class="exercise">
 <p>
@@ -2052,17 +2052,17 @@ A =   0.78861366666666655      +/-   3.5096729498002445E-004
 </div>
 
 
-<div id="outline-container-orgac06adb" class="outline-2">
-<h2 id="orgac06adb"><span class="section-number-2">4</span> <span class="todo TODO">TODO</span> Diffusion Monte Carlo</h2>
+<div id="outline-container-orgbf88afc" class="outline-2">
+<h2 id="orgbf88afc"><span class="section-number-2">4</span> <span class="todo TODO">TODO</span> Diffusion Monte Carlo</h2>
 <div class="outline-text-2" id="text-4">
 </div>
 
-<div id="outline-container-orgfc3b72d" class="outline-3">
-<h3 id="orgfc3b72d"><span class="section-number-3">4.1</span> Hydrogen atom</h3>
+<div id="outline-container-org6800963" class="outline-3">
+<h3 id="org6800963"><span class="section-number-3">4.1</span> Hydrogen atom</h3>
 <div class="outline-text-3" id="text-4-1">
 </div>
 <ol class="org-ol">
-<li><a id="orgb7d1c9f"></a>Exercise<br />
+<li><a id="org9b45536"></a>Exercise<br />
 <div class="outline-text-5" id="text-4-1-0-1">
 <div class="exercise">
 <p>
@@ -2221,8 +2221,8 @@ A =   0.78861366666666655      +/-   3.5096729498002445E-004
 </div>
 
 
-<div id="outline-container-org1f0b148" class="outline-3">
-<h3 id="org1f0b148"><span class="section-number-3">4.2</span> Dihydrogen</h3>
+<div id="outline-container-orgf162a0f" class="outline-3">
+<h3 id="orgf162a0f"><span class="section-number-3">4.2</span> Dihydrogen</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 We will now consider the H<sub>2</sub> molecule in a minimal basis composed of the
@@ -2244,7 +2244,7 @@ the nuclei.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Anthony Scemama, Claudia Filippi</p>
-<p class="date">Created: 2021-01-13 Wed 17:12</p>
+<p class="date">Created: 2021-01-13 Wed 17:16</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
