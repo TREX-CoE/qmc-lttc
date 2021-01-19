@@ -467,14 +467,24 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    \sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
    E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
    $$
+   which can be simplified as
+   
+   $$ \sigma^2(E_L) = \langle E^2 \rangle - \langle E \rangle^2 $$
 
    If the local energy is constant (i.e. $\Psi$ is an eigenfunction of
    $\hat{H}$) the variance is zero, so the variance of the local
    energy can be used as a measure of the quality of a wave function.
 
+*** Exercise (optional)
+   #+begin_exercise
+   Prove that :
+   $$ \sigma^2(E_L) = \langle E^2 \rangle - \langle E \rangle^2 $$
+   #+end_exercise
+   
 *** Exercise
    #+begin_exercise
-   Compute a numerical estimate of the variance of the local energy
+   Add the calculation of the variance to the previous code, and 
+   compute a numerical estimate of the variance of the local energy
    in a grid of $50\times50\times50$ points in the range
    $(-5,-5,-5)
    \le \mathbf{r} \le (5,5,5)$ for different values of $a$.
@@ -492,6 +502,7 @@ r = np.array([0.,0.,0.])
 
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E = 0.
+    E2 = 0.
     norm = 0.
     for x in interval:
         r[0] = x
@@ -503,20 +514,11 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
                 w = w * w * delta
                 El = e_loc(a, r)
                 E  += w * El
+                E2 += w * El*El
                 norm += w 
     E = E / norm
-    s2 = 0.
-    for x in interval:
-        r[0] = x
-        for y in interval:
-            r[1] = y
-            for z in interval:
-                r[2] = z
-                w = psi(a, r)
-                w = w * w * delta
-                El = e_loc(a, r)
-                s2 += w * (El - E)**2
-    s2 = s2 / norm
+    E2 = E2 / norm
+    s2 = E2 - E*E
     print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
    #+end_src
 
