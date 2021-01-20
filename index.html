@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-01-19 Tue 09:46 -->
+<!-- 2021-01-20 Wed 18:13 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Quantum Monte Carlo</title>
@@ -257,64 +257,65 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org1781353">1. Introduction</a></li>
-<li><a href="#org6fb8eba">2. Numerical evaluation of the energy</a>
+<li><a href="#org9c63dfa">1. Introduction</a></li>
+<li><a href="#orgb3448ff">2. Numerical evaluation of the energy</a>
 <ul>
-<li><a href="#org8a01cb3">2.1. Local energy</a>
+<li><a href="#orgfd11035">2.1. Local energy</a>
 <ul>
-<li><a href="#org42e7b45">2.1.1. Exercise 1</a></li>
-<li><a href="#org86d3136">2.1.2. Exercise 2</a></li>
-<li><a href="#org4802db2">2.1.3. Exercise 3</a></li>
-<li><a href="#org30be6bd">2.1.4. Exercise 4</a></li>
+<li><a href="#org5b55d2e">2.1.1. Exercise 1</a></li>
+<li><a href="#org267c2b4">2.1.2. Exercise 2</a></li>
+<li><a href="#orgbb2e99c">2.1.3. Exercise 3</a></li>
+<li><a href="#orgb93cbca">2.1.4. Exercise 4</a></li>
 </ul>
 </li>
-<li><a href="#org66f58ad">2.2. Plot of the local energy along the \(x\) axis</a>
+<li><a href="#orge0c924a">2.2. Plot of the local energy along the \(x\) axis</a>
 <ul>
-<li><a href="#orgc800493">2.2.1. Exercise</a></li>
+<li><a href="#orgae1b757">2.2.1. Exercise</a></li>
 </ul>
 </li>
-<li><a href="#org7d33595">2.3. Numerical estimation of the energy</a>
+<li><a href="#org1d35c3d">2.3. Numerical estimation of the energy</a>
 <ul>
-<li><a href="#org49eff63">2.3.1. Exercise</a></li>
+<li><a href="#orgeee38dd">2.3.1. Exercise</a></li>
 </ul>
 </li>
-<li><a href="#org2377ff3">2.4. Variance of the local energy</a>
+<li><a href="#org0feb42b">2.4. Variance of the local energy</a>
 <ul>
-<li><a href="#orga585c67">2.4.1. Exercise (optional)</a></li>
-<li><a href="#orgc835875">2.4.2. Exercise</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#org83c6a25">3. Variational Monte Carlo</a>
-<ul>
-<li><a href="#org85df268">3.1. Computation of the statistical error</a>
-<ul>
-<li><a href="#org57f2588">3.1.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#org9818f33">3.2. Uniform sampling in the box</a>
-<ul>
-<li><a href="#org91d5f7e">3.2.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#orgdc3ee3e">3.3. Gaussian sampling</a>
-<ul>
-<li><a href="#org6fe98d4">3.3.1. Exercise</a></li>
-</ul>
-</li>
-<li><a href="#orge0e488e">3.4. Sampling with \(\Psi^2\)</a>
-<ul>
-<li><a href="#orgcfcdbfd">3.4.1. Importance sampling</a></li>
-<li><a href="#orgc52903b">3.4.2. Metropolis algorithm</a></li>
+<li><a href="#orgb444cc3">2.4.1. Exercise (optional)</a></li>
+<li><a href="#org11be305">2.4.2. Exercise</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgca1fad0">4. <span class="todo TODO">TODO</span> Diffusion Monte Carlo</a>
+<li><a href="#org478ecf8">3. Variational Monte Carlo</a>
 <ul>
-<li><a href="#org8275af4">4.1. Hydrogen atom</a></li>
-<li><a href="#org745b49b">4.2. Dihydrogen</a></li>
+<li><a href="#org279f738">3.1. Computation of the statistical error</a>
+<ul>
+<li><a href="#org9fc9374">3.1.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org00499df">3.2. Uniform sampling in the box</a>
+<ul>
+<li><a href="#org0e626da">3.2.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#org3c75811">3.3. Metropolis sampling with \(\Psi^2\)</a>
+<ul>
+<li><a href="#org41c65bb">3.3.1. Exercise</a></li>
+</ul>
+</li>
+<li><a href="#orgd11f044">3.4. Gaussian random number generator</a></li>
+<li><a href="#orgd59955a">3.5. Generalized Metropolis algorithm</a>
+<ul>
+<li><a href="#orgae8d2ad">3.5.1. Exercise 1</a></li>
+<li><a href="#orgbb7142f">3.5.2. Exercise 2</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org2042bc2">4. <span class="todo TODO">TODO</span> Diffusion Monte Carlo</a>
+<ul>
+<li><a href="#org964c160">4.1. Hydrogen atom</a></li>
+<li><a href="#orgf75f8aa">4.2. Dihydrogen</a></li>
 </ul>
 </li>
 </ul>
@@ -322,8 +323,8 @@ for the JavaScript code in this tag.
 </div>
 
 
-<div id="outline-container-org1781353" class="outline-2">
-<h2 id="org1781353"><span class="section-number-2">1</span> Introduction</h2>
+<div id="outline-container-org9c63dfa" class="outline-2">
+<h2 id="org9c63dfa"><span class="section-number-2">1</span> Introduction</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 We propose different exercises to understand quantum Monte Carlo (QMC)
@@ -365,8 +366,8 @@ interpreted as a single precision value
 </div>
 
 
-<div id="outline-container-org6fb8eba" class="outline-2">
-<h2 id="org6fb8eba"><span class="section-number-2">2</span> Numerical evaluation of the energy</h2>
+<div id="outline-container-orgb3448ff" class="outline-2">
+<h2 id="orgb3448ff"><span class="section-number-2">2</span> Numerical evaluation of the energy</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 In this section we consider the Hydrogen atom with the following
@@ -440,13 +441,13 @@ E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle}
 \end{eqnarray*}
 </div>
 
-<div id="outline-container-org8a01cb3" class="outline-3">
-<h3 id="org8a01cb3"><span class="section-number-3">2.1</span> Local energy</h3>
+<div id="outline-container-orgfd11035" class="outline-3">
+<h3 id="orgfd11035"><span class="section-number-3">2.1</span> Local energy</h3>
 <div class="outline-text-3" id="text-2-1">
 </div>
 
-<div id="outline-container-org42e7b45" class="outline-4">
-<h4 id="org42e7b45"><span class="section-number-4">2.1.1</span> Exercise 1</h4>
+<div id="outline-container-org5b55d2e" class="outline-4">
+<h4 id="org5b55d2e"><span class="section-number-4">2.1.1</span> Exercise 1</h4>
 <div class="outline-text-4" id="text-2-1-1">
 <div class="exercise">
 <p>
@@ -490,8 +491,8 @@ and returns the potential.
 </div>
 </div>
 
-<div id="outline-container-org86d3136" class="outline-4">
-<h4 id="org86d3136"><span class="section-number-4">2.1.2</span> Exercise 2</h4>
+<div id="outline-container-org267c2b4" class="outline-4">
+<h4 id="org267c2b4"><span class="section-number-4">2.1.2</span> Exercise 2</h4>
 <div class="outline-text-4" id="text-2-1-2">
 <div class="exercise">
 <p>
@@ -526,8 +527,8 @@ input arguments, and returns a scalar.
 </div>
 </div>
 
-<div id="outline-container-org4802db2" class="outline-4">
-<h4 id="org4802db2"><span class="section-number-4">2.1.3</span> Exercise 3</h4>
+<div id="outline-container-orgbb2e99c" class="outline-4">
+<h4 id="orgbb2e99c"><span class="section-number-4">2.1.3</span> Exercise 3</h4>
 <div class="outline-text-4" id="text-2-1-3">
 <div class="exercise">
 <p>
@@ -608,8 +609,8 @@ So the local kinetic energy is
 </div>
 </div>
 
-<div id="outline-container-org30be6bd" class="outline-4">
-<h4 id="org30be6bd"><span class="section-number-4">2.1.4</span> Exercise 4</h4>
+<div id="outline-container-orgb93cbca" class="outline-4">
+<h4 id="orgb93cbca"><span class="section-number-4">2.1.4</span> Exercise 4</h4>
 <div class="outline-text-4" id="text-2-1-4">
 <div class="exercise">
 <p>
@@ -652,14 +653,14 @@ local energy.
 </div>
 </div>
 
-<div id="outline-container-org66f58ad" class="outline-3">
-<h3 id="org66f58ad"><span class="section-number-3">2.2</span> Plot of the local energy along the \(x\) axis</h3>
+<div id="outline-container-orge0c924a" class="outline-3">
+<h3 id="orge0c924a"><span class="section-number-3">2.2</span> Plot of the local energy along the \(x\) axis</h3>
 <div class="outline-text-3" id="text-2-2">
 </div>
 
 
-<div id="outline-container-orgc800493" class="outline-4">
-<h4 id="orgc800493"><span class="section-number-4">2.2.1</span> Exercise</h4>
+<div id="outline-container-orgae1b757" class="outline-4">
+<h4 id="orgae1b757"><span class="section-number-4">2.2.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-2-1">
 <div class="exercise">
 <p>
@@ -776,8 +777,8 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 </div>
 </div>
 
-<div id="outline-container-org7d33595" class="outline-3">
-<h3 id="org7d33595"><span class="section-number-3">2.3</span> Numerical estimation of the energy</h3>
+<div id="outline-container-org1d35c3d" class="outline-3">
+<h3 id="org1d35c3d"><span class="section-number-3">2.3</span> Numerical estimation of the energy</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 If the space is discretized in small volume elements \(\mathbf{r}_i\)
@@ -807,8 +808,8 @@ The energy is biased because:
 </div>
 
 
-<div id="outline-container-org49eff63" class="outline-4">
-<h4 id="org49eff63"><span class="section-number-4">2.3.1</span> Exercise</h4>
+<div id="outline-container-orgeee38dd" class="outline-4">
+<h4 id="orgeee38dd"><span class="section-number-4">2.3.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-3-1">
 <div class="exercise">
 <p>
@@ -918,8 +919,8 @@ a =    2.0000000000000000          E =   -8.0869806678448772E-002
 </div>
 </div>
 
-<div id="outline-container-org2377ff3" class="outline-3">
-<h3 id="org2377ff3"><span class="section-number-3">2.4</span> Variance of the local energy</h3>
+<div id="outline-container-org0feb42b" class="outline-3">
+<h3 id="org0feb42b"><span class="section-number-3">2.4</span> Variance of the local energy</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 The variance of the local energy is a functional of \(\Psi\)
@@ -936,7 +937,7 @@ which can be simplified as
 </p>
 
 <p>
-\[ \sigma^2(E_L) = \langle E^2 \rangle - \langle E \rangle^2 \]
+\[ \sigma^2(E_L) = \langle E_L^2 \rangle - \langle E_L \rangle^2 \]
 </p>
 
 <p>
@@ -946,8 +947,8 @@ energy can be used as a measure of the quality of a wave function.
 </p>
 </div>
 
-<div id="outline-container-orga585c67" class="outline-4">
-<h4 id="orga585c67"><span class="section-number-4">2.4.1</span> Exercise (optional)</h4>
+<div id="outline-container-orgb444cc3" class="outline-4">
+<h4 id="orgb444cc3"><span class="section-number-4">2.4.1</span> Exercise (optional)</h4>
 <div class="outline-text-4" id="text-2-4-1">
 <div class="exercise">
 <p>
@@ -959,8 +960,8 @@ Prove that :
 </div>
 </div>
 
-<div id="outline-container-orgc835875" class="outline-4">
-<h4 id="orgc835875"><span class="section-number-4">2.4.2</span> Exercise</h4>
+<div id="outline-container-org11be305" class="outline-4">
+<h4 id="org11be305"><span class="section-number-4">2.4.2</span> Exercise</h4>
 <div class="outline-text-4" id="text-2-4-2">
 <div class="exercise">
 <p>
@@ -1095,8 +1096,8 @@ a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.806881
 </div>
 
 
-<div id="outline-container-org83c6a25" class="outline-2">
-<h2 id="org83c6a25"><span class="section-number-2">3</span> Variational Monte Carlo</h2>
+<div id="outline-container-org478ecf8" class="outline-2">
+<h2 id="org478ecf8"><span class="section-number-2">3</span> Variational Monte Carlo</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Numerical integration with deterministic methods is very efficient
@@ -1112,8 +1113,8 @@ interval.
 </p>
 </div>
 
-<div id="outline-container-org85df268" class="outline-3">
-<h3 id="org85df268"><span class="section-number-3">3.1</span> Computation of the statistical error</h3>
+<div id="outline-container-org279f738" class="outline-3">
+<h3 id="org279f738"><span class="section-number-3">3.1</span> Computation of the statistical error</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 To compute the statistical error, you need to perform \(M\)
@@ -1153,8 +1154,8 @@ And the confidence interval is given by
 </p>
 </div>
 
-<div id="outline-container-org57f2588" class="outline-4">
-<h4 id="org57f2588"><span class="section-number-4">3.1.1</span> Exercise</h4>
+<div id="outline-container-org9fc9374" class="outline-4">
+<h4 id="org9fc9374"><span class="section-number-4">3.1.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-3-1-1">
 <div class="exercise">
 <p>
@@ -1203,8 +1204,8 @@ input array.
 </div>
 </div>
 
-<div id="outline-container-org9818f33" class="outline-3">
-<h3 id="org9818f33"><span class="section-number-3">3.2</span> Uniform sampling in the box</h3>
+<div id="outline-container-org00499df" class="outline-3">
+<h3 id="org00499df"><span class="section-number-3">3.2</span> Uniform sampling in the box</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 We will now do our first Monte Carlo calculation to compute the
@@ -1238,8 +1239,8 @@ statistical error.
 </p>
 </div>
 
-<div id="outline-container-org91d5f7e" class="outline-4">
-<h4 id="org91d5f7e"><span class="section-number-4">3.2.1</span> Exercise</h4>
+<div id="outline-container-org0e626da" class="outline-4">
+<h4 id="org0e626da"><span class="section-number-4">3.2.1</span> Exercise</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <div class="exercise">
 <p>
@@ -1349,19 +1350,228 @@ E =  -0.49588321986667677      +/-   7.1758863546737969E-004
 </div>
 </div>
 
-<div id="outline-container-orgdc3ee3e" class="outline-3">
-<h3 id="orgdc3ee3e"><span class="section-number-3">3.3</span> Gaussian sampling</h3>
+<div id="outline-container-org3c75811" class="outline-3">
+<h3 id="org3c75811"><span class="section-number-3">3.3</span> Metropolis sampling with \(\Psi^2\)</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
-We will now improve the sampling and allow to sample in the whole
-3D space, correcting the bias related to the sampling in the box.
+We will now use the square of the wave function to sample random
+points distributed with the probability density
+\[
+   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
+   \]
 </p>
 
 <p>
-Instead of drawing uniform random numbers, we will draw Gaussian
-random numbers centered on 0 and with a variance of 1.
+The expression of the average energy is now simplified to the average of
+the local energies, since the weights are taken care of by the
+sampling :
 </p>
 
+<p>
+\[
+   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
+   \]
+</p>
+
+
+<p>
+To sample a chosen probability density, an efficient method is the 
+<a href="https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm">Metropolis-Hastings sampling algorithm</a>. Starting from a random
+initial position \(\mathbf{r}_0\), we will realize a random walk as follows:
+</p>
+
+<p>
+\[
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \mathbf{u}
+   \]
+</p>
+
+<p>
+where \(\tau\) is a fixed constant (the so-called <i>time-step</i>), and
+\(\mathbf{u}\) is a uniform random number in a 3-dimensional box
+\((-1,-1,-1) \le \mathbf{u} \le (1,1,1)\). We will then add the
+accept/reject step that will guarantee that the distribution of the
+\(\mathbf{r}_n\) is \(\Psi^2\):
+</p>
+
+<ul class="org-ul">
+<li>Compute a new position \(\mathbf{r}_{n+1}\)</li>
+<li>Draw a uniform random number \(v \in [0,1]\)</li>
+<li>Compute the ratio \(R = \frac{\left[\Psi(\mathbf{r}_{n+1})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}\)</li>
+<li>if \(v \le R\), accept the move (do nothing)</li>
+<li>else, reject the move (set \(\mathbf{r}_{n+1} = \mathbf{r}_n\))</li>
+<li>evaluate the local energy at \(\mathbf{r}_{n+1}\)</li>
+</ul>
+
+<div class="note">
+<p>
+A common error is to remove the rejected samples from the
+calculation of the average. <b>Don't do it!</b>
+</p>
+
+<p>
+All samples should be kept, from both accepted and rejected moves.
+</p>
+
+</div>
+
+<p>
+If the time step is infinitely small, the ratio will be very close
+to one and all the steps will be accepted. But the trajectory will
+be infinitely too short to have statistical significance.
+</p>
+
+<p>
+On the other hand, as the time step increases, the number of
+accepted steps will decrease because the ratios might become
+small. If the number of accepted steps is close to zero, then the
+space is not well sampled either.
+</p>
+
+<p>
+The time step should be adjusted so that it is as large as
+possible, keeping the number of accepted steps not too small. To
+achieve that we define the acceptance rate as the number of
+accepted steps over the total number of steps. Adjusting the time
+step such that the acceptance rate is close to 0.5 is a good compromise.
+</p>
+</div>
+
+
+<div id="outline-container-org41c65bb" class="outline-4">
+<h4 id="org41c65bb"><span class="section-number-4">3.3.1</span> Exercise</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<div class="exercise">
+<p>
+Modify the program of the previous section to compute the energy, sampling with
+\(Psi^2\).
+Compute also the acceptance rate, so that you can adapt the time
+step in order to have an acceptance rate close to 0.5 .
+Can you observe a reduction in the statistical error?
+</p>
+
+</div>
+
+<p>
+<b>Python</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #a020f0;">from</span> hydrogen  <span style="color: #a020f0;">import</span> *
+<span style="color: #a020f0;">from</span> qmc_stats <span style="color: #a020f0;">import</span> *
+
+<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">MonteCarlo</span>(a,nmax,tau):
+    <span style="color: #a0522d;">E</span> = 0.
+    <span style="color: #a0522d;">N</span> = 0.
+    <span style="color: #a0522d;">N_accep</span> = 0.
+    <span style="color: #a0522d;">r_old</span> = np.random.uniform(-tau, tau, (3))
+    <span style="color: #a0522d;">psi_old</span> = psi(a,r_old)
+    <span style="color: #a020f0;">for</span> istep <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(nmax):
+        <span style="color: #a0522d;">r_new</span> = r_old + np.random.uniform(-tau,tau,(3))
+        <span style="color: #a0522d;">psi_new</span> = psi(a,r_new)
+        <span style="color: #a0522d;">ratio</span> = (psi_new / psi_old)**2
+        <span style="color: #a0522d;">v</span> = np.random.uniform(0,1,(1))
+        <span style="color: #a020f0;">if</span> v &lt; ratio:
+            <span style="color: #a0522d;">N_accep</span> += 1.
+            <span style="color: #a0522d;">r_old</span> = r_new
+            <span style="color: #a0522d;">psi_old</span> = psi_new
+        <span style="color: #a0522d;">N</span> += 1.
+        <span style="color: #a0522d;">E</span> += e_loc(a,r_old)
+    <span style="color: #a020f0;">return</span> E/N, N_accep/N
+
+<span style="color: #a0522d;">a</span> = 0.9
+<span style="color: #a0522d;">nmax</span> = 100000
+<span style="color: #a0522d;">tau</span> = 1.3
+<span style="color: #a0522d;">X0</span> = [ MonteCarlo(a,nmax,tau) <span style="color: #a020f0;">for</span> i <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(30)]
+<span style="color: #a0522d;">X</span> = [ x <span style="color: #a020f0;">for</span> x, _ <span style="color: #a020f0;">in</span> X0 ]
+<span style="color: #a0522d;">A</span> = [ x <span style="color: #a020f0;">for</span> _, x <span style="color: #a020f0;">in</span> X0 ]
+<span style="color: #a0522d;">E</span>, <span style="color: #a0522d;">deltaE</span> = ave_error(X)
+<span style="color: #a0522d;">A</span>, <span style="color: #a0522d;">deltaA</span> = ave_error(A)
+<span style="color: #a020f0;">print</span>(f<span style="color: #8b2252;">"E = {E} +/- {deltaE}"</span>)
+<span style="color: #a020f0;">print</span>(f<span style="color: #8b2252;">"A = {A} +/- {deltaA}"</span>)
+</pre>
+</div>
+
+<p>
+<b>Fortran</b>
+</p>
+<div class="org-src-container">
+<pre class="src src-f90"><span style="color: #a020f0;">subroutine</span> <span style="color: #0000ff;">metropolis_montecarlo</span>(a,nmax,tau,energy,accep)
+  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> a</span>
+  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> nmax </span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> tau</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(out) ::<span style="color: #a0522d;"> energy</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(out) ::<span style="color: #a0522d;"> accep</span>
+
+  <span style="color: #228b22;">integer</span>*8 ::<span style="color: #a0522d;"> istep</span>
+
+  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> norm, r_old(3), r_new(3), psi_old, psi_new</span>
+  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> v, ratio, n_accep</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">external</span> ::<span style="color: #a0522d;"> e_loc, psi, gaussian</span>
+
+  energy = 0.d0
+  norm   = 0.d0
+  n_accep = 0.d0
+  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_number</span>(r_old)
+  r_old(:) = tau * (2.d0*r_old(:) - 1.d0)
+  psi_old = psi(a,r_old)
+  <span style="color: #a020f0;">do</span> istep = 1,nmax
+     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_number</span>(r_new)
+     r_new(:) = r_old(:) + tau * (2.d0*r_new(:) - 1.d0)
+     psi_new = psi(a,r_new)
+     ratio = (psi_new / psi_old)**2
+     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_number</span>(v)
+     <span style="color: #a020f0;">if</span> (v &lt; ratio) <span style="color: #a020f0;">then</span>
+        r_old(:) = r_new(:)
+        psi_old = psi_new
+        n_accep = n_accep + 1.d0
+     <span style="color: #a020f0;">endif</span>
+     norm = norm + 1.d0
+     energy = energy + e_loc(a,r_old)
+  <span style="color: #a020f0;">end do</span>
+  energy = energy / norm
+  accep  = n_accep / norm
+<span style="color: #a020f0;">end subroutine</span> <span style="color: #0000ff;">metropolis_montecarlo</span>
+
+<span style="color: #a020f0;">program</span> <span style="color: #0000ff;">qmc</span>
+  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> a = 0.9d0</span>
+  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> tau = 1.3d0</span>
+  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nmax = 100000</span>
+  <span style="color: #228b22;">integer</span>         , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nruns = 30</span>
+
+  <span style="color: #228b22;">integer</span> ::<span style="color: #a0522d;"> irun</span>
+  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> X(nruns), Y(nruns)</span>
+  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> ave, err</span>
+
+  <span style="color: #a020f0;">do</span> irun=1,nruns
+     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">metropolis_montecarlo</span>(a,nmax,tau,X(irun),Y(irun))
+  <span style="color: #a020f0;">enddo</span>
+  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">ave_error</span>(X,nruns,ave,err)
+  <span style="color: #a020f0;">print</span> *, <span style="color: #8b2252;">'E = '</span>, ave, <span style="color: #8b2252;">'+/-'</span>, err
+  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">ave_error</span>(Y,nruns,ave,err)
+  <span style="color: #a020f0;">print</span> *, <span style="color: #8b2252;">'A = '</span>, ave, <span style="color: #8b2252;">'+/-'</span>, err
+<span style="color: #a020f0;">end program</span> <span style="color: #0000ff;">qmc</span>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-sh">gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
+./qmc_metropolis
+</pre>
+</div>
+<pre class="example">
+E =  -0.49478505004797046      +/-   2.0493795299184956E-004
+A =   0.51737800000000000      +/-   4.1827406733181444E-004
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd11f044" class="outline-3">
+<h3 id="orgd11f044"><span class="section-number-3">3.4</span> Gaussian random number generator</h3>
+<div class="outline-text-3" id="text-3-4">
 <p>
 To obtain Gaussian-distributed random numbers, you can apply the
 <a href="https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform">Box Muller transform</a> to uniform random numbers:
@@ -1373,8 +1583,9 @@ z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2)
 \end{eqnarray*}
 
 <p>
-Here is a Fortran implementation returning a Gaussian-distributed
-n-dimensional vector \(\mathbf{z}\);
+Below is a Fortran implementation returning a Gaussian-distributed
+n-dimensional vector \(\mathbf{z}\). This will be useful for the
+following sections.
 </p>
 
 <p>
@@ -1410,296 +1621,112 @@ n-dimensional vector \(\mathbf{z}\);
 <span style="color: #a020f0;">end subroutine</span> <span style="color: #0000ff;">random_gauss</span>
 </pre>
 </div>
+</div>
+</div>
 
+<div id="outline-container-orgd59955a" class="outline-3">
+<h3 id="orgd59955a"><span class="section-number-3">3.5</span> Generalized Metropolis algorithm</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+One can use more efficient numerical schemes to move the electrons.
+But in that case, the Metropolis accepation step has to be adapted
+accordingly: the acceptance
+probability \(A\) is chosen so that it is consistent with the
+probability of leaving \(\mathbf{r}_n\) and the probability of
+entering \(\mathbf{r}_{n+1}\):
+</p>
 
 <p>
-Now the sampling probability can be inserted into the equation of the energy:
+\[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
+   \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
+   \right)
+   \]
+where \(T(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})\) is the
+probability of transition from \(\mathbf{r}_n\) to
+\(\mathbf{r}_{n+1}\).
+</p>
+
+<p>
+In the previous example, we were using uniform random
+numbers. Hence, the transition probability was
 </p>
 
 <p>
 \[
-   E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \text{constant}
    \]
 </p>
 
 <p>
-with the Gaussian probability
+So the expression of \(A\) was simplified to the ratios of the squared
+wave functions.
+</p>
+
+<p>
+Now, if instead of drawing uniform random numbers
+choose to draw Gaussian random numbers with mean 0 and variance
+\(\tau\), the transition probability becomes:
 </p>
 
 <p>
 \[
-   P(\mathbf{r}) = \frac{1}{(2 \pi)^{3/2}}\exp\left( -\frac{\mathbf{r}^2}{2} \right).
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\tau} \right]
+   \]
+</p>
+
+
+<p>
+To sample even better the density, we can "push" the electrons
+into in the regions of high probability, and "pull" them away from
+the low-probability regions. This will mechanically increase the
+acceptance ratios and improve the sampling.
+</p>
+
+<p>
+To do this, we can add the drift vector
+</p>
+
+<p>
+\[
+   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi} 
+   \].
+</p>
+
+<p>
+The numerical scheme becomes a drifted diffusion:
+</p>
+
+<p>
+\[
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \frac{\nabla
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
    \]
 </p>
 
 <p>
-As the coordinates are drawn with probability \(P(\mathbf{r})\), the
-average energy can be computed as
-</p>
-
-<p>
-\[
-   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
-   \]
-</p>
-</div>
-
-
-<div id="outline-container-org6fe98d4" class="outline-4">
-<h4 id="org6fe98d4"><span class="section-number-4">3.3.1</span> Exercise</h4>
-<div class="outline-text-4" id="text-3-3-1">
-<div class="exercise">
-<p>
-Modify the exercise of the previous section to sample with
-Gaussian-distributed random numbers. Can you see an reduction in
-the statistical error?
-</p>
-
-</div>
-
-<p>
-<b>Python</b>
-</p>
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #a020f0;">from</span> hydrogen  <span style="color: #a020f0;">import</span> *
-<span style="color: #a020f0;">from</span> qmc_stats <span style="color: #a020f0;">import</span> *
-
-<span style="color: #a0522d;">norm_gauss</span> = 1./(2.*np.pi)**(1.5)
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">gaussian</span>(r):
-    <span style="color: #a020f0;">return</span> norm_gauss * np.exp(-np.dot(r,r)*0.5)
-
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">MonteCarlo</span>(a,nmax):
-    <span style="color: #a0522d;">E</span> = 0.
-    <span style="color: #a0522d;">N</span> = 0.
-    <span style="color: #a020f0;">for</span> istep <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(nmax):
-        <span style="color: #a0522d;">r</span> = np.random.normal(loc=0., scale=1.0, size=(3))
-        <span style="color: #a0522d;">w</span> = psi(a,r)
-        <span style="color: #a0522d;">w</span> = w*w / gaussian(r)
-        <span style="color: #a0522d;">N</span> += w
-        <span style="color: #a0522d;">E</span> += w * e_loc(a,r)
-    <span style="color: #a020f0;">return</span> E/N
-
-<span style="color: #a0522d;">a</span> = 0.9
-<span style="color: #a0522d;">nmax</span> = 100000
-<span style="color: #a0522d;">X</span> = [MonteCarlo(a,nmax) <span style="color: #a020f0;">for</span> i <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(30)]
-<span style="color: #a0522d;">E</span>, <span style="color: #a0522d;">deltaE</span> = ave_error(X)
-<span style="color: #a020f0;">print</span>(f<span style="color: #8b2252;">"E = {E} +/- {deltaE}"</span>)
-</pre>
-</div>
-
-
-<p>
-<b>Fortran</b>
-</p>
-<div class="org-src-container">
-<pre class="src src-f90"><span style="color: #228b22;">double precision </span><span style="color: #a020f0;">function</span><span style="color: #a0522d;"> </span><span style="color: #0000ff;">gaussian</span><span style="color: #000000; background-color: #ffffff;">(r)</span>
-  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(in) ::<span style="color: #a0522d;"> r(3)</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> norm_gauss = 1.d0/(2.d0*dacos(-1.d0))**(1.5d0)</span>
-  gaussian = norm_gauss * dexp( -0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
-<span style="color: #a020f0;">end function</span> <span style="color: #0000ff;">gaussian</span>
-
-
-<span style="color: #a020f0;">subroutine</span> <span style="color: #0000ff;">gaussian_montecarlo</span>(a,nmax,energy)
-  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> a</span>
-  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> nmax </span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(out) ::<span style="color: #a0522d;"> energy</span>
-
-  <span style="color: #228b22;">integer</span>*8 ::<span style="color: #a0522d;"> istep</span>
-
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> norm, r(3), w</span>
-
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">external</span> ::<span style="color: #a0522d;"> e_loc, psi, gaussian</span>
-
-  energy = 0.d0
-  norm   = 0.d0
-  <span style="color: #a020f0;">do</span> istep = 1,nmax
-     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_gauss</span>(r,3)
-     w = psi(a,r) 
-     w = w*w / gaussian(r)
-     norm = norm + w
-     energy = energy + w * e_loc(a,r)
-  <span style="color: #a020f0;">end do</span>
-  energy = energy / norm
-<span style="color: #a020f0;">end subroutine</span> <span style="color: #0000ff;">gaussian_montecarlo</span>
-
-<span style="color: #a020f0;">program</span> <span style="color: #0000ff;">qmc</span>
-  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> a = 0.9</span>
-  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nmax = 100000</span>
-  <span style="color: #228b22;">integer</span>         , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nruns = 30</span>
-
-  <span style="color: #228b22;">integer</span> ::<span style="color: #a0522d;"> irun</span>
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> X(nruns)</span>
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> ave, err</span>
-
-  <span style="color: #a020f0;">do</span> irun=1,nruns
-     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">gaussian_montecarlo</span>(a,nmax,X(irun))
-  <span style="color: #a020f0;">enddo</span>
-  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">ave_error</span>(X,nruns,ave,err)
-  <span style="color: #a020f0;">print</span> *, <span style="color: #8b2252;">'E = '</span>, ave, <span style="color: #8b2252;">'+/-'</span>, err
-<span style="color: #a020f0;">end program</span> <span style="color: #0000ff;">qmc</span>
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-sh">gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
-./qmc_gaussian
-</pre>
-</div>
-
-<pre class="example">
-E =  -0.49517104619091717      +/-   1.0685523607878961E-004
-
-</pre>
-</div>
-</div>
-</div>
-
-<div id="outline-container-orge0e488e" class="outline-3">
-<h3 id="orge0e488e"><span class="section-number-3">3.4</span> Sampling with \(\Psi^2\)</h3>
-<div class="outline-text-3" id="text-3-4">
-<p>
-We will now use the square of the wave function to make the sampling:
-</p>
-
-<p>
-\[
-   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
-   \]
-</p>
-
-<p>
-The expression for the energy will be simplified to the average of
-the local energies, each with a weight of 1.
-</p>
-
-<p>
-\[
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
-   \]
-</p>
-</div>
-
-
-<div id="outline-container-orgcfcdbfd" class="outline-4">
-<h4 id="orgcfcdbfd"><span class="section-number-4">3.4.1</span> Importance sampling</h4>
-<div class="outline-text-4" id="text-3-4-1">
-<p>
-To generate the probability density \(\Psi^2\), we consider a
-diffusion process characterized by a time-dependent density
-\([\Psi(\mathbf{r},t)]^2\), which obeys the Fokker-Planck equation:
-</p>
-
-<p>
-\[
-    \frac{\partial \Psi^2}{\partial t} = \sum_i D
-    \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-    [\Psi(\mathbf{r},t)]^2.
-    \]
-</p>
-
-<p>
-\(D\) is the diffusion constant and \(F_i\) is the i-th component of a
-drift velocity caused by an external potential. For a stationary
-density, \( \frac{\partial \Psi^2}{\partial t} = 0 \), so
-</p>
-
-\begin{eqnarray*}
-0 & = & \sum_i D
-\frac{\partial}{\partial \mathbf{r}_i} \left(
-\frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-[\Psi(\mathbf{r})]^2 \\
-0 & = & \sum_i D
-\frac{\partial}{\partial \mathbf{r}_i} \left(
-\frac{\partial [\Psi(\mathbf{r})]^2}{\partial \mathbf{r}_i} -
-F_i(\mathbf{r})\,[\Psi(\mathbf{r})]^2 \right) \\
-0 & = &
-\frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} -
-\frac{\partial   F_i   }{\partial \mathbf{r}_i}[\Psi(\mathbf{r})]^2  - 
-\frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
-\end{eqnarray*}
-
-<p>
-we search for a drift function which satisfies 
-</p>
-
-<p>
-\[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
-    \]
-</p>
-
-<p>
-to obtain a second derivative on the left, we need the drift to be
-of the form
-\[
-    F_i(\mathbf{r}) = g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
-    \]
-</p>
-
-<p>
-\[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial
-    g(\mathbf{r})}{\partial \mathbf{r}_i}\frac{\partial \Psi^2}{\partial \mathbf{r}_i} + 
-    [\Psi(\mathbf{r})]^2 g(\mathbf{r}) \frac{\partial^2
-    \Psi^2}{\partial \mathbf{r}_i^2} + 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} 
-    g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
-    \]
-</p>
-
-<p>
-\(g = 1 / \Psi^2\) satisfies this equation, so 
-</p>
-
-<p>
-\[
-    F(\mathbf{r}) = \frac{\nabla [\Psi(\mathbf{r})]^2}{[\Psi(\mathbf{r})]^2} = 2 \frac{\nabla
-    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} = 2 \nabla \left( \log \Psi(\mathbf{r}) \right)
-    \]
-</p>
-
-<p>
-In statistical mechanics, Fokker-Planck trajectories are generated
-by a Langevin equation:
-</p>
-
-<p>
-\[
-     \frac{\partial \mathbf{r}(t)}{\partial t} = 2D \frac{\nabla
-     \Psi(\mathbf{r}(t))}{\Psi} + \eta
-    \]
-</p>
-
-<p>
-where \(\eta\) is a normally-distributed fluctuating random force.
-</p>
-
-<p>
-Discretizing this differential equation gives the following drifted
-diffusion scheme:
-</p>
-
-<p>
-\[
-    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau\, 2D \frac{\nabla
-    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
-    \]
 where \(\chi\) is a Gaussian random variable with zero mean and
-variance \(\tau\,2D\).
+variance \(\tau\).
+The transition probability becomes:
+</p>
+
+<p>
+\[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\tau} \right]
+   \]
 </p>
 </div>
 
-<ol class="org-ol">
-<li><a id="org6f8bd81"></a>Exercise 1<br />
-<div class="outline-text-5" id="text-3-4-1-1">
+
+<div id="outline-container-orgae8d2ad" class="outline-4">
+<h4 id="orgae8d2ad"><span class="section-number-4">3.5.1</span> Exercise 1</h4>
+<div class="outline-text-4" id="text-3-5-1">
 <div class="exercise">
 <p>
 Write a function to compute the drift vector \(\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\).
@@ -1732,189 +1759,15 @@ Write a function to compute the drift vector \(\frac{\nabla \Psi(\mathbf{r})}{\P
 </pre>
 </div>
 </div>
-</li>
+</div>
 
-<li><a id="org4976dcc"></a><span class="todo TODO">TODO</span> Exercise 2<br />
-<div class="outline-text-5" id="text-3-4-1-2">
+<div id="outline-container-orgbb7142f" class="outline-4">
+<h4 id="orgbb7142f"><span class="section-number-4">3.5.2</span> Exercise 2</h4>
+<div class="outline-text-4" id="text-3-5-2">
 <div class="exercise">
 <p>
-Sample \(\Psi^2\) approximately using the drifted diffusion scheme,
-with a diffusion constant \(D=1/2\). You can use a time step of
-0.001 a.u.
-</p>
-
-</div>
-
-<p>
-<b>Python</b>
-</p>
-<div class="org-src-container">
-<pre class="src src-python"><span style="color: #a020f0;">from</span> hydrogen  <span style="color: #a020f0;">import</span> *
-<span style="color: #a020f0;">from</span> qmc_stats <span style="color: #a020f0;">import</span> *
-
-<span style="color: #a020f0;">def</span> <span style="color: #0000ff;">MonteCarlo</span>(a,tau,nmax):
-    <span style="color: #a0522d;">sq_tau</span> = np.sqrt(tau)
-
-    # <span style="color: #b22222;">Initialization</span>
-    <span style="color: #a0522d;">E</span> = 0.
-    <span style="color: #a0522d;">N</span> = 0.
-    <span style="color: #a0522d;">r_old</span> = np.random.normal(loc=0., scale=1.0, size=(3))
-
-    <span style="color: #a020f0;">for</span> istep <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(nmax):
-        <span style="color: #a0522d;">d_old</span> = drift(a,r_old)
-        <span style="color: #a0522d;">chi</span> = np.random.normal(loc=0., scale=1.0, size=(3))
-        <span style="color: #a0522d;">r_new</span> = r_old + tau * d_old + chi*sq_tau
-        <span style="color: #a0522d;">N</span> += 1.
-        <span style="color: #a0522d;">E</span> += e_loc(a,r_new)
-        <span style="color: #a0522d;">r_old</span> = r_new
-    <span style="color: #a020f0;">return</span> E/N
-
-
-<span style="color: #a0522d;">a</span> = 0.9
-<span style="color: #a0522d;">nmax</span> = 100000
-<span style="color: #a0522d;">tau</span> = 0.2
-<span style="color: #a0522d;">X</span> = [MonteCarlo(a,tau,nmax) <span style="color: #a020f0;">for</span> i <span style="color: #a020f0;">in</span> <span style="color: #483d8b;">range</span>(30)]
-<span style="color: #a0522d;">E</span>, <span style="color: #a0522d;">deltaE</span> = ave_error(X)
-<span style="color: #a020f0;">print</span>(f<span style="color: #8b2252;">"E = {E} +/- {deltaE}"</span>)
-</pre>
-</div>
-
-<p>
-<b>Fortran</b>
-</p>
-<div class="org-src-container">
-<pre class="src src-f90"><span style="color: #a020f0;">subroutine</span> <span style="color: #0000ff;">variational_montecarlo</span>(a,tau,nmax,energy)
-  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> a, tau</span>
-  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">intent</span>(in)  ::<span style="color: #a0522d;"> nmax </span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">intent</span>(out) ::<span style="color: #a0522d;"> energy</span>
-
-  <span style="color: #228b22;">integer</span>*8 ::<span style="color: #a0522d;"> istep</span>
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> norm, r_old(3), r_new(3), d_old(3), sq_tau, chi(3)</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">external</span> ::<span style="color: #a0522d;"> e_loc</span>
-
-  sq_tau = dsqrt(tau)
-
-  ! <span style="color: #b22222;">Initialization</span>
-  energy = 0.d0
-  norm   = 0.d0
-  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_gauss</span>(r_old,3)
-
-  <span style="color: #a020f0;">do</span> istep = 1,nmax
-     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">drift</span>(a,r_old,d_old)
-     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">random_gauss</span>(chi,3)
-     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
-     norm = norm + 1.d0
-     energy = energy + e_loc(a,r_new)
-     r_old(:) = r_new(:)
-  <span style="color: #a020f0;">end do</span>
-  energy = energy / norm
-<span style="color: #a020f0;">end subroutine</span> <span style="color: #0000ff;">variational_montecarlo</span>
-
-<span style="color: #a020f0;">program</span> <span style="color: #0000ff;">qmc</span>
-  <span style="color: #a020f0;">implicit</span> <span style="color: #228b22;">none</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> a = 0.9</span>
-  <span style="color: #228b22;">double precision</span>, <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> tau = 0.2</span>
-  <span style="color: #228b22;">integer</span>*8       , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nmax = 100000</span>
-  <span style="color: #228b22;">integer</span>         , <span style="color: #a020f0;">parameter</span> ::<span style="color: #a0522d;"> nruns = 30</span>
-
-  <span style="color: #228b22;">integer</span> ::<span style="color: #a0522d;"> irun</span>
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> X(nruns)</span>
-  <span style="color: #228b22;">double precision</span> ::<span style="color: #a0522d;"> ave, err</span>
-
-  <span style="color: #a020f0;">do</span> irun=1,nruns
-     <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">variational_montecarlo</span>(a,tau,nmax,X(irun))
-  <span style="color: #a020f0;">enddo</span>
-  <span style="color: #a020f0;">call</span> <span style="color: #0000ff;">ave_error</span>(X,nruns,ave,err)
-  <span style="color: #a020f0;">print</span> *, <span style="color: #8b2252;">'E = '</span>, ave, <span style="color: #8b2252;">'+/-'</span>, err
-<span style="color: #a020f0;">end program</span> <span style="color: #0000ff;">qmc</span>
-</pre>
-</div>
-
-<div class="org-src-container">
-<pre class="src src-sh">gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
-./vmc
-</pre>
-</div>
-
-<pre class="example">
-E =  -0.48584030499187431      +/-   1.0411743995438257E-004
-
-</pre>
-</div>
-</li>
-</ol>
-</div>
-
-<div id="outline-container-orgc52903b" class="outline-4">
-<h4 id="orgc52903b"><span class="section-number-4">3.4.2</span> Metropolis algorithm</h4>
-<div class="outline-text-4" id="text-3-4-2">
-<p>
-Discretizing the differential equation to generate the desired
-probability density will suffer from a discretization error
-leading to biases in the averages. The <a href="https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm">Metropolis-Hastings
-sampling algorithm</a> removes exactly the discretization errors, so
-large time steps can be employed.
-</p>
-
-<p>
-After the new position \(\mathbf{r}_{n+1}\) has been computed, an
-additional accept/reject step is performed. The acceptance
-probability \(A\) is chosen so that it is consistent with the
-probability of leaving \(\mathbf{r}_n\) and the probability of
-entering \(\mathbf{r}_{n+1}\):
-</p>
-
-<p>
-\[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
-    \frac{g(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-    {g(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
-    \right)
-    \]
-</p>
-
-<p>
-In our Hydrogen atom example, \(P\) is \(\Psi^2\) and \(g\) is a
-solution of the discretized Fokker-Planck equation:
-</p>
-
-\begin{eqnarray*}
-P(r_{n}) &=& \Psi^2(\mathbf{r}_n) \\
-g(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
-\frac{1}{(4\pi\,D\,\tau)^{3/2}} \exp \left[ - \frac{\left(
-\mathbf{r}_{n+1} - \mathbf{r}_{n} - 2D \frac{\nabla
-\Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{4D\,\tau} \right]
-\end{eqnarray*}
-
-<p>
-The accept/reject step is the following:
-</p>
-<ul class="org-ul">
-<li>Compute \(A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})\).</li>
-<li>Draw a uniform random number \(u\)</li>
-<li>if \(u \le A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})\), accept
-the move</li>
-<li>if \(u>A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})\), reject
-the move: set \(\mathbf{r}_{n+1} = \mathbf{r}_{n}\), but <b>don't
-remove the sample from the average!</b></li>
-</ul>
-
-<p>
-The <i>acceptance rate</i> is the ratio of the number of accepted step
-over the total number of steps. The time step should be adapted so
-that the acceptance rate is around 0.5 for a good efficiency of
-the simulation.
-</p>
-</div>
-
-<ol class="org-ol">
-<li><a id="orgefc66ea"></a>Exercise<br />
-<div class="outline-text-5" id="text-3-4-2-1">
-<div class="exercise">
-<p>
-Modify the previous program to introduce the accept/reject step.
-You should recover the unbiased result.
-Adjust the time-step so that the acceptance rate is 0.5.
+Modify the previous program to introduce the drifted diffusion scheme.
+(This is a necessary step for the next section).
 </p>
 
 </div>
@@ -1952,8 +1805,8 @@ Adjust the time-step so that the acceptance rate is 0.5.
             <span style="color: #a0522d;">d_old</span> = d_new
             <span style="color: #a0522d;">d2_old</span> = d2_new
             <span style="color: #a0522d;">psi_old</span> = psi_new
-        <span style="color: #a0522d;">N</span> += 1.
-        <span style="color: #a0522d;">E</span> += e_loc(a,r_old)
+            <span style="color: #a0522d;">N</span> += 1.
+            <span style="color: #a0522d;">E</span> += e_loc(a,r_old)
     <span style="color: #a020f0;">return</span> E/N, accep_rate/N
 
 
@@ -2003,8 +1856,8 @@ Adjust the time-step so that the acceptance rate is 0.5.
      psi_new = psi(a,r_new)
      ! <span style="color: #b22222;">Metropolis</span>
      prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + <span style="color: #a020f0;">&amp;</span>
-            (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + <span style="color: #a020f0;">&amp;</span>
-            (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
+          (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + <span style="color: #a020f0;">&amp;</span>
+          (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
      argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
      q = psi_new / psi_old
      q = dexp(-argexpo) * q*q
@@ -2057,24 +1910,21 @@ A =   0.78861366666666655      +/-   3.5096729498002445E-004
 
 </pre>
 </div>
-</li>
-</ol>
 </div>
 </div>
 </div>
 
-
-<div id="outline-container-orgca1fad0" class="outline-2">
-<h2 id="orgca1fad0"><span class="section-number-2">4</span> <span class="todo TODO">TODO</span> Diffusion Monte Carlo</h2>
+<div id="outline-container-org2042bc2" class="outline-2">
+<h2 id="org2042bc2"><span class="section-number-2">4</span> <span class="todo TODO">TODO</span> Diffusion Monte Carlo</h2>
 <div class="outline-text-2" id="text-4">
 </div>
 
-<div id="outline-container-org8275af4" class="outline-3">
-<h3 id="org8275af4"><span class="section-number-3">4.1</span> Hydrogen atom</h3>
+<div id="outline-container-org964c160" class="outline-3">
+<h3 id="org964c160"><span class="section-number-3">4.1</span> Hydrogen atom</h3>
 <div class="outline-text-3" id="text-4-1">
 </div>
 <ol class="org-ol">
-<li><a id="org64b6416"></a>Exercise<br />
+<li><a id="orge2cfd4b"></a>Exercise<br />
 <div class="outline-text-5" id="text-4-1-0-1">
 <div class="exercise">
 <p>
@@ -2233,8 +2083,8 @@ A =   0.78861366666666655      +/-   3.5096729498002445E-004
 </div>
 
 
-<div id="outline-container-org745b49b" class="outline-3">
-<h3 id="org745b49b"><span class="section-number-3">4.2</span> Dihydrogen</h3>
+<div id="outline-container-orgf75f8aa" class="outline-3">
+<h3 id="orgf75f8aa"><span class="section-number-3">4.2</span> Dihydrogen</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 We will now consider the H<sub>2</sub> molecule in a minimal basis composed of the
@@ -2256,7 +2106,7 @@ the nuclei.
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Anthony Scemama, Claudia Filippi</p>
-<p class="date">Created: 2021-01-19 Tue 09:46</p>
+<p class="date">Created: 2021-01-20 Wed 18:13</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
