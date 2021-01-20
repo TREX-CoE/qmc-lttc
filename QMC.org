@@ -469,7 +469,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    $$
    which can be simplified as
    
-   $$ \sigma^2(E_L) = \langle E^2 \rangle - \langle E \rangle^2 $$
+   $$ \sigma^2(E_L) = \langle E_L^2 \rangle - \langle E_L \rangle^2 $$
 
    If the local energy is constant (i.e. $\Psi$ is an eigenfunction of
    $\hat{H}$) the variance is zero, so the variance of the local
@@ -804,88 +804,79 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     #+RESULTS:
     :  E =  -0.49588321986667677      +/-   7.1758863546737969E-004
 
-** Gaussian sampling 
+** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
-   :header-args:python: :tangle qmc_gaussian.py
-   :header-args:f90: :tangle qmc_gaussian.f90
+   :header-args:python: :tangle qmc_metropolis.py
+   :header-args:f90: :tangle qmc_metropolis.f90
    :END:
 
-   We will now improve the sampling and allow to sample in the whole
-   3D space, correcting the bias related to the sampling in the box.
+   We will now use the square of the wave function to sample random
+   points distributed with the probability density
+   \[
+   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
+   \]
 
-   Instead of drawing uniform random numbers, we will draw Gaussian
-   random numbers centered on 0 and with a variance of 1.
+   The expression of the average energy is now simplified to the average of
+   the local energies, since the weights are taken care of by the
+   sampling :
 
-   To obtain Gaussian-distributed random numbers, you can apply the
-   [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
-
-   \begin{eqnarray*}
-   z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
-   z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
-   \end{eqnarray*}
-
-   Here is a Fortran implementation returning a Gaussian-distributed
-   n-dimensional vector $\mathbf{z}$;
-
-   *Fortran*
-   #+BEGIN_SRC f90 :tangle qmc_stats.f90
-subroutine random_gauss(z,n)
-  implicit none
-  integer, intent(in) :: n
-  double precision, intent(out) :: z(n)
-  double precision :: u(n+1)
-  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
-  integer :: i
-
-  call random_number(u)
-  if (iand(n,1) == 0) then
-     ! n is even
-     do i=1,n,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-  else
-     ! n is odd
-     do i=1,n-1,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
-     z(n)   = z(n) * dcos( two_pi*u(n+1) )
-  end if
-end subroutine random_gauss
-   #+END_SRC
-
-
-   Now the sampling probability can be inserted into the equation of the energy:
+   $$
+   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
+   $$
    
-   \[
-   E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
-   \]
 
-   with the Gaussian probability
-
-   \[
-   P(\mathbf{r}) = \frac{1}{(2 \pi)^{3/2}}\exp\left( -\frac{\mathbf{r}^2}{2} \right).
-   \]
-
-   As the coordinates are drawn with probability $P(\mathbf{r})$, the
-   average energy can be computed as
+   To sample a chosen probability density, an efficient method is the 
+   [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings sampling algorithm]]. Starting from a random
+   initial position $\mathbf{r}_0$, we will realize a random walk as follows:
 
    $$
-   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \mathbf{u}
    $$
 
+   where $\tau$ is a fixed constant (the so-called /time-step/), and
+   $\mathbf{u}$ is a uniform random number in a 3-dimensional box
+   $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. We will then add the
+   accept/reject step that will guarantee that the distribution of the
+   $\mathbf{r}_n$ is $\Psi^2$:
+
+   - Compute a new position $\mathbf{r}_{n+1}$
+   - Draw a uniform random number $v \in [0,1]$
+   - Compute the ratio $R = \frac{\left[\Psi(\mathbf{r}_{n+1})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
+   - if $v \le R$, accept the move (do nothing)
+   - else, reject the move (set $\mathbf{r}_{n+1} = \mathbf{r}_n$)
+   - evaluate the local energy at $\mathbf{r}_{n+1}$ 
+   
+   #+begin_note
+    A common error is to remove the rejected samples from the
+    calculation of the average. *Don't do it!*
+
+    All samples should be kept, from both accepted and rejected moves.
+   #+end_note
+   
+   If the time step is infinitely small, the ratio will be very close
+   to one and all the steps will be accepted. But the trajectory will
+   be infinitely too short to have statistical significance.
+
+   On the other hand, as the time step increases, the number of
+   accepted steps will decrease because the ratios might become
+   small. If the number of accepted steps is close to zero, then the
+   space is not well sampled either.
+
+   The time step should be adjusted so that it is as large as
+   possible, keeping the number of accepted steps not too small. To
+   achieve that we define the acceptance rate as the number of
+   accepted steps over the total number of steps. Adjusting the time
+   step such that the acceptance rate is close to 0.5 is a good compromise.
+   
    
 *** Exercise
-
+    
     #+begin_exercise
-    Modify the exercise of the previous section to sample with
-    Gaussian-distributed random numbers. Can you see an reduction in
-    the statistical error?
+    Modify the program of the previous section to compute the energy, sampling with
+    $Psi^2$.
+    Compute also the acceptance rate, so that you can adapt the time
+    step in order to have an acceptance rate close to 0.5 .
+    Can you observe a reduction in the statistical error?
     #+end_exercise
 
     *Python*
@@ -893,91 +884,110 @@ end subroutine random_gauss
 from hydrogen  import *
 from qmc_stats import *
 
-norm_gauss = 1./(2.*np.pi)**(1.5)
-def gaussian(r):
-    return norm_gauss * np.exp(-np.dot(r,r)*0.5)
-
-def MonteCarlo(a,nmax):
+def MonteCarlo(a,nmax,tau):
     E = 0.
     N = 0.
+    N_accep = 0.
+    r_old = np.random.uniform(-tau, tau, (3))
+    psi_old = psi(a,r_old)
     for istep in range(nmax):
-        r = np.random.normal(loc=0., scale=1.0, size=(3))
-        w = psi(a,r)
-        w = w*w / gaussian(r)
-        N += w
-        E += w * e_loc(a,r)
-    return E/N
+        r_new = r_old + np.random.uniform(-tau,tau,(3))
+        psi_new = psi(a,r_new)
+        ratio = (psi_new / psi_old)**2
+        v = np.random.uniform(0,1,(1))
+        if v < ratio:
+            N_accep += 1.
+            r_old = r_new
+            psi_old = psi_new
+        N += 1.
+        E += e_loc(a,r_old)
+    return E/N, N_accep/N
 
 a = 0.9
 nmax = 100000
-X = [MonteCarlo(a,nmax) for i in range(30)]
+tau = 1.3
+X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
+X = [ x for x, _ in X0 ]
+A = [ x for _, x in X0 ]
 E, deltaE = ave_error(X)
+A, deltaA = ave_error(A)
 print(f"E = {E} +/- {deltaE}")
+print(f"A = {A} +/- {deltaA}")
     #+END_SRC
 
     #+RESULTS:
-    : E = -0.49511014287471955 +/- 0.00012402022172236656
+    : E = -0.4950720838131573 +/- 0.00019089638602238043
+    : A = 0.5172960000000001 +/- 0.0003443446549306529
 
-   
     *Fortran*
     #+BEGIN_SRC f90
-double precision function gaussian(r)
-  implicit none
-  double precision, intent(in) :: r(3)
-  double precision, parameter :: norm_gauss = 1.d0/(2.d0*dacos(-1.d0))**(1.5d0)
-  gaussian = norm_gauss * dexp( -0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
-end function gaussian
-
-
-subroutine gaussian_montecarlo(a,nmax,energy)
+subroutine metropolis_montecarlo(a,nmax,tau,energy,accep)
   implicit none
   double precision, intent(in)  :: a
   integer*8       , intent(in)  :: nmax 
+  double precision, intent(in)  :: tau
   double precision, intent(out) :: energy
+  double precision, intent(out) :: accep
 
   integer*8 :: istep
 
-  double precision :: norm, r(3), w
-
+  double precision :: norm, r_old(3), r_new(3), psi_old, psi_new
+  double precision :: v, ratio, n_accep
   double precision, external :: e_loc, psi, gaussian
 
   energy = 0.d0
   norm   = 0.d0
+  n_accep = 0.d0
+  call random_number(r_old)
+  r_old(:) = tau * (2.d0*r_old(:) - 1.d0)
+  psi_old = psi(a,r_old)
   do istep = 1,nmax
-     call random_gauss(r,3)
-     w = psi(a,r) 
-     w = w*w / gaussian(r)
-     norm = norm + w
-     energy = energy + w * e_loc(a,r)
+     call random_number(r_new)
+     r_new(:) = r_old(:) + tau * (2.d0*r_new(:) - 1.d0)
+     psi_new = psi(a,r_new)
+     ratio = (psi_new / psi_old)**2
+     call random_number(v)
+     if (v < ratio) then
+        r_old(:) = r_new(:)
+        psi_old = psi_new
+        n_accep = n_accep + 1.d0
+     endif
+     norm = norm + 1.d0
+     energy = energy + e_loc(a,r_old)
   end do
   energy = energy / norm
-end subroutine gaussian_montecarlo
+  accep  = n_accep / norm
+end subroutine metropolis_montecarlo
 
 program qmc
   implicit none
-  double precision, parameter :: a = 0.9
+  double precision, parameter :: a = 0.9d0
+  double precision, parameter :: tau = 1.3d0
   integer*8       , parameter :: nmax = 100000
   integer         , parameter :: nruns = 30
 
   integer :: irun
-  double precision :: X(nruns)
+  double precision :: X(nruns), Y(nruns)
   double precision :: ave, err
 
   do irun=1,nruns
-     call gaussian_montecarlo(a,nmax,X(irun))
+     call metropolis_montecarlo(a,nmax,tau,X(irun),Y(irun))
   enddo
   call ave_error(X,nruns,ave,err)
   print *, 'E = ', ave, '+/-', err
+  call ave_error(Y,nruns,ave,err)
+  print *, 'A = ', ave, '+/-', err
 end program qmc
     #+END_SRC
 
     #+begin_src sh :results output :exports both
-gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
-./qmc_gaussian
+gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
+./qmc_metropolis
     #+end_src
-
     #+RESULTS:
-    :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004
+    :  E =  -0.49478505004797046      +/-   2.0493795299184956E-004
+    :  A =   0.51737800000000000      +/-   4.1827406733181444E-004
+
 
 ** Sampling with $\Psi^2$
 
@@ -1206,7 +1216,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
       #+RESULTS:
       :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
      
-*** Metropolis algorithm
+*** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
    :header-args:f90: :tangle vmc_metropolis.f90
@@ -1225,17 +1235,19 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
     entering $\mathbf{r}_{n+1}$:
 
     \[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
-    \frac{g(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-    {g(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
+    \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+    {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
     \right)
     \]
+    where $T(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})$ is the
+    probability of transition from $\mathbf{r}_n$ to $\mathbf{r}_{n+1})$.
 
     In our Hydrogen atom example, $P$ is $\Psi^2$ and $g$ is a
     solution of the discretized Fokker-Planck equation:
     
     \begin{eqnarray*}
     P(r_{n}) &=& \Psi^2(\mathbf{r}_n) \\
-    g(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
     \frac{1}{(4\pi\,D\,\tau)^{3/2}} \exp \left[ - \frac{\left(
     \mathbf{r}_{n+1} - \mathbf{r}_{n} - 2D \frac{\nabla
     \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{4D\,\tau} \right]
@@ -1247,8 +1259,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
     - if $u \le A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})$, accept
       the move
     - if $u>A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})$, reject
-      the move: set $\mathbf{r}_{n+1} = \mathbf{r}_{n}$, but *don't
-      remove the sample from the average!*
+      the move: set $\mathbf{r}_{n+1} = \mathbf{r}_{n}$, but *don't remove the sample from the average!*
 
     The /acceptance rate/ is the ratio of the number of accepted step
     over the total number of steps. The time step should be adapted so
@@ -1567,3 +1578,180 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 
 
   
+
+
+   
+* Appendix
+
+** Gaussian sampling                                               :noexport:
+   :PROPERTIES:
+   :header-args:python: :tangle qmc_gaussian.py
+   :header-args:f90: :tangle qmc_gaussian.f90
+   :END:
+
+   We will now improve the sampling and allow to sample in the whole
+   3D space, correcting the bias related to the sampling in the box.
+
+   Instead of drawing uniform random numbers, we will draw Gaussian
+   random numbers centered on 0 and with a variance of 1.
+
+   To obtain Gaussian-distributed random numbers, you can apply the
+   [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
+
+   \begin{eqnarray*}
+   z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
+   z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
+   \end{eqnarray*}
+
+   Here is a Fortran implementation returning a Gaussian-distributed
+   n-dimensional vector $\mathbf{z}$;
+
+   *Fortran*
+   #+BEGIN_SRC f90 :tangle qmc_stats.f90
+subroutine random_gauss(z,n)
+  implicit none
+  integer, intent(in) :: n
+  double precision, intent(out) :: z(n)
+  double precision :: u(n+1)
+  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
+  integer :: i
+
+  call random_number(u)
+  if (iand(n,1) == 0) then
+     ! n is even
+     do i=1,n,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+  else
+     ! n is odd
+     do i=1,n-1,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
+     z(n)   = z(n) * dcos( two_pi*u(n+1) )
+  end if
+end subroutine random_gauss
+   #+END_SRC
+
+   Now the sampling probability can be inserted into the equation of the energy:
+   
+   \[
+   E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
+   \]
+
+   with the Gaussian probability
+
+   \[
+   P(\mathbf{r}) = \frac{1}{(2 \pi)^{3/2}}\exp\left( -\frac{\mathbf{r}^2}{2} \right).
+   \]
+
+   As the coordinates are drawn with probability $P(\mathbf{r})$, the
+   average energy can be computed as
+
+   $$
+   E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
+   w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
+   $$
+
+   
+*** Exercise
+
+    #+begin_exercise
+    Modify the program of the previous section to sample with
+    Gaussian-distributed random numbers. Can you see an reduction in
+    the statistical error?
+    #+end_exercise
+
+    *Python*
+    #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
+norm_gauss = 1./(2.*np.pi)**(1.5)
+def gaussian(r):
+    return norm_gauss * np.exp(-np.dot(r,r)*0.5)
+
+def MonteCarlo(a,nmax):
+    E = 0.
+    N = 0.
+    for istep in range(nmax):
+        r = np.random.normal(loc=0., scale=1.0, size=(3))
+        w = psi(a,r)
+        w = w*w / gaussian(r)
+        N += w
+        E += w * e_loc(a,r)
+    return E/N
+
+a = 0.9
+nmax = 100000
+X = [MonteCarlo(a,nmax) for i in range(30)]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+    #+END_SRC
+
+    #+RESULTS:
+    : E = -0.49511014287471955 +/- 0.00012402022172236656
+   
+    *Fortran*
+    #+BEGIN_SRC f90
+double precision function gaussian(r)
+  implicit none
+  double precision, intent(in) :: r(3)
+  double precision, parameter :: norm_gauss = 1.d0/(2.d0*dacos(-1.d0))**(1.5d0)
+  gaussian = norm_gauss * dexp( -0.5d0 * (r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ))
+end function gaussian
+
+
+subroutine gaussian_montecarlo(a,nmax,energy)
+  implicit none
+  double precision, intent(in)  :: a
+  integer*8       , intent(in)  :: nmax 
+  double precision, intent(out) :: energy
+
+  integer*8 :: istep
+
+  double precision :: norm, r(3), w
+
+  double precision, external :: e_loc, psi, gaussian
+
+  energy = 0.d0
+  norm   = 0.d0
+  do istep = 1,nmax
+     call random_gauss(r,3)
+     w = psi(a,r) 
+     w = w*w / gaussian(r)
+     norm = norm + w
+     energy = energy + w * e_loc(a,r)
+  end do
+  energy = energy / norm
+end subroutine gaussian_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call gaussian_montecarlo(a,nmax,X(irun))
+  enddo
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+end program qmc
+    #+END_SRC
+
+    #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
+./qmc_gaussian
+    #+end_src
+
+    #+RESULTS:
+    :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004

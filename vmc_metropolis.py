@@ -34,8 +34,8 @@ def MonteCarlo(a,tau,nmax):
 
 a = 0.9
 nmax = 100000
-tau = 2.5
+tau = 1.0
 X = [MonteCarlo(a,tau,nmax) for i in range(30)]
 E, deltaE = ave_error([x[0] for x in X])
 A, deltaA = ave_error([x[1] for x in X])
-print(f"E = {E} +/- {deltaE}  {A} +/- {deltaA}")
+print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
