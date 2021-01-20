@@ -478,7 +478,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 *** Exercise (optional)
    #+begin_exercise
    Prove that :
-   $$ \sigma^2(E_L) = \langle E^2 \rangle - \langle E \rangle^2 $$
+   $$\langle E - \langle E \rangle \rangle^2 = \langle E^2 \rangle - \langle E \rangle^2 $$
    #+end_exercise
    
 *** Exercise
@@ -537,6 +537,7 @@ program variance_hydrogen
   implicit none
   double precision, external :: e_loc, psi
   double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm, s2
+  double precision :: e, energy2
   integer :: i, k, l, j
 
   a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
@@ -552,6 +553,7 @@ program variance_hydrogen
 
   do j=1,size(a)
      energy = 0.d0
+     energy2 = 0.d0
      norm = 0.d0
      do i=1,size(x)
         r(1) = x(i)
@@ -561,29 +563,16 @@ program variance_hydrogen
               r(3) = x(l)
               w = psi(a(j),r)
               w = w * w * delta
-              energy = energy + w * e_loc(a(j), r)
+              e = e_loc(a(j), r)
+              energy  = energy  + w * e
+              energy2 = energy2 + w * e * e
               norm   = norm   + w 
            end do
         end do
      end do
-     energy = energy / norm
-
-     s2 = 0.d0
-     norm = 0.d0
-     do i=1,size(x)
-        r(1) = x(i)
-        do k=1,size(x)
-           r(2) = x(k)
-           do l=1,size(x)
-              r(3) = x(l)
-              w = psi(a(j),r)
-              w = w * w * delta
-              s2 = s2 + w * ( e_loc(a(j), r) - energy )**2
-              norm   = norm   + w 
-           end do
-        end do
-     end do
-     s2 = s2 / norm
+     energy  = energy  / norm
+     energy2 = energy2 / norm
+     s2 = energy2 - energy*energy
      print *, 'a = ', a(j), ' E = ', energy, ' s2 = ', s2
   end do
 
@@ -598,12 +587,12 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    #+end_src
 
    #+RESULTS:
-   :  a =   0.10000000000000001       E =  -0.24518438948809140       s2 =    2.6965218719733813E-002
-   :  a =   0.20000000000000001       E =  -0.26966057967803236       s2 =    3.7197072370217653E-002
-   :  a =   0.50000000000000000       E =  -0.38563576125173815       s2 =    5.3185967578488862E-002
+   :  a =   0.10000000000000001       E =  -0.24518438948809140       s2 =    2.6965218719722767E-002
+   :  a =   0.20000000000000001       E =  -0.26966057967803236       s2 =    3.7197072370201284E-002
+   :  a =   0.50000000000000000       E =  -0.38563576125173815       s2 =    5.3185967578480653E-002
    :  a =    1.0000000000000000       E =  -0.50000000000000000       s2 =    0.0000000000000000     
-   :  a =    1.5000000000000000       E =  -0.39242967082602065       s2 =   0.31449670909180444     
-   :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270851303     
+   :  a =    1.5000000000000000       E =  -0.39242967082602065       s2 =   0.31449670909172917     
+   :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
 
 
 * Variational Monte Carlo

@@ -27,8 +27,8 @@ def MonteCarlo(a,tau,nmax):
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-        N += 1.
-        E += e_loc(a,r_old)
+            N += 1.
+            E += e_loc(a,r_old)
     return E/N, accep_rate/N
 
 

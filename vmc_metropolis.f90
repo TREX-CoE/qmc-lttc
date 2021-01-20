@@ -12,7 +12,7 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   double precision, external :: e_loc, psi
 
   sq_tau = dsqrt(tau)
-  
+
   ! Initialization
   energy = 0.d0
   norm   = 0.d0
@@ -30,8 +30,8 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
      psi_new = psi(a,r_new)
      ! Metropolis
      prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + &
-            (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
-            (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
+          (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
+          (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
      argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
      q = psi_new / psi_old
      q = dexp(-argexpo) * q*q
