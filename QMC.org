@@ -988,125 +988,140 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
     :  E =  -0.49478505004797046      +/-   2.0493795299184956E-004
     :  A =   0.51737800000000000      +/-   4.1827406733181444E-004
 
-
-** Sampling with $\Psi^2$
-
-   We will now use the square of the wave function to make the sampling:
-
-   \[
-   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
-   \]
-
-   The expression for the energy will be simplified to the average of
-   the local energies, each with a weight of 1.
-
-   $$
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
-   $$
+** Gaussian random number generator
    
-   
-*** Importance sampling
+   To obtain Gaussian-distributed random numbers, you can apply the
+   [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
+
+   \begin{eqnarray*}
+   z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
+   z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
+   \end{eqnarray*}
+
+   Below is a Fortran implementation returning a Gaussian-distributed
+   n-dimensional vector $\mathbf{z}$. This will be useful for the
+   following sections.
+
+   *Fortran*
+   #+BEGIN_SRC f90 :tangle qmc_stats.f90
+subroutine random_gauss(z,n)
+  implicit none
+  integer, intent(in) :: n
+  double precision, intent(out) :: z(n)
+  double precision :: u(n+1)
+  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
+  integer :: i
+
+  call random_number(u)
+  if (iand(n,1) == 0) then
+     ! n is even
+     do i=1,n,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+  else
+     ! n is odd
+     do i=1,n-1,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
+     z(n)   = z(n) * dcos( two_pi*u(n+1) )
+  end if
+end subroutine random_gauss
+   #+END_SRC
+
+** Generalized Metropolis algorithm
    :PROPERTIES:
-   :header-args:python: :tangle vmc.py
-   :header-args:f90: :tangle vmc.f90
+   :header-args:python: :tangle vmc_metropolis.py
+   :header-args:f90: :tangle vmc_metropolis.f90
    :END:
 
-    To generate the probability density $\Psi^2$, we consider a
-    diffusion process characterized by a time-dependent density
-    $[\Psi(\mathbf{r},t)]^2$, which obeys the Fokker-Planck equation:
+   One can use more efficient numerical schemes to move the electrons.
+   But in that case, the Metropolis accepation step has to be adapted
+   accordingly: the acceptance
+   probability $A$ is chosen so that it is consistent with the
+   probability of leaving $\mathbf{r}_n$ and the probability of
+   entering $\mathbf{r}_{n+1}$:
 
-    \[
-    \frac{\partial \Psi^2}{\partial t} = \sum_i D
-    \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-    [\Psi(\mathbf{r},t)]^2.
-    \]
+   \[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
+   \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
+   \right)
+   \]
+   where $T(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})$ is the
+   probability of transition from $\mathbf{r}_n$ to
+   $\mathbf{r}_{n+1}$.
+
+   In the previous example, we were using uniform random
+   numbers. Hence, the transition probability was
+
+   \[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \text{constant}
+   \]
+
+   So the expression of $A$ was simplified to the ratios of the squared
+   wave functions.
+    
+   Now, if instead of drawing uniform random numbers
+   choose to draw Gaussian random numbers with mean 0 and variance
+   $\tau$, the transition probability becomes:
+    
+   \[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\tau} \right]
+   \]
+
+    
+   To sample even better the density, we can "push" the electrons
+   into in the regions of high probability, and "pull" them away from
+   the low-probability regions. This will mechanically increase the
+   acceptance ratios and improve the sampling.
+
+   To do this, we can add the drift vector
+
+   \[
+   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi} 
+   \].
+    
+   The numerical scheme becomes a drifted diffusion:
+
+   \[
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau \frac{\nabla
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
+   \]
+
+   where $\chi$ is a Gaussian random variable with zero mean and
+   variance $\tau$.
+   The transition probability becomes:
+    
+   \[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\tau} \right]
+   \]
+    
+
+*** Exercise 1
+
+     #+begin_exercise
+     Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
+     #+end_exercise
    
-    $D$ is the diffusion constant and $F_i$ is the i-th component of a
-    drift velocity caused by an external potential. For a stationary
-    density, \( \frac{\partial \Psi^2}{\partial t} = 0 \), so
-
-    \begin{eqnarray*}
-    0 & = & \sum_i D
-    \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-    [\Psi(\mathbf{r})]^2 \\
-    0 & = & \sum_i D
-    \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial [\Psi(\mathbf{r})]^2}{\partial \mathbf{r}_i} -
-    F_i(\mathbf{r})\,[\Psi(\mathbf{r})]^2 \right) \\
-    0 & = &
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} -
-    \frac{\partial   F_i   }{\partial \mathbf{r}_i}[\Psi(\mathbf{r})]^2  - 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
-    \end{eqnarray*}
-
-    we search for a drift function which satisfies 
-
-    \[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
-    \]
-
-    to obtain a second derivative on the left, we need the drift to be
-    of the form
-    \[
-    F_i(\mathbf{r}) = g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
-    \]
-
-    \[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial
-    g(\mathbf{r})}{\partial \mathbf{r}_i}\frac{\partial \Psi^2}{\partial \mathbf{r}_i} + 
-    [\Psi(\mathbf{r})]^2 g(\mathbf{r}) \frac{\partial^2
-    \Psi^2}{\partial \mathbf{r}_i^2} + 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} 
-    g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
-    \]
-   
-    $g = 1 / \Psi^2$ satisfies this equation, so 
-
-    \[
-    F(\mathbf{r}) = \frac{\nabla [\Psi(\mathbf{r})]^2}{[\Psi(\mathbf{r})]^2} = 2 \frac{\nabla
-    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} = 2 \nabla \left( \log \Psi(\mathbf{r}) \right)
-    \]
-
-    In statistical mechanics, Fokker-Planck trajectories are generated
-    by a Langevin equation:
-
-    \[
-     \frac{\partial \mathbf{r}(t)}{\partial t} = 2D \frac{\nabla
-     \Psi(\mathbf{r}(t))}{\Psi} + \eta
-    \]
-
-    where $\eta$ is a normally-distributed fluctuating random force.
-
-    Discretizing this differential equation gives the following drifted
-    diffusion scheme:
-
-    \[
-    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau\, 2D \frac{\nabla
-    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
-    \]
-    where $\chi$ is a Gaussian random variable with zero mean and
-    variance $\tau\,2D$.
-   
-**** Exercise 1
-
-      #+begin_exercise
-      Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
-      #+end_exercise
-   
-      *Python*
-      #+BEGIN_SRC python :tangle hydrogen.py
+     *Python*
+     #+BEGIN_SRC python :tangle hydrogen.py
 def drift(a,r):
   ar_inv = -a/np.sqrt(np.dot(r,r))
   return r * ar_inv
-      #+END_SRC
+     #+END_SRC
 
-      *Fortran*
-      #+BEGIN_SRC f90 :tangle hydrogen.f90
+     *Fortran*
+     #+BEGIN_SRC f90 :tangle hydrogen.f90
 subroutine drift(a,r,b)
   implicit none
   double precision, intent(in)  :: a, r(3)
@@ -1115,167 +1130,17 @@ subroutine drift(a,r,b)
   ar_inv = -a / dsqrt(r(1)*r(1) + r(2)*r(2) + r(3)*r(3))
   b(:) = r(:) * ar_inv
 end subroutine drift
-      #+END_SRC
+     #+END_SRC
 
-**** TODO Exercise 2
+*** Exercise 2
 
-     #+begin_exercise
-     Sample $\Psi^2$ approximately using the drifted diffusion scheme,
-     with a diffusion constant $D=1/2$. You can use a time step of
-     0.001 a.u.
-     #+end_exercise
+    #+begin_exercise
+    Modify the previous program to introduce the drifted diffusion scheme.
+    (This is a necessary step for the next section).
+    #+end_exercise
    
-      *Python*
-      #+BEGIN_SRC python :results output
-from hydrogen  import *
-from qmc_stats import *
-
-def MonteCarlo(a,tau,nmax):
-    sq_tau = np.sqrt(tau)
-
-    # Initialization
-    E = 0.
-    N = 0.
-    r_old = np.random.normal(loc=0., scale=1.0, size=(3))
-
-    for istep in range(nmax):
-        d_old = drift(a,r_old)
-        chi = np.random.normal(loc=0., scale=1.0, size=(3))
-        r_new = r_old + tau * d_old + chi*sq_tau
-        N += 1.
-        E += e_loc(a,r_new)
-        r_old = r_new
-    return E/N
-
-
-a = 0.9
-nmax = 100000
-tau = 0.2
-X = [MonteCarlo(a,tau,nmax) for i in range(30)]
-E, deltaE = ave_error(X)
-print(f"E = {E} +/- {deltaE}")
-      #+END_SRC
-
-      #+RESULTS:
-      : E = -0.4858534479298907 +/- 0.00010203236131158794
-
-      *Fortran*
-      #+BEGIN_SRC f90
-subroutine variational_montecarlo(a,tau,nmax,energy)
-  implicit none
-  double precision, intent(in)  :: a, tau
-  integer*8       , intent(in)  :: nmax 
-  double precision, intent(out) :: energy
-
-  integer*8 :: istep
-  double precision :: norm, r_old(3), r_new(3), d_old(3), sq_tau, chi(3)
-  double precision, external :: e_loc
-
-  sq_tau = dsqrt(tau)
-  
-  ! Initialization
-  energy = 0.d0
-  norm   = 0.d0
-  call random_gauss(r_old,3)
-
-  do istep = 1,nmax
-     call drift(a,r_old,d_old)
-     call random_gauss(chi,3)
-     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
-     norm = norm + 1.d0
-     energy = energy + e_loc(a,r_new)
-     r_old(:) = r_new(:)
-  end do
-  energy = energy / norm
-end subroutine variational_montecarlo
-
-program qmc
-  implicit none
-  double precision, parameter :: a = 0.9
-  double precision, parameter :: tau = 0.2
-  integer*8       , parameter :: nmax = 100000
-  integer         , parameter :: nruns = 30
-
-  integer :: irun
-  double precision :: X(nruns)
-  double precision :: ave, err
-
-  do irun=1,nruns
-     call variational_montecarlo(a,tau,nmax,X(irun))
-  enddo
-  call ave_error(X,nruns,ave,err)
-  print *, 'E = ', ave, '+/-', err
-end program qmc
-      #+END_SRC
-
-      #+begin_src sh :results output :exports both
-gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
-./vmc
-      #+end_src
-
-      #+RESULTS:
-      :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
-     
-*** Generalized Metropolis algorithm
-   :PROPERTIES:
-   :header-args:python: :tangle vmc_metropolis.py
-   :header-args:f90: :tangle vmc_metropolis.f90
-   :END:
-
-    Discretizing the differential equation to generate the desired
-    probability density will suffer from a discretization error
-    leading to biases in the averages. The [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings
-    sampling algorithm]] removes exactly the discretization errors, so
-    large time steps can be employed.
-
-    After the new position $\mathbf{r}_{n+1}$ has been computed, an
-    additional accept/reject step is performed. The acceptance
-    probability $A$ is chosen so that it is consistent with the
-    probability of leaving $\mathbf{r}_n$ and the probability of
-    entering $\mathbf{r}_{n+1}$:
-
-    \[ A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \min \left( 1,
-    \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-    {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}
-    \right)
-    \]
-    where $T(\mathbf{r}_n \rightarrow \mathbf{r}_{n+1})$ is the
-    probability of transition from $\mathbf{r}_n$ to $\mathbf{r}_{n+1})$.
-
-    In our Hydrogen atom example, $P$ is $\Psi^2$ and $g$ is a
-    solution of the discretized Fokker-Planck equation:
-    
-    \begin{eqnarray*}
-    P(r_{n}) &=& \Psi^2(\mathbf{r}_n) \\
-    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
-    \frac{1}{(4\pi\,D\,\tau)^{3/2}} \exp \left[ - \frac{\left(
-    \mathbf{r}_{n+1} - \mathbf{r}_{n} - 2D \frac{\nabla
-    \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{4D\,\tau} \right]
-    \end{eqnarray*}
-    
-    The accept/reject step is the following:
-    - Compute $A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})$.
-    - Draw a uniform random number $u$
-    - if $u \le A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})$, accept
-      the move
-    - if $u>A(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})$, reject
-      the move: set $\mathbf{r}_{n+1} = \mathbf{r}_{n}$, but *don't remove the sample from the average!*
-
-    The /acceptance rate/ is the ratio of the number of accepted step
-    over the total number of steps. The time step should be adapted so
-    that the acceptance rate is around 0.5 for a good efficiency of
-    the simulation.
-
-**** Exercise 
-
-     #+begin_exercise
-     Modify the previous program to introduce the accept/reject step.
-     You should recover the unbiased result.
-     Adjust the time-step so that the acceptance rate is 0.5.
-     #+end_exercise
-   
-      *Python*
-      #+BEGIN_SRC python :results output
+    *Python*
+    #+BEGIN_SRC python :results output
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1305,8 +1170,8 @@ def MonteCarlo(a,tau,nmax):
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-        N += 1.
-        E += e_loc(a,r_old)
+            N += 1.
+            E += e_loc(a,r_old)
     return E/N, accep_rate/N
 
 
@@ -1317,14 +1182,14 @@ X = [MonteCarlo(a,tau,nmax) for i in range(30)]
 E, deltaE = ave_error([x[0] for x in X])
 A, deltaA = ave_error([x[1] for x in X])
 print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
-      #+END_SRC
+    #+END_SRC
 
-      #+RESULTS:
-      : E = -0.4949730317138491 +/- 0.00012478601801760644
-      : A = 0.7887163333333334 +/- 0.00026834549840347617
+    #+RESULTS:
+    : E = -0.4949730317138491 +/- 0.00012478601801760644
+    : A = 0.7887163333333334 +/- 0.00026834549840347617
    
-      *Fortran*
-      #+BEGIN_SRC f90
+    *Fortran*
+    #+BEGIN_SRC f90
 subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   implicit none
   double precision, intent(in)  :: a, tau
@@ -1339,7 +1204,7 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   double precision, external :: e_loc, psi
 
   sq_tau = dsqrt(tau)
-  
+
   ! Initialization
   energy = 0.d0
   norm   = 0.d0
@@ -1357,8 +1222,8 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
      psi_new = psi(a,r_new)
      ! Metropolis
      prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + &
-            (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
-            (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
+          (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
+          (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
      argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
      q = psi_new / psi_old
      q = dexp(-argexpo) * q*q
@@ -1396,18 +1261,17 @@ program qmc
   call ave_error(accep,nruns,ave,err)
   print *, 'A = ', ave, '+/-', err
 end program qmc
-      #+END_SRC
+    #+END_SRC
 
-      #+begin_src sh :results output :exports both
+    #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 ./vmc_metropolis
-      #+end_src
+    #+end_src
 
-      #+RESULTS:
-      :  E =  -0.49499990423528023      +/-   1.5958250761863871E-004
-      :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
+    #+RESULTS:
+    :  E =  -0.49499990423528023      +/-   1.5958250761863871E-004
+    :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
      
-  
 * TODO Diffusion Monte Carlo
    :PROPERTIES:
    :header-args:python: :tangle dmc.py
@@ -1576,12 +1440,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    coordinates and $\mathbf{R}_A$ and $\mathbf{R}_B$ the coordinates of
    the nuclei.
 
-
-  
-
-
    
-* Appendix
+* Appendix                                                         :noexport:
 
 ** Gaussian sampling                                               :noexport:
    :PROPERTIES:
@@ -1594,49 +1454,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 
    Instead of drawing uniform random numbers, we will draw Gaussian
    random numbers centered on 0 and with a variance of 1.
-
-   To obtain Gaussian-distributed random numbers, you can apply the
-   [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
-
-   \begin{eqnarray*}
-   z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
-   z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
-   \end{eqnarray*}
-
-   Here is a Fortran implementation returning a Gaussian-distributed
-   n-dimensional vector $\mathbf{z}$;
-
-   *Fortran*
-   #+BEGIN_SRC f90 :tangle qmc_stats.f90
-subroutine random_gauss(z,n)
-  implicit none
-  integer, intent(in) :: n
-  double precision, intent(out) :: z(n)
-  double precision :: u(n+1)
-  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
-  integer :: i
-
-  call random_number(u)
-  if (iand(n,1) == 0) then
-     ! n is even
-     do i=1,n,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-  else
-     ! n is odd
-     do i=1,n-1,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
-     z(n)   = z(n) * dcos( two_pi*u(n+1) )
-  end if
-end subroutine random_gauss
-   #+END_SRC
-
+   
    Now the sampling probability can be inserted into the equation of the energy:
    
    \[
@@ -1755,3 +1573,192 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
 
     #+RESULTS:
     :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004
+
+** Improved sampling with $\Psi^2$                                 :noexport:
+
+*** Importance sampling
+   :PROPERTIES:
+   :header-args:python: :tangle vmc.py
+   :header-args:f90: :tangle vmc.f90
+   :END:
+
+    To generate the probability density $\Psi^2$, we consider a
+    diffusion process characterized by a time-dependent density
+    $[\Psi(\mathbf{r},t)]^2$, which obeys the Fokker-Planck equation:
+
+    \[
+    \frac{\partial \Psi^2}{\partial t} = \sum_i D
+    \frac{\partial}{\partial \mathbf{r}_i} \left(
+    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
+    [\Psi(\mathbf{r},t)]^2.
+    \]
+   
+    $D$ is the diffusion constant and $F_i$ is the i-th component of a
+    drift velocity caused by an external potential. For a stationary
+    density, \( \frac{\partial \Psi^2}{\partial t} = 0 \), so
+
+    \begin{eqnarray*}
+    0 & = & \sum_i D
+    \frac{\partial}{\partial \mathbf{r}_i} \left(
+    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
+    [\Psi(\mathbf{r})]^2 \\
+    0 & = & \sum_i D
+    \frac{\partial}{\partial \mathbf{r}_i} \left(
+    \frac{\partial [\Psi(\mathbf{r})]^2}{\partial \mathbf{r}_i} -
+    F_i(\mathbf{r})\,[\Psi(\mathbf{r})]^2 \right) \\
+    0 & = &
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} -
+    \frac{\partial   F_i   }{\partial \mathbf{r}_i}[\Psi(\mathbf{r})]^2  - 
+    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
+    \end{eqnarray*}
+
+    we search for a drift function which satisfies 
+
+    \[
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
+    [\Psi(\mathbf{r})]^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
+    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
+    \]
+
+    to obtain a second derivative on the left, we need the drift to be
+    of the form
+    \[
+    F_i(\mathbf{r}) = g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
+    \]
+
+    \[
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
+    [\Psi(\mathbf{r})]^2 \frac{\partial
+    g(\mathbf{r})}{\partial \mathbf{r}_i}\frac{\partial \Psi^2}{\partial \mathbf{r}_i} + 
+    [\Psi(\mathbf{r})]^2 g(\mathbf{r}) \frac{\partial^2
+    \Psi^2}{\partial \mathbf{r}_i^2} + 
+    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} 
+    g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
+    \]
+   
+    $g = 1 / \Psi^2$ satisfies this equation, so 
+
+    \[
+    F(\mathbf{r}) = \frac{\nabla [\Psi(\mathbf{r})]^2}{[\Psi(\mathbf{r})]^2} = 2 \frac{\nabla
+    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} = 2 \nabla \left( \log \Psi(\mathbf{r}) \right)
+    \]
+
+    In statistical mechanics, Fokker-Planck trajectories are generated
+    by a Langevin equation:
+
+    \[
+     \frac{\partial \mathbf{r}(t)}{\partial t} = 2D \frac{\nabla
+     \Psi(\mathbf{r}(t))}{\Psi} + \eta
+    \]
+
+    where $\eta$ is a normally-distributed fluctuating random force.
+
+    Discretizing this differential equation gives the following drifted
+    diffusion scheme:
+
+    \[
+    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \tau\, 2D \frac{\nabla
+    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
+    \]
+    where $\chi$ is a Gaussian random variable with zero mean and
+    variance $\tau\,2D$.
+   
+**** Exercise 2
+
+     #+begin_exercise
+     Sample $\Psi^2$ approximately using the drifted diffusion scheme,
+     with a diffusion constant $D=1/2$. You can use a time step of
+     0.001 a.u.
+     #+end_exercise
+   
+      *Python*
+      #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
+def MonteCarlo(a,tau,nmax):
+    sq_tau = np.sqrt(tau)
+
+    # Initialization
+    E = 0.
+    N = 0.
+    r_old = np.random.normal(loc=0., scale=1.0, size=(3))
+
+    for istep in range(nmax):
+        d_old = drift(a,r_old)
+        chi = np.random.normal(loc=0., scale=1.0, size=(3))
+        r_new = r_old + tau * d_old + chi*sq_tau
+        N += 1.
+        E += e_loc(a,r_new)
+        r_old = r_new
+    return E/N
+
+
+a = 0.9
+nmax = 100000
+tau = 0.2
+X = [MonteCarlo(a,tau,nmax) for i in range(30)]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+      #+END_SRC
+
+      #+RESULTS:
+      : E = -0.4858534479298907 +/- 0.00010203236131158794
+
+      *Fortran*
+      #+BEGIN_SRC f90
+subroutine variational_montecarlo(a,tau,nmax,energy)
+  implicit none
+  double precision, intent(in)  :: a, tau
+  integer*8       , intent(in)  :: nmax 
+  double precision, intent(out) :: energy
+
+  integer*8 :: istep
+  double precision :: norm, r_old(3), r_new(3), d_old(3), sq_tau, chi(3)
+  double precision, external :: e_loc
+
+  sq_tau = dsqrt(tau)
+  
+  ! Initialization
+  energy = 0.d0
+  norm   = 0.d0
+  call random_gauss(r_old,3)
+
+  do istep = 1,nmax
+     call drift(a,r_old,d_old)
+     call random_gauss(chi,3)
+     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
+     norm = norm + 1.d0
+     energy = energy + e_loc(a,r_new)
+     r_old(:) = r_new(:)
+  end do
+  energy = energy / norm
+end subroutine variational_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  double precision, parameter :: tau = 0.2
+  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call variational_montecarlo(a,tau,nmax,X(irun))
+  enddo
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+end program qmc
+      #+END_SRC
+
+      #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
+./vmc
+      #+end_src
+
+      #+RESULTS:
+      :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
+     
