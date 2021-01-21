@@ -6,9 +6,10 @@
 #+LATEX_CLASS: report
 #+LATEX_HEADER_EXTRA: \usepackage{minted}
 #+HTML_HEAD: <link rel="stylesheet" title="Standard" href="worg.css" type="text/css" />
-#+OPTIONS: H:2 num:t toc:nil \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
-#+EXPORT_EXCLUDE_TAGS: solution
+# EXCLUDE_TAGS: Python solution
+# EXCLUDE_TAGS: Fortran solution
 
   #+BEGIN_SRC elisp :output none :exports none
 (setq org-latex-listings 'minted
@@ -54,7 +55,7 @@
   *Note*
   #+begin_important
   In Fortran, when  you use a double precision  constant, don't forget
-  to  put  d0 as  a  suffix (for example  2.0d0),  or  it will  be
+  to  put  ~d0~ as  a  suffix (for example  ~2.0d0~),  or  it will  be
   interpreted as a single precision value
   #+end_important
 
@@ -68,32 +69,31 @@
   \Psi(\mathbf{r}) = \exp(-a |\mathbf{r}|)
   $$
 
-  We will first verify that $\Psi$ is an eigenfunction of the Hamiltonian
+  We will first verify that, for a given value of $a$, $\Psi$ is an
+  eigenfunction of the Hamiltonian
 
   $$
   \hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
   $$
 
-  when $a=1$, by checking that $\hat{H}\Psi(\mathbf{r}) = E\Psi(\mathbf{r})$ for
-  all $\mathbf{r}$. We will check that the local energy, defined as
+  To do that, we will check if the local energy, defined as
 
   $$
   E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
   $$
 
-  is constant. We will also see that when $a \ne 1$ the local energy
-  is not constant, so $\hat{H} \Psi \ne E \Psi$.
+  is constant.
 
 
   The probabilistic /expected value/ of an arbitrary function $f(x)$
   with respect to a probability density function $p(x)$ is given by
 
-  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx $$.
+  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx. $$
 
   Recall that a probability density function $p(x)$ is non-negative
   and integrates to one:
 
-  $$ \int_{-\infty}^\infty p(x)\,dx = 1 $$.
+  $$ \int_{-\infty}^\infty p(x)\,dx = 1. $$
 
     
   The electronic energy of a system is the expectation value of the
@@ -114,7 +114,17 @@
    :header-args:f90: :tangle hydrogen.f90
    :END:
 
+   Write all the functions of this section in a single file :
+   ~hydrogen.py~ if you use Python, or ~hydrogen.f90~ is you use
+   Fortran.
+   
 *** Exercise 1
+
+    #+begin_exercise
+    Find the theoretical value of $a$ for which $\Psi$ is an eigenfunction of $\hat{H}$.
+    #+end_exercise
+
+*** Exercise 2
 
     #+begin_exercise
     Write a function which computes the potential at $\mathbf{r}$.
@@ -127,7 +137,15 @@
     V(\mathbf{r}) = -\frac{1}{\sqrt{x^2 + y^2 + z^2}}
     $$
 
-    *Python*
+**** Python
+     #+BEGIN_SRC python :results none :tangle none
+import numpy as np
+
+def potential(r):
+    # TODO
+     #+END_SRC
+
+**** Python                                                        :solution:
      #+BEGIN_SRC python :results none
 import numpy as np
 
@@ -135,8 +153,16 @@ def potential(r):
     return -1. / np.sqrt(np.dot(r,r))
      #+END_SRC
 
+**** Fortran 
+     #+BEGIN_SRC f90 :tangle none
+double precision function potential(r)
+  implicit none
+  double precision, intent(in) :: r(3)
+  ! TODO
+end function potential
+     #+END_SRC
 
-     *Fortran*
+**** Fortran                                                       :solution:
      #+BEGIN_SRC f90 
 double precision function potential(r)
   implicit none
@@ -145,7 +171,7 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
-*** Exercise 2 
+*** Exercise 3 
     #+begin_exercise
     Write a function which computes the wave function at $\mathbf{r}$.
     The function accepts a scalar =a= and a 3-dimensional vector =r= as
@@ -153,13 +179,28 @@ end function potential
     #+end_exercise
 
     
-    *Python*
+**** Python
+     #+BEGIN_SRC python :results none
+def psi(a, r):
+    # TODO
+     #+END_SRC
+
+**** Python                                                        :solution:
      #+BEGIN_SRC python :results none
 def psi(a, r):
     return np.exp(-a*np.sqrt(np.dot(r,r)))
      #+END_SRC
 
-     *Fortran*
+**** Fortran
+     #+BEGIN_SRC f90 
+double precision function psi(a, r)
+  implicit none
+  double precision, intent(in) :: a, r(3)
+  ! TODO
+end function psi
+     #+END_SRC
+     
+**** Fortran                                                       :solution:
      #+BEGIN_SRC f90 
 double precision function psi(a, r)
   implicit none
@@ -168,7 +209,7 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
-*** Exercise 3
+*** Exercise 4
     #+begin_exercise
     Write a function which computes the local kinetic energy at $\mathbf{r}$.
     The function accepts =a= and =r= as input arguments and returns the
@@ -205,13 +246,28 @@ end function psi
     -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
     $$
      
-    *Python*
+**** Python
+     #+BEGIN_SRC python :results none
+def kinetic(a,r):
+    # TODO
+     #+END_SRC
+
+**** Python                                                        :solution:
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
     return -0.5 * (a**2 - (2.*a)/np.sqrt(np.dot(r,r)))
      #+END_SRC
 
-     *Fortran*
+**** Fortran
+     #+BEGIN_SRC f90 
+double precision function kinetic(a,r)
+  implicit none
+  double precision, intent(in) :: a, r(3)
+  ! TODO
+end function kinetic
+     #+END_SRC
+
+**** Fortran                                                       :solution:
      #+BEGIN_SRC f90 
 double precision function kinetic(a,r)
   implicit none
@@ -221,11 +277,12 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
-*** Exercise 4
+*** Exercise 5
     #+begin_exercise
-    Write a function which computes the local energy at $\mathbf{r}$.
-    The function accepts =x,y,z= as input arguments and returns the
-    local energy.
+    Write a function which computes the local energy at $\mathbf{r}$,
+    using the previously defined functions.
+    The function accepts =a= and =r= as input arguments and returns the
+    local kinetic energy.
     #+end_exercise
    
     $$
@@ -233,13 +290,28 @@ end function kinetic
     $$
 
     
-    *Python*
+**** Python
+     #+BEGIN_SRC python :results none
+def e_loc(a,r):
+    #TODO
+     #+END_SRC
+
+**** Python                                                        :solution:
      #+BEGIN_SRC python :results none
 def e_loc(a,r):
     return kinetic(a,r) + potential(r)
      #+END_SRC
 
-     *Fortran*
+**** Fortran
+     #+BEGIN_SRC f90
+double precision function e_loc(a,r)
+  implicit none
+  double precision, intent(in) :: a, r(3)
+  ! TODO
+end function e_loc
+     #+END_SRC
+   
+**** Fortran                                                       :solution:
      #+BEGIN_SRC f90
 double precision function e_loc(a,r)
   implicit none
@@ -254,47 +326,98 @@ end function e_loc
    :header-args:python: :tangle plot_hydrogen.py
    :header-args:f90: :tangle plot_hydrogen.f90
    :END:
-
    
 *** Exercise
     #+begin_exercise
     For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
-    local energy along the $x$ axis.
+    local energy along the $x$ axis. In Python, you can use matplotlib
+    for example. In Fortran, it is convenient to write in a text file
+    the values of $x$ and $E_L(\mathbf{r})$ for each point, and use
+    Gnuplot to plot the files.
     #+end_exercise
 
-    *Python*
-    #+BEGIN_SRC python :results none
+**** Python
+     #+BEGIN_SRC python :results none
 import numpy as np
 import matplotlib.pyplot as plt
 
 from hydrogen import e_loc
 
 x=np.linspace(-5,5)
-
-def make_array(a):
-  y=np.array([ e_loc(a, np.array([t,0.,0.]) ) for t in x])
-  return y
-
 plt.figure(figsize=(10,5))
+
+# TODO
+
+plt.tight_layout()
+plt.legend()
+plt.savefig("plot_py.png")
+     #+end_src
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results none
+import numpy as np
+import matplotlib.pyplot as plt
+
+from hydrogen import e_loc
+
+x=np.linspace(-5,5)
+plt.figure(figsize=(10,5))
+
 for a in [0.1, 0.2, 0.5, 1., 1.5, 2.]:
-  y = make_array(a)
+  y=np.array([ e_loc(a, np.array([t,0.,0.]) ) for t in x])
   plt.plot(x,y,label=f"a={a}")
 
 plt.tight_layout()
-
 plt.legend()
-
 plt.savefig("plot_py.png")
-    #+end_src
+     #+end_src
 
-    #+RESULTS:
+     #+RESULTS:
 
-    [[./plot_py.png]]
+     [[./plot_py.png]]
 
+**** Fortran
+        #+begin_src f90 
+program plot
+  implicit none
+  double precision, external :: e_loc
 
-    
-    *Fortran*
-    #+begin_src f90 
+  double precision :: x(50), dx
+  integer :: i, j
+
+  dx = 10.d0/(size(x)-1)
+  do i=1,size(x)
+     x(i) = -5.d0 + (i-1)*dx
+  end do
+
+  ! TODO
+
+end program plot
+        #+end_src
+
+        To compile and run:
+
+        #+begin_src sh :exports both
+gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
+./plot_hydrogen > data
+        #+end_src
+
+        To plot the data using gnuplot:
+
+        #+begin_src gnuplot :file plot.png :exports both
+set grid
+set xrange [-5:5]
+set yrange [-2:1]
+plot './data' index 0 using 1:2 with lines title 'a=0.1', \
+     './data' index 1 using 1:2 with lines title 'a=0.2', \
+     './data' index 2 using 1:2 with lines title 'a=0.5', \
+     './data' index 3 using 1:2 with lines title 'a=1.0', \
+     './data' index 4 using 1:2 with lines title 'a=1.5', \
+     './data' index 5 using 1:2 with lines title 'a=2.0'
+        #+end_src
+
+**** Fortran                                                       :solution:
+        #+begin_src f90 
 program plot
   implicit none
   double precision, external :: e_loc
@@ -323,20 +446,20 @@ program plot
   end do
 
 end program plot
-    #+end_src
+        #+end_src
 
-    To compile and run:
+        To compile and run:
 
-    #+begin_src sh :exports both
+        #+begin_src sh :exports both
 gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 ./plot_hydrogen > data
-    #+end_src
+        #+end_src
 
-    #+RESULTS:
+        #+RESULTS:
 
-    To plot the data using gnuplot:
+        To plot the data using gnuplot:
 
-    #+begin_src gnuplot :file plot.png :exports both
+        #+begin_src gnuplot :file plot.png :exports both
 set grid
 set xrange [-5:5]
 set yrange [-2:1]
@@ -346,12 +469,12 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 3 using 1:2 with lines title 'a=1.0', \
      './data' index 4 using 1:2 with lines title 'a=1.5', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
-    #+end_src
+        #+end_src
 
-    #+RESULTS:
-    [[file:plot.png]]
+        #+RESULTS:
+        [[file:plot.png]]
 
-** Numerical estimation of the energy
+** TODO Numerical estimation of the energy
    :PROPERTIES:
    :header-args:python: :tangle energy_hydrogen.py
    :header-args:f90: :tangle energy_hydrogen.f90
@@ -476,7 +599,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
       :  a =    1.5000000000000000          E =  -0.39242967082602065     
       :  a =    2.0000000000000000          E =   -8.0869806678448772E-002
 
-** Variance of the local energy
+** TODO Variance of the local energy
    :PROPERTIES:
    :header-args:python: :tangle variance_hydrogen.py
    :header-args:f90: :tangle variance_hydrogen.f90
@@ -618,7 +741,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
 
 
-* Variational Monte Carlo
+* TODO Variational Monte Carlo
 
   Numerical integration with deterministic methods is very efficient
   in low dimensions. When the number of dimensions becomes large,
@@ -629,7 +752,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
   to the discretization of space, and compute a statistical confidence
   interval.
 
-** Computation of the statistical error
+** TODO Computation of the statistical error
    :PROPERTIES:
    :header-args:python: :tangle qmc_stats.py
    :header-args:f90: :tangle qmc_stats.f90
@@ -694,7 +817,7 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
    #+END_SRC
    
-** Uniform sampling in the box
+** TODO Uniform sampling in the box
    :PROPERTIES:
    :header-args:python: :tangle qmc_uniform.py
    :header-args:f90: :tangle qmc_uniform.f90
@@ -816,7 +939,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     #+RESULTS:
     :  E =  -0.49588321986667677      +/-   7.1758863546737969E-004
 
-** Metropolis sampling with $\Psi^2$
+** TODO Metropolis sampling with $\Psi^2$
    :PROPERTIES:
    :header-args:python: :tangle qmc_metropolis.py
    :header-args:f90: :tangle qmc_metropolis.f90
@@ -1000,7 +1123,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
     :  E =  -0.49478505004797046      +/-   2.0493795299184956E-004
     :  A =   0.51737800000000000      +/-   4.1827406733181444E-004
 
-** Gaussian random number generator
+** TODO Gaussian random number generator
    
    To obtain Gaussian-distributed random numbers, you can apply the
    [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
@@ -1045,7 +1168,7 @@ subroutine random_gauss(z,n)
 end subroutine random_gauss
    #+END_SRC
 
-** Generalized Metropolis algorithm
+** TODO Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
    :header-args:f90: :tangle vmc_metropolis.f90
@@ -1290,9 +1413,9 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    :header-args:f90: :tangle dmc.f90
    :END:
    
-** Hydrogen atom
+** TODO Hydrogen atom
    
-**** Exercise 
+*** Exercise 
 
      #+begin_exercise
      Modify the Metropolis VMC program to introduce the PDMC weight.
@@ -1439,7 +1562,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
       :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
      
 
-** Dihydrogen
+** TODO Dihydrogen
 
    We will now consider the H_2 molecule in a minimal basis composed of the
    $1s$ orbitals of the hydrogen atoms:
