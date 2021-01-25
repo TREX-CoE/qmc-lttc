@@ -114,6 +114,17 @@
    ~hydrogen.py~ if you use Python, or ~hydrogen.f90~ is you use
    Fortran.
    
+   #+begin_note
+   - When computing a square root in $\mathbb{R}$, *always* make sure
+     that the argument of the square root is non-negative.
+   - When you divide, *always* make sure that you will not divide by zero
+
+   If a /floating-point exception/ can occur, you should make a test
+   to catch the error.
+   #+end_note
+   
+   #+end_note
+
 *** Exercise 1
 
     #+begin_exercise
@@ -146,7 +157,9 @@ def potential(r):
 import numpy as np
 
 def potential(r):
-    return -1. / np.sqrt(np.dot(r,r))
+    distance = np.sqrt(np.dot(r,r))
+    assert (distance > 0)
+    return -1. / distance
      #+END_SRC
 
 **** Fortran 
@@ -163,7 +176,13 @@ end function potential
 double precision function potential(r)
   implicit none
   double precision, intent(in) :: r(3)
-  potential = -1.d0 / dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) )
+  double precision :: distance
+  distance = dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) )
+  if (distance > 0.d0) then
+     potential = -1.d0 / dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) )
+  else
+     stop 'potential at r=0.d0 diverges'
+  end if
 end function potential
      #+END_SRC
 
@@ -173,7 +192,6 @@ end function potential
     The function accepts a scalar =a= and a 3-dimensional vector =r= as
     input arguments, and returns a scalar.
     #+end_exercise
-
     
 **** Python
      #+BEGIN_SRC python :results none  :tangle none
@@ -251,7 +269,9 @@ def kinetic(a,r):
 **** Python                                                        :solution:
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
-    return -0.5 * (a**2 - (2.*a)/np.sqrt(np.dot(r,r)))
+    distance = np.sqrt(np.dot(r,r))
+    assert (distance > 0.)
+    return -0.5 * (a**2 - (2.*a)/distance)
      #+END_SRC
 
 **** Fortran
@@ -268,8 +288,13 @@ end function kinetic
 double precision function kinetic(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
-  kinetic = -0.5d0 * (a*a - (2.d0*a) / &
-       dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ) ) 
+  double precision :: distance
+  distance = dsqrt( r(1)*r(1) + r(2)*r(2) + r(3)*r(3) ) 
+  if (distance > 0.d0) then
+     kinetic = -0.5d0 * (a*a - (2.d0*a) / distance)
+  else
+     stop 'kinetic energy diverges at r=0'
+  end if
 end function kinetic
      #+END_SRC
 
@@ -323,6 +348,11 @@ end function e_loc
    :header-args:f90: :tangle plot_hydrogen.f90
    :END:
    
+   #+begin_note
+   The potential and the kinetic energy both diverge at $r=0$, so we
+   choose a grid which does not contain the origin.
+   #+end_note
+
 *** Exercise
     #+begin_exercise
     For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
@@ -833,7 +863,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
      :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
 
 
-* TODO Variational Monte Carlo
+* Variational Monte Carlo
 
   Numerical integration with deterministic methods is very efficient
   in low dimensions. When the number of dimensions becomes large,
@@ -844,7 +874,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
   to the discretization of space, and compute a statistical confidence
   interval.
 
-** TODO Computation of the statistical error
+** Computation of the statistical error
    :PROPERTIES:
    :header-args:python: :tangle qmc_stats.py
    :header-args:f90: :tangle qmc_stats.f90
@@ -853,7 +883,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    To compute the statistical error, you need to perform $M$
    independent Monte Carlo calculations. You will obtain $M$ different
    estimates of the energy, which are expected to have a Gaussian
-   distribution by the central limit theorem.
+   distribution according to the [[https://en.wikipedia.org/wiki/Central_limit_theorem][Central Limit Theorem]].
 
    The estimate of the energy is
 
@@ -879,26 +909,51 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    input array.
    #+end_exercise
 
-   *Python*
-   #+BEGIN_SRC python :results none
+**** Python
+     #+BEGIN_SRC python :results none :tangle none
+from math import sqrt
+def ave_error(arr):
+    #TODO
+    return (average, error)
+     #+END_SRC
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results none
 from math import sqrt
 def ave_error(arr):
     M = len(arr)
-    assert (M>1)
-    average = sum(arr)/M
-    variance = 1./(M-1) * sum( [ (x - average)**2 for x in arr ] )
-    return (average, sqrt(variance/M))
-   #+END_SRC
+    assert(M>0)
+    if M == 1:
+        return (arr[0], 0.)
+    else:
+        average = sum(arr)/M
+        variance = 1./(M-1) * sum( [ (x - average)**2 for x in arr ] )
+        error = sqrt(variance/M)
+        return (average, error)
+     #+END_SRC
 
-   *Fortran*
-   #+BEGIN_SRC f90
+**** Fortran
+        #+BEGIN_SRC f90
+subroutine ave_error(x,n,ave,err)
+  implicit none
+  integer, intent(in)           :: n 
+  double precision, intent(in)  :: x(n) 
+  double precision, intent(out) :: ave, err
+  ! TODO
+end subroutine ave_error
+        #+END_SRC
+   
+**** Fortran                                                       :solution:
+        #+BEGIN_SRC f90
 subroutine ave_error(x,n,ave,err)
   implicit none
   integer, intent(in)           :: n 
   double precision, intent(in)  :: x(n) 
   double precision, intent(out) :: ave, err
   double precision :: variance
-  if (n == 1) then
+  if (n < 1) then
+     stop 'n<1 in ave_error'
+  else if (n == 1) then
      ave = x(1)
      err = 0.d0
   else
@@ -907,7 +962,7 @@ subroutine ave_error(x,n,ave,err)
      err = dsqrt(variance/dble(n))
   endif
 end subroutine ave_error
-   #+END_SRC
+        #+END_SRC
    
 ** TODO Uniform sampling in the box
    :PROPERTIES:

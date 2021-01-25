@@ -3,8 +3,18 @@ subroutine ave_error(x,n,ave,err)
   integer, intent(in)           :: n 
   double precision, intent(in)  :: x(n) 
   double precision, intent(out) :: ave, err
+  ! TODO
+end subroutine ave_error
+
+subroutine ave_error(x,n,ave,err)
+  implicit none
+  integer, intent(in)           :: n 
+  double precision, intent(in)  :: x(n) 
+  double precision, intent(out) :: ave, err
   double precision :: variance
-  if (n == 1) then
+  if (n < 1) then
+     stop 'n<1 in ave_error'
+  else if (n == 1) then
      ave = x(1)
      err = 0.d0
   else
