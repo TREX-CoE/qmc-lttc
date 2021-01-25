@@ -41,24 +41,20 @@
   computes a statistical estimate of the expectation value of the energy
   associated with a given wave function.
   Finally, we introduce the diffusion Monte Carlo (DMC) method which
-  gives the exact energy of the $H_2$ molecule. 
+  gives the exact energy of the hydrogen atom and of the $H_2$ molecule. 
 
-  Code examples will be given in Python and Fortran. Whatever language
-  can be chosen.
+  Code examples will be given in Python and Fortran. You can use
+  whatever language you prefer to write the program.
 
   We consider the stationary solution of the Schrödinger equation, so
   the wave functions considered here are real: for an $N$ electron
   system where the electrons move in the 3-dimensional space,
   $\Psi : \mathbb{R}^{3N} \rightarrow \mathbb{R}$. In addition, $\Psi$
   is defined everywhere, continuous and infinitely differentiable.
-  
-  *Note*
-  #+begin_important
-  In Fortran, when  you use a double precision  constant, don't forget
-  to  put  ~d0~ as  a  suffix (for example  ~2.0d0~),  or  it will  be
-  interpreted as a single precision value
-  #+end_important
 
+  All the quantities are expressed in /atomic units/ (energies,
+  coordinates, etc).
+  
 
 * Numerical evaluation of the energy
 
@@ -180,7 +176,7 @@ end function potential
 
     
 **** Python
-     #+BEGIN_SRC python :results none
+     #+BEGIN_SRC python :results none  :tangle none
 def psi(a, r):
     # TODO
      #+END_SRC
@@ -192,7 +188,7 @@ def psi(a, r):
      #+END_SRC
 
 **** Fortran
-     #+BEGIN_SRC f90 
+     #+BEGIN_SRC f90  :tangle none
 double precision function psi(a, r)
   implicit none
   double precision, intent(in) :: a, r(3)
@@ -247,7 +243,7 @@ end function psi
     $$
      
 **** Python
-     #+BEGIN_SRC python :results none
+     #+BEGIN_SRC python :results none :tangle none
 def kinetic(a,r):
     # TODO
      #+END_SRC
@@ -259,7 +255,7 @@ def kinetic(a,r):
      #+END_SRC
 
 **** Fortran
-     #+BEGIN_SRC f90 
+     #+BEGIN_SRC f90  :tangle none
 double precision function kinetic(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
@@ -291,7 +287,7 @@ end function kinetic
 
     
 **** Python
-     #+BEGIN_SRC python :results none
+     #+BEGIN_SRC python :results none :tangle none
 def e_loc(a,r):
     #TODO
      #+END_SRC
@@ -303,7 +299,7 @@ def e_loc(a,r):
      #+END_SRC
 
 **** Fortran
-     #+BEGIN_SRC f90
+     #+BEGIN_SRC f90 :tangle none
 double precision function e_loc(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
@@ -337,7 +333,7 @@ end function e_loc
     #+end_exercise
 
 **** Python
-     #+BEGIN_SRC python :results none
+     #+BEGIN_SRC python :results none :tangle none
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -366,7 +362,7 @@ plt.figure(figsize=(10,5))
 for a in [0.1, 0.2, 0.5, 1., 1.5, 2.]:
   y=np.array([ e_loc(a, np.array([t,0.,0.]) ) for t in x])
   plt.plot(x,y,label=f"a={a}")
-
+  
 plt.tight_layout()
 plt.legend()
 plt.savefig("plot_py.png")
@@ -377,7 +373,7 @@ plt.savefig("plot_py.png")
      [[./plot_py.png]]
 
 **** Fortran
-        #+begin_src f90 
+     #+begin_src f90  :tangle none
 program plot
   implicit none
   double precision, external :: e_loc
@@ -393,18 +389,18 @@ program plot
   ! TODO
 
 end program plot
-        #+end_src
+     #+end_src
 
-        To compile and run:
+     To compile and run:
 
-        #+begin_src sh :exports both
+     #+begin_src sh :exports both
 gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 ./plot_hydrogen > data
-        #+end_src
+     #+end_src
 
-        To plot the data using gnuplot:
+     To plot the data using Gnuplot:
 
-        #+begin_src gnuplot :file plot.png :exports both
+     #+begin_src gnuplot :file plot.png :exports both
 set grid
 set xrange [-5:5]
 set yrange [-2:1]
@@ -414,10 +410,10 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 3 using 1:2 with lines title 'a=1.0', \
      './data' index 4 using 1:2 with lines title 'a=1.5', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
-        #+end_src
+     #+end_src
 
 **** Fortran                                                       :solution:
-        #+begin_src f90 
+     #+begin_src f90 
 program plot
   implicit none
   double precision, external :: e_loc
@@ -446,20 +442,20 @@ program plot
   end do
 
 end program plot
-        #+end_src
+     #+end_src
 
-        To compile and run:
+     To compile and run:
 
-        #+begin_src sh :exports both
+     #+begin_src sh :exports both
 gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 ./plot_hydrogen > data
-        #+end_src
+     #+end_src
 
-        #+RESULTS:
+     #+RESULTS:
 
-        To plot the data using gnuplot:
+     To plot the data using Gnuplot:
 
-        #+begin_src gnuplot :file plot.png :exports both
+     #+begin_src gnuplot :file plot.png :exports both
 set grid
 set xrange [-5:5]
 set yrange [-2:1]
@@ -469,12 +465,12 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 3 using 1:2 with lines title 'a=1.0', \
      './data' index 4 using 1:2 with lines title 'a=1.5', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
-        #+end_src
+     #+end_src
 
-        #+RESULTS:
-        [[file:plot.png]]
+     #+RESULTS:
+     [[file:plot.png]]
 
-** TODO Numerical estimation of the energy
+** Numerical estimation of the energy
    :PROPERTIES:
    :header-args:python: :tangle energy_hydrogen.py
    :header-args:f90: :tangle energy_hydrogen.f90
@@ -505,8 +501,24 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
     \mathbf{r} \le (5,5,5)$.
      #+end_exercise
 
-    *Python*
-      #+BEGIN_SRC python :results none
+**** Python
+     #+BEGIN_SRC python :results none :tangle none
+import numpy as np
+from hydrogen import e_loc, psi
+
+interval = np.linspace(-5,5,num=50)
+delta = (interval[1]-interval[0])**3
+
+r = np.array([0.,0.,0.])
+
+for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
+    # TODO
+    print(f"a = {a} \t E = {E}")                
+
+     #+end_src
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results none
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -518,32 +530,62 @@ r = np.array([0.,0.,0.])
 for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E = 0.
     norm = 0.
-      for x in interval:
-          r[0] = x
-            for y in interval:
-                r[1] = y
-                  for z in interval:
-                      r[2] = z
-                      w = psi(a,r)
-                      w = w * w * delta
-                      E    += w * e_loc(a,r)
-                      norm += w 
+    for x in interval:
+        r[0] = x
+        for y in interval:
+            r[1] = y
+            for z in interval:
+                r[2] = z
+                w = psi(a,r)
+                w = w * w * delta
+                E    += w * e_loc(a,r)
+                norm += w 
     E = E / norm
     print(f"a = {a} \t E = {E}")                
 
-      #+end_src
+     #+end_src
 
-      #+RESULTS:
-      : a = 0.1 	 E = -0.24518438948809218
-      : a = 0.2 	 E = -0.26966057967803525
-      : a = 0.5 	 E = -0.3856357612517407
-      : a = 0.9 	 E = -0.49435709786716214
-      : a = 1.0 	 E = -0.5
-      : a = 1.5 	 E = -0.39242967082602226
-      : a = 2.0 	 E = -0.08086980667844901
+     #+RESULTS:
+     : a = 0.1 	 E = -0.24518438948809218
+     : a = 0.2 	 E = -0.26966057967803525
+     : a = 0.5 	 E = -0.3856357612517407
+     : a = 0.9 	 E = -0.49435709786716214
+     : a = 1.0 	 E = -0.5
+     : a = 1.5 	 E = -0.39242967082602226
+     : a = 2.0 	 E = -0.08086980667844901
 
-      *Fortran*
-      #+begin_src f90 
+**** Fortran
+     #+begin_src f90 
+program energy_hydrogen
+  implicit none
+  double precision, external :: e_loc, psi
+  double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm
+  integer :: i, k, l, j
+
+  a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
+
+  dx = 10.d0/(size(x)-1)
+  do i=1,size(x)
+     x(i) = -5.d0 + (i-1)*dx
+  end do
+
+  do j=1,size(a)
+     ! TODO
+     print *, 'a = ', a(j), '    E = ', energy
+  end do
+
+end program energy_hydrogen
+     #+end_src
+
+     To compile the Fortran and run it:
+
+     #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
+./energy_hydrogen 
+     #+end_src
+
+**** Fortran                                                       :solution:
+     #+begin_src f90 
 program energy_hydrogen
   implicit none
   double precision, external :: e_loc, psi
@@ -582,24 +624,24 @@ program energy_hydrogen
   end do
 
 end program energy_hydrogen
-      #+end_src
+     #+end_src
 
-      To compile the Fortran and run it:
+     To compile the Fortran and run it:
 
-      #+begin_src sh :results output :exports both
+     #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 ./energy_hydrogen 
-      #+end_src
+     #+end_src
 
-      #+RESULTS:
-      :  a =   0.10000000000000001          E =  -0.24518438948809140     
-      :  a =   0.20000000000000001          E =  -0.26966057967803236     
-      :  a =   0.50000000000000000          E =  -0.38563576125173815     
-      :  a =    1.0000000000000000          E =  -0.50000000000000000     
-      :  a =    1.5000000000000000          E =  -0.39242967082602065     
-      :  a =    2.0000000000000000          E =   -8.0869806678448772E-002
+     #+RESULTS:
+     :  a =   0.10000000000000001          E =  -0.24518438948809140     
+     :  a =   0.20000000000000001          E =  -0.26966057967803236     
+     :  a =   0.50000000000000000          E =  -0.38563576125173815     
+     :  a =    1.0000000000000000          E =  -0.50000000000000000     
+     :  a =    1.5000000000000000          E =  -0.39242967082602065     
+     :  a =    2.0000000000000000          E =   -8.0869806678448772E-002
 
-** TODO Variance of the local energy
+** Variance of the local energy
    :PROPERTIES:
    :header-args:python: :tangle variance_hydrogen.py
    :header-args:f90: :tangle variance_hydrogen.f90
@@ -607,7 +649,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 
    The variance of the local energy is a functional of $\Psi$
    which measures the magnitude of the fluctuations of the local
-   energy associated with $\Psi$ around the average:
+   energy associated with $\Psi$ around its average:
 
    $$
    \sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
@@ -615,7 +657,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    $$
    which can be simplified as
    
-   $$ \sigma^2(E_L) = \langle E_L^2 \rangle - \langle E_L \rangle^2 $$
+   $$ \sigma^2(E_L) = \langle E_L^2 \rangle_{\Psi^2} - \langle E_L \rangle_{\Psi^2}^2.$$
 
    If the local energy is constant (i.e. $\Psi$ is an eigenfunction of
    $\hat{H}$) the variance is zero, so the variance of the local
@@ -624,7 +666,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 *** Exercise (optional)
    #+begin_exercise
    Prove that :
-   $$\langle E - \langle E \rangle \rangle^2 = \langle E^2 \rangle - \langle E \rangle^2 $$
+   $$\left( \langle E - \langle E \rangle_{\Psi^2} \rangle_{\Psi^2} \right)^2 = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
    #+end_exercise
    
 *** Exercise
@@ -636,8 +678,23 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    \le \mathbf{r} \le (5,5,5)$ for different values of $a$.
    #+end_exercise
      
-   *Python*
-   #+begin_src python :results none
+**** Python
+     #+begin_src python :results none :tangle none
+import numpy as np
+from hydrogen import e_loc, psi
+
+interval = np.linspace(-5,5,num=50)
+delta = (interval[1]-interval[0])**3
+
+r = np.array([0.,0.,0.])
+
+for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
+    # TODO
+    print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
+     #+end_src
+
+**** Python                                                        :solution:
+     #+begin_src python :results none
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -666,19 +723,54 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E2 = E2 / norm
     s2 = E2 - E*E
     print(f"a = {a} \t E = {E:10.8f}  \t  \sigma^2 = {s2:10.8f}")
-   #+end_src
+     #+end_src
 
-   #+RESULTS:
-   : a = 0.1 	 E = -0.24518439  	  \sigma^2 = 0.02696522
-   : a = 0.2 	 E = -0.26966058  	  \sigma^2 = 0.03719707
-   : a = 0.5 	 E = -0.38563576  	  \sigma^2 = 0.05318597
-   : a = 0.9 	 E = -0.49435710  	  \sigma^2 = 0.00577812
-   : a = 1.0 	 E = -0.50000000  	  \sigma^2 = 0.00000000
-   : a = 1.5 	 E = -0.39242967  	  \sigma^2 = 0.31449671
-   : a = 2.0 	 E = -0.08086981  	  \sigma^2 = 1.80688143
+     #+RESULTS:
+     : a = 0.1 	 E = -0.24518439  	  \sigma^2 = 0.02696522
+     : a = 0.2 	 E = -0.26966058  	  \sigma^2 = 0.03719707
+     : a = 0.5 	 E = -0.38563576  	  \sigma^2 = 0.05318597
+     : a = 0.9 	 E = -0.49435710  	  \sigma^2 = 0.00577812
+     : a = 1.0 	 E = -0.50000000  	  \sigma^2 = 0.00000000
+     : a = 1.5 	 E = -0.39242967  	  \sigma^2 = 0.31449671
+     : a = 2.0 	 E = -0.08086981  	  \sigma^2 = 1.80688143
+     
+**** Fortran
+     #+begin_src f90 :tangle none
+program variance_hydrogen
+  implicit none
+  double precision, external :: e_loc, psi
+  double precision :: x(50), w, delta, energy, dx, r(3), a(6), norm, s2
+  double precision :: e, energy2
+  integer :: i, k, l, j
 
-   *Fortran*
-   #+begin_src f90 
+  a = (/ 0.1d0, 0.2d0, 0.5d0, 1.d0, 1.5d0, 2.d0 /)
+  
+  dx = 10.d0/(size(x)-1)
+  do i=1,size(x)
+     x(i) = -5.d0 + (i-1)*dx
+  end do
+  
+  delta = dx**3
+  
+  r(:) = 0.d0
+  
+  do j=1,size(a)
+     ! TODO
+     print *, 'a = ', a(j), ' E = ', energy, ' s2 = ', s2
+  end do
+
+end program variance_hydrogen
+     #+end_src
+
+     To compile and run:
+
+     #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
+./variance_hydrogen 
+     #+end_src
+
+**** Fortran                                                       :solution:
+     #+begin_src f90 
 program variance_hydrogen
   implicit none
   double precision, external :: e_loc, psi
@@ -723,22 +815,22 @@ program variance_hydrogen
   end do
 
 end program variance_hydrogen
-   #+end_src
+     #+end_src
 
-   To compile and run:
+     To compile and run:
 
-   #+begin_src sh :results output :exports both
+     #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 ./variance_hydrogen 
-   #+end_src
+     #+end_src
 
-   #+RESULTS:
-   :  a =   0.10000000000000001       E =  -0.24518438948809140       s2 =    2.6965218719722767E-002
-   :  a =   0.20000000000000001       E =  -0.26966057967803236       s2 =    3.7197072370201284E-002
-   :  a =   0.50000000000000000       E =  -0.38563576125173815       s2 =    5.3185967578480653E-002
-   :  a =    1.0000000000000000       E =  -0.50000000000000000       s2 =    0.0000000000000000     
-   :  a =    1.5000000000000000       E =  -0.39242967082602065       s2 =   0.31449670909172917     
-   :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
+     #+RESULTS:
+     :  a =   0.10000000000000001       E =  -0.24518438948809140       s2 =    2.6965218719722767E-002
+     :  a =   0.20000000000000001       E =  -0.26966057967803236       s2 =    3.7197072370201284E-002
+     :  a =   0.50000000000000000       E =  -0.38563576125173815       s2 =    5.3185967578480653E-002
+     :  a =    1.0000000000000000       E =  -0.50000000000000000       s2 =    0.0000000000000000     
+     :  a =    1.5000000000000000       E =  -0.39242967082602065       s2 =   0.31449670909172917     
+     :  a =    2.0000000000000000       E =   -8.0869806678448772E-002  s2 =    1.8068814270846534     
 
 
 * TODO Variational Monte Carlo
@@ -1897,3 +1989,12 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
       #+RESULTS:
       :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
      
+      
+* TODO [0/1] Last things to do
+
+  - [ ] Prepare 4 questions for the exam: multiple-choice questions
+    with 4 possible answers. Questions should be independent because
+    they will be asked in a random order.
+  - [ ] Propose a project for the students to continue the
+    programs. Idea: Modify the program to compute the exact energy of
+    the H$_2$ molecule at $R$=1.4010 bohr. Answer: 0.17406 a.u.
