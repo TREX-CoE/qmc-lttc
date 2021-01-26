@@ -5,7 +5,7 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   double precision, intent(out) :: energy, accep_rate
 
   integer*8 :: istep
-  double precision :: norm, sq_tau, chi(3), d2_old, prod, u
+  double precision :: sq_tau, chi(3), d2_old, prod, u
   double precision :: psi_old, psi_new, d2_new, argexpo, q
   double precision :: r_old(3), r_new(3)
   double precision :: d_old(3), d_new(3)
@@ -15,7 +15,6 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
 
   ! Initialization
   energy = 0.d0
-  norm   = 0.d0
   accep_rate = 0.d0
   call random_gauss(r_old,3)
   call drift(a,r_old,d_old)
@@ -30,8 +29,8 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
      psi_new = psi(a,r_new)
      ! Metropolis
      prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + &
-          (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
-          (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
+            (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
+            (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
      argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
      q = psi_new / psi_old
      q = dexp(-argexpo) * q*q
@@ -43,11 +42,10 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
         d2_old = d2_new
         psi_old = psi_new
      end if
-     norm = norm + 1.d0
      energy = energy + e_loc(a,r_old)
   end do
-  energy = energy / norm
-  accep_rate = accep_rate / norm
+  energy = energy / dble(nmax)
+  accep_rate = dble(accep_rate) / dble(nmax)
 end subroutine variational_montecarlo
 
 program qmc

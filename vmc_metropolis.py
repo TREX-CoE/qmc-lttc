@@ -1,9 +1,8 @@
 from hydrogen  import *
 from qmc_stats import *
 
-def MonteCarlo(a,tau,nmax):
+def MonteCarlo(a,nmax,tau):
     E = 0.
-    N = 0.
     accep_rate = 0.
     sq_tau = np.sqrt(tau)
     r_old = np.random.normal(loc=0., scale=1.0, size=(3))
@@ -27,15 +26,22 @@ def MonteCarlo(a,tau,nmax):
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-        N += 1.
         E += e_loc(a,r_old)
-    return E/N, accep_rate/N
+    return E/nmax, accep_rate/nmax
 
 
+# Run simulation
 a = 0.9
 nmax = 100000
-tau = 1.0
-X = [MonteCarlo(a,tau,nmax) for i in range(30)]
-E, deltaE = ave_error([x[0] for x in X])
-A, deltaA = ave_error([x[1] for x in X])
-print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
+tau = 1.3
+X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
+
+# Energy
+X = [ x for (x, _) in X0 ]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+
+# Acceptance rate
+X = [ x for (_, x) in X0 ]
+A, deltaA = ave_error(X)
+print(f"A = {A} +/- {deltaA}")

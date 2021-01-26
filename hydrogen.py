@@ -17,5 +17,5 @@ def e_loc(a,r):
     return kinetic(a,r) + potential(r)
 
 def drift(a,r):
-  ar_inv = -a/np.sqrt(np.dot(r,r))
-  return r * ar_inv
+   ar_inv = -a/np.sqrt(np.dot(r,r))
+   return r * ar_inv

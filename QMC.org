@@ -1428,7 +1428,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
      :  E =  -0.49515370205041676      +/-   1.7660819245720729E-004
      :  A =   0.51713866666666664      +/-   3.7072551835783688E-004
 
-** TODO Gaussian random number generator
+** Gaussian random number generator
    
    To obtain Gaussian-distributed random numbers, you can apply the
    [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
@@ -1473,15 +1473,16 @@ subroutine random_gauss(z,n)
 end subroutine random_gauss
    #+END_SRC
 
-** TODO Generalized Metropolis algorithm
+   In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
+** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
    :header-args:f90: :tangle vmc_metropolis.f90
    :END:
 
-   One can use more efficient numerical schemes to move the electrons.
-   But in that case, the Metropolis accepation step has to be adapted
-   accordingly: the acceptance
+   One can use more efficient numerical schemes to move the electrons,
+   but the Metropolis accepation step has to be adapted accordingly:
+   the acceptance
    probability $A$ is chosen so that it is consistent with the
    probability of leaving $\mathbf{r}_n$ and the probability of
    entering $\mathbf{r}_{n+1}$:
@@ -1499,19 +1500,19 @@ end subroutine random_gauss
    numbers. Hence, the transition probability was
 
    \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \text{constant}
    \]
 
-   So the expression of $A$ was simplified to the ratios of the squared
+   so the expression of $A$ was simplified to the ratios of the squared
    wave functions.
     
-   Now, if instead of drawing uniform random numbers
-   choose to draw Gaussian random numbers with mean 0 and variance
+   Now, if instead of drawing uniform random numbers we
+   choose to draw Gaussian random numbers with zero mean and variance
    $\tau$, the transition probability becomes:
     
    \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
    \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\tau} \right]
    \]
@@ -1525,8 +1526,8 @@ end subroutine random_gauss
    To do this, we can add the drift vector
 
    \[
-   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi} 
-   \].
+   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}.
+   \]
     
    The numerical scheme becomes a drifted diffusion:
 
@@ -1540,7 +1541,7 @@ end subroutine random_gauss
    The transition probability becomes:
     
    \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) & = &
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\tau)^{3/2}} \exp \left[ - \frac{\left(
    \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
    \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\tau} \right]
@@ -1548,19 +1549,35 @@ end subroutine random_gauss
     
 
 *** Exercise 1
-
+    
      #+begin_exercise
      Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
      #+end_exercise
    
-     *Python*
-     #+BEGIN_SRC python :tangle hydrogen.py
+**** Python
+     #+BEGIN_SRC python :tangle hydrogen.py :tangle none
 def drift(a,r):
-  ar_inv = -a/np.sqrt(np.dot(r,r))
-  return r * ar_inv
+   # TODO
      #+END_SRC
 
-     *Fortran*
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :tangle hydrogen.py
+def drift(a,r):
+   ar_inv = -a/np.sqrt(np.dot(r,r))
+   return r * ar_inv
+     #+END_SRC
+
+**** Fortran
+     #+BEGIN_SRC f90 :tangle hydrogen.f90 :tangle none
+subroutine drift(a,r,b)
+  implicit none
+  double precision, intent(in)  :: a, r(3)
+  double precision, intent(out) :: b(3)
+  ! TODO
+end subroutine drift
+     #+END_SRC
+
+**** Fortran                                                       :solution:
      #+BEGIN_SRC f90 :tangle hydrogen.f90
 subroutine drift(a,r,b)
   implicit none
@@ -1579,14 +1596,38 @@ end subroutine drift
     (This is a necessary step for the next section).
     #+end_exercise
    
-    *Python*
-    #+BEGIN_SRC python :results output
+**** Python
+     #+BEGIN_SRC python :results output :tangle none
 from hydrogen  import *
 from qmc_stats import *
 
-def MonteCarlo(a,tau,nmax):
-    E = 0.
-    N = 0.
+def MonteCarlo(a,nmax,tau):
+   # TODO
+
+# Run simulation
+a = 0.9
+nmax = 100000
+tau = 1.3
+X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
+
+# Energy
+X = [ x for (x, _) in X0 ]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+
+# Acceptance rate
+X = [ x for (_, x) in X0 ]
+A, deltaA = ave_error(X)
+print(f"A = {A} +/- {deltaA}")
+     #+END_SRC
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
+def MonteCarlo(a,nmax,tau):
+    energy = 0.
     accep_rate = 0.
     sq_tau = np.sqrt(tau)
     r_old = np.random.normal(loc=0., scale=1.0, size=(3))
@@ -1610,26 +1651,33 @@ def MonteCarlo(a,tau,nmax):
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-        N += 1.
-        E += e_loc(a,r_old)
-    return E/N, accep_rate/N
+        energy += e_loc(a,r_old)
+    return energy/nmax, accep_rate/nmax
 
 
+# Run simulation
 a = 0.9
 nmax = 100000
-tau = 1.0
-X = [MonteCarlo(a,tau,nmax) for i in range(30)]
-E, deltaE = ave_error([x[0] for x in X])
-A, deltaA = ave_error([x[1] for x in X])
-print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
-    #+END_SRC
+tau = 1.3
+X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
 
-    #+RESULTS:
-    : E = -0.4949730317138491 +/- 0.00012478601801760644
-    : A = 0.7887163333333334 +/- 0.00026834549840347617
+# Energy
+X = [ x for (x, _) in X0 ]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+
+# Acceptance rate
+X = [ x for (_, x) in X0 ]
+A, deltaA = ave_error(X)
+print(f"A = {A} +/- {deltaA}")
+     #+END_SRC
+
+     #+RESULTS:
+     : E = -0.4951317910667116 +/- 0.00014045774335059988
+     : A = 0.7200673333333333 +/- 0.00045942791345632793
    
-    *Fortran*
-    #+BEGIN_SRC f90
+**** Fortran
+     #+BEGIN_SRC f90 :tangle none
 subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   implicit none
   double precision, intent(in)  :: a, tau
@@ -1637,49 +1685,14 @@ subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   double precision, intent(out) :: energy, accep_rate
 
   integer*8 :: istep
-  double precision :: norm, sq_tau, chi(3), d2_old, prod, u
-  double precision :: psi_old, psi_new, d2_new, argexpo, q
+  double precision :: sq_tau, chi(3)
+  double precision :: psi_old, psi_new
   double precision :: r_old(3), r_new(3)
   double precision :: d_old(3), d_new(3)
   double precision, external :: e_loc, psi
 
-  sq_tau = dsqrt(tau)
+  ! TODO
 
-  ! Initialization
-  energy = 0.d0
-  norm   = 0.d0
-  accep_rate = 0.d0
-  call random_gauss(r_old,3)
-  call drift(a,r_old,d_old)
-  d2_old = d_old(1)*d_old(1) + d_old(2)*d_old(2) + d_old(3)*d_old(3)
-  psi_old = psi(a,r_old)
-
-  do istep = 1,nmax
-     call random_gauss(chi,3)
-     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
-     call drift(a,r_new,d_new)
-     d2_new = d_new(1)*d_new(1) + d_new(2)*d_new(2) + d_new(3)*d_new(3)
-     psi_new = psi(a,r_new)
-     ! Metropolis
-     prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + &
-          (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
-          (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
-     argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
-     q = psi_new / psi_old
-     q = dexp(-argexpo) * q*q
-     call random_number(u)
-     if (u<q) then
-        accep_rate = accep_rate + 1.d0
-        r_old(:) = r_new(:)
-        d_old(:) = d_new(:)
-        d2_old = d2_new
-        psi_old = psi_new
-     end if
-     norm = norm + 1.d0
-     energy = energy + e_loc(a,r_old)
-  end do
-  energy = energy / norm
-  accep_rate = accep_rate / norm
 end subroutine variational_montecarlo
 
 program qmc
@@ -1701,16 +1714,94 @@ program qmc
   call ave_error(accep,nruns,ave,err)
   print *, 'A = ', ave, '+/-', err
 end program qmc
-    #+END_SRC
+     #+END_SRC
 
-    #+begin_src sh :results output :exports both
+     #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 ./vmc_metropolis
-    #+end_src
+     #+end_src
 
-    #+RESULTS:
-    :  E =  -0.49499990423528023      +/-   1.5958250761863871E-004
-    :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
+**** Fortran                                                       :solution:
+     #+BEGIN_SRC f90
+subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
+  implicit none
+  double precision, intent(in)  :: a, tau
+  integer*8       , intent(in)  :: nmax 
+  double precision, intent(out) :: energy, accep_rate
+
+  integer*8 :: istep
+  double precision :: sq_tau, chi(3), d2_old, prod, u
+  double precision :: psi_old, psi_new, d2_new, argexpo, q
+  double precision :: r_old(3), r_new(3)
+  double precision :: d_old(3), d_new(3)
+  double precision, external :: e_loc, psi
+
+  sq_tau = dsqrt(tau)
+
+  ! Initialization
+  energy = 0.d0
+  accep_rate = 0.d0
+  call random_gauss(r_old,3)
+  call drift(a,r_old,d_old)
+  d2_old = d_old(1)*d_old(1) + d_old(2)*d_old(2) + d_old(3)*d_old(3)
+  psi_old = psi(a,r_old)
+
+  do istep = 1,nmax
+     call random_gauss(chi,3)
+     r_new(:) = r_old(:) + tau * d_old(:) + chi(:)*sq_tau
+     call drift(a,r_new,d_new)
+     d2_new = d_new(1)*d_new(1) + d_new(2)*d_new(2) + d_new(3)*d_new(3)
+     psi_new = psi(a,r_new)
+     ! Metropolis
+     prod = (d_new(1) + d_old(1))*(r_new(1) - r_old(1)) + &
+            (d_new(2) + d_old(2))*(r_new(2) - r_old(2)) + &
+            (d_new(3) + d_old(3))*(r_new(3) - r_old(3))
+     argexpo = 0.5d0 * (d2_new - d2_old)*tau + prod
+     q = psi_new / psi_old
+     q = dexp(-argexpo) * q*q
+     call random_number(u)
+     if (u<q) then
+        accep_rate = accep_rate + 1.d0
+        r_old(:) = r_new(:)
+        d_old(:) = d_new(:)
+        d2_old = d2_new
+        psi_old = psi_new
+     end if
+     energy = energy + e_loc(a,r_old)
+  end do
+  energy = energy / dble(nmax)
+  accep_rate = dble(accep_rate) / dble(nmax)
+end subroutine variational_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  double precision, parameter :: tau = 1.0
+  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns), accep(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call variational_montecarlo(a,tau,nmax,X(irun),accep(irun))
+  enddo
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+  call ave_error(accep,nruns,ave,err)
+  print *, 'A = ', ave, '+/-', err
+end program qmc
+     #+END_SRC
+
+     #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
+./vmc_metropolis
+     #+end_src
+
+     #+RESULTS:
+     :  E =  -0.49495906384751226      +/-   1.5257646086088266E-004
+     :  A =   0.78861366666666666      +/-   3.7855335138754813E-004
      
 * TODO Diffusion Monte Carlo
    :PROPERTIES:
@@ -1733,10 +1824,10 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 from hydrogen  import *
 from qmc_stats import *
 
-def MonteCarlo(a,tau,nmax,Eref):
-    E = 0.
-    N = 0.
-    accep_rate = 0.
+def MonteCarlo(a,nmax,tau,Eref):
+    energy = 0.
+    normalization = 0.
+    accep_rate = 0
     sq_tau = np.sqrt(tau)
     r_old = np.random.normal(loc=0., scale=1.0, size=(3))
     d_old = drift(a,r_old)
@@ -1747,8 +1838,8 @@ def MonteCarlo(a,tau,nmax,Eref):
         chi = np.random.normal(loc=0., scale=1.0, size=(3))
         el = e_loc(a,r_old)
         w *= np.exp(-tau*(el - Eref))
-        N += w
-        E += w * el
+        normalization += w
+        energy += w * el
 
         r_new = r_old + tau * d_old + sq_tau * chi
         d_new = drift(a,r_new)
@@ -1761,18 +1852,19 @@ def MonteCarlo(a,tau,nmax,Eref):
         q = np.exp(-argexpo) * q*q
         # PDMC weight
         if np.random.uniform() < q:
-            accep_rate += w
+            accep_rate += 1
             r_old = r_new
             d_old = d_new
             d2_old = d2_new
             psi_old = psi_new
-    return E/N, accep_rate/N
+    return energy/normalization, accep_rate/nmax
 
 
 a = 0.9
 nmax = 10000
 tau = .1
-X = [MonteCarlo(a,tau,nmax,-0.5) for i in range(30)]
+E_ref = -0.5
+X = [MonteCarlo(a,nmax,tau,E_ref) for i in range(30)]
 E, deltaE = ave_error([x[0] for x in X])
 A, deltaA = ave_error([x[1] for x in X])
 print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
@@ -1782,8 +1874,8 @@ print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
       : E = -0.49654807434947584 +/- 0.0006868522447409156
       : A = 0.9876193891840709 +/- 0.00041857361650995804
    
-      *Fortran*
-      #+BEGIN_SRC f90
+**** Fortran
+     #+BEGIN_SRC f90
 subroutine variational_montecarlo(a,tau,nmax,energy,accep_rate)
   implicit none
   double precision, intent(in)  :: a, tau
@@ -1855,16 +1947,16 @@ program qmc
   call ave_error(accep,nruns,ave,err)
   print *, 'A = ', ave, '+/-', err
 end program qmc
-      #+END_SRC
+         #+END_SRC
 
-      #+begin_src sh :results output :exports both
+         #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 ./vmc_metropolis
-      #+end_src
+         #+end_src
 
-      #+RESULTS:
-      :  E =  -0.49499990423528023      +/-   1.5958250761863871E-004
-      :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
+         #+RESULTS:
+         :  E =  -0.49499990423528023      +/-   1.5958250761863871E-004
+         :  A =   0.78861366666666655      +/-   3.5096729498002445E-004
      
 
 ** TODO Dihydrogen
@@ -1924,8 +2016,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     the statistical error?
     #+end_exercise
 
-    *Python*
-    #+BEGIN_SRC python :results output
+**** Python
+     #+BEGIN_SRC python :results output
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1949,13 +2041,13 @@ nmax = 100000
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
-    #+END_SRC
+     #+END_SRC
 
-    #+RESULTS:
-    : E = -0.49511014287471955 +/- 0.00012402022172236656
+     #+RESULTS:
+     : E = -0.49511014287471955 +/- 0.00012402022172236656
    
-    *Fortran*
-    #+BEGIN_SRC f90
+**** Fortran
+     #+BEGIN_SRC f90
 double precision function gaussian(r)
   implicit none
   double precision, intent(in) :: r(3)
@@ -2004,15 +2096,15 @@ program qmc
   call ave_error(X,nruns,ave,err)
   print *, 'E = ', ave, '+/-', err
 end program qmc
-    #+END_SRC
+     #+END_SRC
 
-    #+begin_src sh :results output :exports both
+     #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
 ./qmc_gaussian
-    #+end_src
+     #+end_src
 
-    #+RESULTS:
-    :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004
+     #+RESULTS:
+     :  E =  -0.49517104619091717      +/-   1.0685523607878961E-004
 
 ** Improved sampling with $\Psi^2$                                 :noexport:
 
