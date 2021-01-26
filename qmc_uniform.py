@@ -2,15 +2,15 @@ from hydrogen  import *
 from qmc_stats import *
 
 def MonteCarlo(a, nmax):
-     E = 0.
-     N = 0.
+     energy = 0.
+     normalization = 0.
      for istep in range(nmax):
           r = np.random.uniform(-5., 5., (3))
           w = psi(a,r)
           w = w*w
-          N += w
-          E += w * e_loc(a,r)
-   return E/N
+          normalization += w
+          energy += w * e_loc(a,r)
+     return energy/normalization
 
 a = 0.9
 nmax = 100000

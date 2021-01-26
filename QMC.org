@@ -2,11 +2,14 @@
 #+AUTHOR: Anthony Scemama, Claudia Filippi
 # SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
 # SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-bigblow.setup
+#+LANGUAGE:  en
+#+INFOJS_OPT: toc:t mouse:underline path:http://orgmode.org/org-info.js
 #+STARTUP: latexpreview
 #+LATEX_CLASS: report
 #+LATEX_HEADER_EXTRA: \usepackage{minted}
 #+HTML_HEAD: <link rel="stylesheet" title="Standard" href="worg.css" type="text/css" />
-#+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
+
+#+OPTIONS: H:3 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 # EXCLUDE_TAGS: Python solution
 # EXCLUDE_TAGS: Fortran solution
@@ -123,8 +126,6 @@
    to catch the error.
    #+end_note
    
-   #+end_note
-
 *** Exercise 1
 
     #+begin_exercise
@@ -964,7 +965,7 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
         #+END_SRC
    
-** TODO Uniform sampling in the box
+** Uniform sampling in the box
    :PROPERTIES:
    :header-args:python: :tangle qmc_uniform.py
    :header-args:f90: :tangle qmc_uniform.f90
@@ -973,7 +974,7 @@ end subroutine ave_error
    We will now do our first Monte Carlo calculation to compute the
    energy of the hydrogen atom.
    
-   At every Monte Carlo step:
+   At every Monte Carlo iteration:
 
    - Draw a random point $\mathbf{r}_i$ in the box $(-5,-5,-5) \le
      (x,y,z) \le (5,5,5)$
@@ -982,14 +983,14 @@ end subroutine ave_error
    - Compute $[\Psi(\mathbf{r}_i)]^2 \times E_L(\mathbf{r}_i)$, and accumulate the
      result in a variable =energy=
 
-   One Monte Carlo run will consist of $N$ Monte Carlo steps. Once all the
-   steps have been computed, the run returns the average energy
-   $\bar{E}_k$ over the $N$ steps of the run.
+   One Monte Carlo run will consist of $N$ Monte Carlo iterations. Once all the
+   iterations have been computed, the run returns the average energy
+   $\bar{E}_k$ over the $N$ iterations of the run.
 
-   To compute the statistical error, perform $M$ runs. The final
-   estimate of the energy will be the average over the $\bar{E}_k$,
-   and the variance of the $\bar{E}_k$ will be used to compute the
-   statistical error.
+   To compute the statistical error, perform $M$ independent runs. The
+   final estimate of the energy will be the average over the
+   $\bar{E}_k$, and the variance of the $\bar{E}_k$ will be used to
+   compute the statistical error.
    
 *** Exercise
 
@@ -1000,41 +1001,113 @@ end subroutine ave_error
     compute the average energy and the associated error bar.
     #+end_exercise
 
-    *Python*
-    #+BEGIN_SRC python :results output
+**** Python
+
+     #+begin_note
+     To draw a uniform random number in Python, you can use
+     the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.uniform.html][~random.uniform~]] function of Numpy.
+     #+end_note
+
+     #+BEGIN_SRC python :results output :tangle none
 from hydrogen  import *
 from qmc_stats import *
 
 def MonteCarlo(a, nmax):
-     E = 0.
-     N = 0.
+     # TODO
+
+a = 0.9
+nmax = 100000
+#TODO
+print(f"E = {E} +/- {deltaE}")
+     #+END_SRC
+
+     #+RESULTS:
+     : E = -0.4956255109300764 +/- 0.0007082875482711226
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
+def MonteCarlo(a, nmax):
+     energy = 0.
+     normalization = 0.
      for istep in range(nmax):
           r = np.random.uniform(-5., 5., (3))
           w = psi(a,r)
           w = w*w
-          N += w
-          E += w * e_loc(a,r)
-   return E/N
+          normalization += w
+          energy += w * e_loc(a,r)
+     return energy/normalization
 
 a = 0.9
 nmax = 100000
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)
 print(f"E = {E} +/- {deltaE}")
-    #+END_SRC
+     #+END_SRC
 
-    #+RESULTS:
-    : E = -0.4956255109300764 +/- 0.0007082875482711226
+     #+RESULTS:
+     : E = -0.4956255109300764 +/- 0.0007082875482711226
 
-    *Fortran*
-#+begin_note
-When running Monte Carlo calculations, the number of steps is
-usually very large. We expect =nmax= to be possibly larger than 2
-billion, so we use 8-byte integers (=integer*8=) to represent it, as
-well as the index of the current step.
-#+end_note
+**** Fortran
+     #+begin_note
+     To draw a uniform random number in Fortran, you can use
+     the [[https://gcc.gnu.org/onlinedocs/gfortran/RANDOM_005fNUMBER.html][~RANDOM_NUMBER~]] subroutine.
+     #+end_note
 
-    #+BEGIN_SRC f90
+     #+begin_note
+     When running Monte Carlo calculations, the number of steps is
+     usually very large. We expect =nmax= to be possibly larger than 2
+     billion, so we use 8-byte integers (=integer*8=) to represent it, as
+     well as the index of the current step.
+     #+end_note
+
+     #+BEGIN_SRC f90 :tangle none
+subroutine uniform_montecarlo(a,nmax,energy)
+  implicit none
+  double precision, intent(in)  :: a
+  integer*8       , intent(in)  :: nmax 
+  double precision, intent(out) :: energy
+
+  integer*8 :: istep
+
+  double precision :: norm, r(3), w
+
+  double precision, external :: e_loc, psi
+
+  ! TODO
+end subroutine uniform_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9
+  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns)
+  double precision :: ave, err
+
+  !TODO
+  print *, 'E = ', ave, '+/-', err
+end program qmc
+     #+END_SRC
+
+     #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
+./qmc_uniform
+     #+end_src
+
+**** Fortran                                                       :solution:
+      #+begin_note
+      When running Monte Carlo calculations, the number of steps is
+      usually very large. We expect =nmax= to be possibly larger than 2
+      billion, so we use 8-byte integers (=integer*8=) to represent it, as
+      well as the index of the current step.
+      #+end_note
+
+          #+BEGIN_SRC f90
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
   double precision, intent(in)  :: a
@@ -1076,17 +1149,17 @@ program qmc
   call ave_error(X,nruns,ave,err)
   print *, 'E = ', ave, '+/-', err
 end program qmc
-    #+END_SRC
+          #+END_SRC
 
-    #+begin_src sh :results output :exports both
+          #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 ./qmc_uniform
-    #+end_src
+          #+end_src
 
-    #+RESULTS:
-    :  E =  -0.49588321986667677      +/-   7.1758863546737969E-004
+          #+RESULTS:
+          :  E =  -0.49588321986667677      +/-   7.1758863546737969E-004
 
-** TODO Metropolis sampling with $\Psi^2$
+** Metropolis sampling with $\Psi^2$
    :PROPERTIES:
    :header-args:python: :tangle qmc_metropolis.py
    :header-args:f90: :tangle qmc_metropolis.f90
@@ -1098,7 +1171,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
    \]
 
-   The expression of the average energy is now simplified to the average of
+   The expression of the average energy is now simplified as the average of
    the local energies, since the weights are taken care of by the
    sampling :
 
@@ -1118,15 +1191,16 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    where $\tau$ is a fixed constant (the so-called /time-step/), and
    $\mathbf{u}$ is a uniform random number in a 3-dimensional box
    $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. We will then add the
-   accept/reject step that will guarantee that the distribution of the
+   accept/reject step that guarantees that the distribution of the
    $\mathbf{r}_n$ is $\Psi^2$:
 
-   - Compute a new position $\mathbf{r}_{n+1}$
-   - Draw a uniform random number $v \in [0,1]$
-   - Compute the ratio $R = \frac{\left[\Psi(\mathbf{r}_{n+1})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
-   - if $v \le R$, accept the move (do nothing)
-   - else, reject the move (set $\mathbf{r}_{n+1} = \mathbf{r}_n$)
-   - evaluate the local energy at $\mathbf{r}_{n+1}$ 
+   1) Compute $\Psi$ at a new position $\mathbf{r'} = \mathbf{r}_n +
+      \tau \mathbf{u}$
+   2) Compute the ratio $R = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
+   3) Draw a uniform random number $v \in [0,1]$
+   4) if $v \le R$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
    
    #+begin_note
     A common error is to remove the rejected samples from the
@@ -1146,7 +1220,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 
    The time step should be adjusted so that it is as large as
    possible, keeping the number of accepted steps not too small. To
-   achieve that we define the acceptance rate as the number of
+   achieve that, we define the acceptance rate as the number of
    accepted steps over the total number of steps. Adjusting the time
    step such that the acceptance rate is close to 0.5 is a good compromise.
    
@@ -1154,55 +1228,90 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 *** Exercise
     
     #+begin_exercise
-    Modify the program of the previous section to compute the energy, sampling with
-    $Psi^2$.
+    Modify the program of the previous section to compute the energy,
+    sampled with $\Psi^2$.
+
     Compute also the acceptance rate, so that you can adapt the time
     step in order to have an acceptance rate close to 0.5 .
+
     Can you observe a reduction in the statistical error?
     #+end_exercise
 
-    *Python*
-    #+BEGIN_SRC python :results output
+**** Python
+     #+BEGIN_SRC python :results output :tangle none
 from hydrogen  import *
 from qmc_stats import *
 
 def MonteCarlo(a,nmax,tau):
-    E = 0.
-    N = 0.
-    N_accep = 0.
+    # TODO
+    return energy/nmax, N_accep/nmax
+
+# Run simulation
+a = 0.9
+nmax = 100000
+tau = 1.3
+X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
+
+# Energy
+X = [ x for (x, _) in X0 ]
+E, deltaE = ave_error(X)
+print(f"E = {E} +/- {deltaE}")
+
+# Acceptance rate
+X = [ x for (_, x) in X0 ]
+A, deltaA = ave_error(X)
+print(f"A = {A} +/- {deltaA}")
+     #+END_SRC
+
+     #+RESULTS:
+     : E = -0.4950720838131573 +/- 0.00019089638602238043
+     : A = 0.5172960000000001 +/- 0.0003443446549306529
+
+**** Python                                                        :solution:
+     #+BEGIN_SRC python :results output
+from hydrogen  import *
+from qmc_stats import *
+
+def MonteCarlo(a,nmax,tau):
+    energy = 0.
+    N_accep = 0
     r_old = np.random.uniform(-tau, tau, (3))
     psi_old = psi(a,r_old)
     for istep in range(nmax):
         r_new = r_old + np.random.uniform(-tau,tau,(3))
         psi_new = psi(a,r_new)
         ratio = (psi_new / psi_old)**2
-        v = np.random.uniform(0,1,(1))
-        if v < ratio:
-            N_accep += 1.
+        v = np.random.uniform()
+        if v <= ratio:
+            N_accep += 1
             r_old = r_new
             psi_old = psi_new
-        N += 1.
-        E += e_loc(a,r_old)
-    return E/N, N_accep/N
+        energy += e_loc(a,r_old)
+    return energy/nmax, N_accep/nmax
 
+# Run simulation
 a = 0.9
 nmax = 100000
 tau = 1.3
 X0 = [ MonteCarlo(a,nmax,tau) for i in range(30)]
-X = [ x for x, _ in X0 ]
-A = [ x for _, x in X0 ]
+
+# Energy
+X = [ x for (x, _) in X0 ]
 E, deltaE = ave_error(X)
-A, deltaA = ave_error(A)
 print(f"E = {E} +/- {deltaE}")
+
+# Acceptance rate
+X = [ x for (_, x) in X0 ]
+A, deltaA = ave_error(X)
 print(f"A = {A} +/- {deltaA}")
-    #+END_SRC
+     #+END_SRC
 
-    #+RESULTS:
-    : E = -0.4950720838131573 +/- 0.00019089638602238043
-    : A = 0.5172960000000001 +/- 0.0003443446549306529
+     #+RESULTS:
+     : E = -0.4950720838131573 +/- 0.00019089638602238043
+     : A = 0.5172960000000001 +/- 0.0003443446549306529
 
-    *Fortran*
-    #+BEGIN_SRC f90
+**** Fortran
+     #+BEGIN_SRC f90 :tangle none
 subroutine metropolis_montecarlo(a,nmax,tau,energy,accep)
   implicit none
   double precision, intent(in)  :: a
@@ -1213,32 +1322,12 @@ subroutine metropolis_montecarlo(a,nmax,tau,energy,accep)
 
   integer*8 :: istep
 
-  double precision :: norm, r_old(3), r_new(3), psi_old, psi_new
-  double precision :: v, ratio, n_accep
+  double precision :: r_old(3), r_new(3), psi_old, psi_new
+  double precision :: v, ratio
+  integer*8        :: n_accep
   double precision, external :: e_loc, psi, gaussian
 
-  energy = 0.d0
-  norm   = 0.d0
-  n_accep = 0.d0
-  call random_number(r_old)
-  r_old(:) = tau * (2.d0*r_old(:) - 1.d0)
-  psi_old = psi(a,r_old)
-  do istep = 1,nmax
-     call random_number(r_new)
-     r_new(:) = r_old(:) + tau * (2.d0*r_new(:) - 1.d0)
-     psi_new = psi(a,r_new)
-     ratio = (psi_new / psi_old)**2
-     call random_number(v)
-     if (v < ratio) then
-        r_old(:) = r_new(:)
-        psi_old = psi_new
-        n_accep = n_accep + 1.d0
-     endif
-     norm = norm + 1.d0
-     energy = energy + e_loc(a,r_old)
-  end do
-  energy = energy / norm
-  accep  = n_accep / norm
+  ! TODO
 end subroutine metropolis_montecarlo
 
 program qmc
@@ -1255,20 +1344,89 @@ program qmc
   do irun=1,nruns
      call metropolis_montecarlo(a,nmax,tau,X(irun),Y(irun))
   enddo
+
   call ave_error(X,nruns,ave,err)
   print *, 'E = ', ave, '+/-', err
+
   call ave_error(Y,nruns,ave,err)
   print *, 'A = ', ave, '+/-', err
 end program qmc
-    #+END_SRC
+     #+END_SRC
 
-    #+begin_src sh :results output :exports both
+     #+begin_src sh :results output :exports both
 gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
 ./qmc_metropolis
-    #+end_src
-    #+RESULTS:
-    :  E =  -0.49478505004797046      +/-   2.0493795299184956E-004
-    :  A =   0.51737800000000000      +/-   4.1827406733181444E-004
+     #+end_src
+
+**** Fortran                                                       :solution:
+     #+BEGIN_SRC f90
+subroutine metropolis_montecarlo(a,nmax,tau,energy,accep)
+  implicit none
+  double precision, intent(in)  :: a
+  integer*8       , intent(in)  :: nmax 
+  double precision, intent(in)  :: tau
+  double precision, intent(out) :: energy
+  double precision, intent(out) :: accep
+
+  integer*8 :: istep
+
+  double precision :: r_old(3), r_new(3), psi_old, psi_new
+  double precision :: v, ratio
+  integer*8        :: n_accep
+  double precision, external :: e_loc, psi, gaussian
+
+  energy = 0.d0
+  n_accep = 0_8
+  call random_number(r_old)
+  r_old(:) = tau * (2.d0*r_old(:) - 1.d0)
+  psi_old = psi(a,r_old)
+  do istep = 1,nmax
+     call random_number(r_new)
+     r_new(:) = r_old(:) + tau * (2.d0*r_new(:) - 1.d0)
+     psi_new = psi(a,r_new)
+     ratio = (psi_new / psi_old)**2
+     call random_number(v)
+     if (v <= ratio) then
+        r_old(:) = r_new(:)
+        psi_old = psi_new
+        n_accep = n_accep + 1_8
+     endif
+     energy = energy + e_loc(a,r_old)
+  end do
+  energy = energy / dble(nmax)
+  accep  = dble(n_accep) / dble(nmax)
+end subroutine metropolis_montecarlo
+
+program qmc
+  implicit none
+  double precision, parameter :: a = 0.9d0
+  double precision, parameter :: tau = 1.3d0
+  integer*8       , parameter :: nmax = 100000
+  integer         , parameter :: nruns = 30
+
+  integer :: irun
+  double precision :: X(nruns), Y(nruns)
+  double precision :: ave, err
+
+  do irun=1,nruns
+     call metropolis_montecarlo(a,nmax,tau,X(irun),Y(irun))
+  enddo
+
+  call ave_error(X,nruns,ave,err)
+  print *, 'E = ', ave, '+/-', err
+
+  call ave_error(Y,nruns,ave,err)
+  print *, 'A = ', ave, '+/-', err
+end program qmc
+     #+END_SRC
+
+     #+begin_src sh :results output :exports both
+gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
+./qmc_metropolis
+     #+end_src
+     #+RESULTS:
+     :  E =  -0.49515370205041676      +/-   1.7660819245720729E-004
+     :  A =   0.51713866666666664      +/-   3.7072551835783688E-004
 
 ** TODO Gaussian random number generator
    
