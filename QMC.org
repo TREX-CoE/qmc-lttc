@@ -1803,7 +1803,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      :  E =  -0.49495906384751226      +/-   1.5257646086088266E-004
      :  A =   0.78861366666666666      +/-   3.7855335138754813E-004
      
-* TODO Diffusion Monte Carlo
+* Diffusion Monte Carlo
    :PROPERTIES:
    :header-args:python: :tangle dmc.py
    :header-args:f90: :tangle dmc.f90
@@ -1833,7 +1833,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    $\tau=i\,t$, we obtain
 
    \[
-   -\frac{\partial \psi(\mathbf{r}, t)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, t) 
+   -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, \tau) 
    \]
 
    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\tau) = \Psi(\mathbf{r},t)$
@@ -1842,7 +1842,103 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
    \]
    For large positive values of $\tau$, $\psi$ is dominated by the
-   $k=0$ term, namely the ground state.
+   $k=0$ term, namely the lowest eigenstate.
+   So we can expect that simulating the differetial equation in
+   imaginary time will converge to the exact ground state of the
+   system.
+
+
+   The [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
+
+   \[
+   \frac{\partial \phi(\mathbf{r},t)}{\partial t} = D\, \Delta \phi(\mathbf{r},t).
+   \]
+
+   The [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
+   takes place. In a solution, the rate is given as a function of the
+   concentration $[A]$ by
+
+   \[
+   v = \frac{d[A]}{dt},
+   \]
+
+   where the concentration $[A]$ is proportional to the number of particles.
+
+   These two equations allow us to interpret the Schrödinger equation
+   in imaginary time as the combination of:
+   - a diffusion equation with a diffusion coefficient $D=1/2$ for the
+     kinetic energy, and
+   - a rate equation for the potential.
+
+   The diffusion equation can be simulated by a Brownian motion:
+   \[ \mathbf{r}_{n+1} = \mathbf{r}_{n} + \sqrt{\tau}\, \chi \]
+   where $\chi$ is a Gaussian random variable, and the rate equation
+   can be simulated by creating or destroying particles over time.
+
+   /Diffusion Monte Carlo/ (DMC) consists in obtaining the ground state of a
+   system by simulating the Schrödinger equation in imaginary time, by
+   the combination of a diffusion process and a rate process. 
+   
+   In a molecular system, the potential is far from being constant,
+   and diverges at inter-particle coalescence points. Hence, when the
+   rate equation is simulated, it results in very large fluctuations
+   in the numbers of particles, making the calculations impossible in
+   practice.
+   Fortunately, if we multiply the Schrödinger equation by a chosen
+   /trial wave function/ $\Psi_T(\mathbf{r})$ (Hartree-Fock, Kohn-Sham
+   determinant, CI wave function, /etc/), one obtains
+
+
+  \begin{eqnarray*}
+  \end{eqnarray*}
+\[
+  -\frac{\partial \psi(\mathbf{r},\tau)}{\partial \tau} \Psi_T(\mathbf{r}) =
+  \left[ -\frac{1}{2} \Delta \psi(\mathbf{r},\tau) + V(\mathbf{r}) \psi(\mathbf{r},\tau) \right] \Psi_T(\mathbf{r}) 
+\]
+
+\[
+-\frac{\partial \big[ \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big]}{\partial \tau}
+= -\frac{1}{2} \Big( \Delta \big[
+\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big] -
+\psi(\mathbf{r},\tau) \Delta \Psi_T(\mathbf{r}) - 2
+\nabla \psi(\mathbf{r},\tau) \nabla \Psi_T(\mathbf{r}) \Big) + V(\mathbf{r}) \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) 
+\]
+
+\[
+-\frac{\partial \big[ \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big]}{\partial \tau}
+= -\frac{1}{2} \Delta \big[\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big] +
+   \frac{1}{2} \psi(\mathbf{r},\tau) \Delta \Psi_T(\mathbf{r}) + 
+\Psi_T(\mathbf{r})\nabla \psi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})} + V(\mathbf{r}) \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) 
+\]
+
+\[
+-\frac{\partial \big[ \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big]}{\partial \tau}
+= -\frac{1}{2} \Delta \big[\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big] +
+               \psi(\mathbf{r},\tau) \Delta \Psi_T(\mathbf{r}) + 
+\Psi_T(\mathbf{r})\nabla \psi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})} + E_L(\mathbf{r}) \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) 
+\]
+\[
+-\frac{\partial \big[ \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big]}{\partial \tau}
+= -\frac{1}{2} \Delta \big[\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \big] +
+\nabla \left[ \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r})
+\frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
+\right] + E_L(\mathbf{r}) \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) 
+\]
+
+Defining $\Pi(\mathbf{r},t) = \psi(\mathbf{r},\tau)
+\Psi_T(\mathbf{r})$, 
+
+\[
+-\frac{\partial \Pi(\mathbf{r},\tau)}{\partial \tau}
+= -\frac{1}{2} \Delta \Pi(\mathbf{r},\tau) +
+\nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
+\right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
+\]
+
+The new "potential" is the local energy, which has smaller fluctuations
+as $\Psi_T$ tends to the exact wave function. The new "kinetic energy"
+can be simulated by the drifted diffusion scheme presented in the
+previous section (VMC).
 
 ** TODO Hydrogen atom
    
@@ -1854,8 +1950,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      energy of H for any value of $a$.
      #+end_exercise
    
-      *Python*
-      #+BEGIN_SRC python :results output
+**** Python
+         #+BEGIN_SRC python :results output
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1903,11 +1999,11 @@ X = [MonteCarlo(a,nmax,tau,E_ref) for i in range(30)]
 E, deltaE = ave_error([x[0] for x in X])
 A, deltaA = ave_error([x[1] for x in X])
 print(f"E = {E} +/- {deltaE}\nA = {A} +/- {deltaA}")
-      #+END_SRC
+         #+END_SRC
 
-      #+RESULTS:
-      : E = -0.49654807434947584 +/- 0.0006868522447409156
-      : A = 0.9876193891840709 +/- 0.00041857361650995804
+         #+RESULTS:
+         : E = -0.49654807434947584 +/- 0.0006868522447409156
+         : A = 0.9876193891840709 +/- 0.00041857361650995804
    
 **** Fortran
      #+BEGIN_SRC f90
