@@ -1809,6 +1809,41 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    :header-args:f90: :tangle dmc.f90
    :END:
    
+
+   Consider the time-dependent Schrödinger equation:
+
+   \[
+   i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = \hat{H} \Psi(\mathbf{r},t) 
+   \]
+
+   We can expand $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
+   of the time-independent Hamiltonian:
+
+   \[
+   \Psi(\mathbf{r},0) = \sum_k a_k\, \Phi_k(\mathbf{r}).
+   \]
+
+   The solution of the Schrödinger equation at time $t$ is 
+
+   \[
+   \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, E_k\, t \right) \Phi_k(\mathbf{r}).
+   \]
+
+   Now, let's replace the time variable $t$ by an imaginary time variable
+   $\tau=i\,t$, we obtain
+
+   \[
+   -\frac{\partial \psi(\mathbf{r}, t)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, t) 
+   \]
+
+   where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\tau) = \Psi(\mathbf{r},t)$
+   and
+   \[
+  \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
+   \]
+   For large positive values of $\tau$, $\psi$ is dominated by the
+   $k=0$ term, namely the ground state.
+
 ** TODO Hydrogen atom
    
 *** Exercise 
