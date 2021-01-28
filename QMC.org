@@ -2505,8 +2505,9 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
       :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
      
       
-* TODO [0/1] Last things to do
+* TODO [0/3] Last things to do
 
+  - [ ] Give some hints of how much time is required for each section
   - [ ] Prepare 4 questions for the exam: multiple-choice questions
     with 4 possible answers. Questions should be independent because
     they will be asked in a random order.
