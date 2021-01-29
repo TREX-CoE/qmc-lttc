@@ -11,7 +11,8 @@ def psi(a, r):
 def kinetic(a,r):
     distance = np.sqrt(np.dot(r,r))
     assert (distance > 0.)
-    return -0.5 * (a**2 - (2.*a)/distance)
+
+    return a * (1./distance - 0.5 * a)
 
 def e_loc(a,r):
     return kinetic(a,r) + potential(r)
