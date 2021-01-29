@@ -1,16 +1,19 @@
 import numpy as np
 
 def potential(r):
-    distance = np.sqrt(np.dot(r,r))
-    assert (distance > 0)
+    r2 = np.dot(r,r)
+    assert (r2 > 0.)
+    distance = np.sqrt(r2)
+    
     return -1. / distance
 
 def psi(a, r):
     return np.exp(-a*np.sqrt(np.dot(r,r)))
 
 def kinetic(a,r):
-    distance = np.sqrt(np.dot(r,r))
-    assert (distance > 0.)
+    r2 = np.dot(r,r)
+    assert (r2 > 0.)
+    distance = np.sqrt(r2)
 
     return a * (1./distance - 0.5 * a)
 
