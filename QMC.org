@@ -276,10 +276,10 @@ end function psi
     applied to the wave function gives:
 
     $$
-    \Delta \Psi (\mathbf{r}) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(\mathbf{r})
+    \Delta \Psi (\mathbf{r}) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(\mathbf{r})\,.
     $$
 
-    So the local kinetic energy is
+    Therefore, the local kinetic energy is
     $$
     -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
     $$
@@ -563,7 +563,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    If the space is discretized in small volume elements $\mathbf{r}_i$
    of size $\delta \mathbf{r}$, the expression of $\langle E_L \rangle_{\Psi^2}$
    becomes a weighted average of the local energy, where the weights
-   are the values of the probability density at $\mathbf{r}_i$
+   are the values of the wave function square at $\mathbf{r}_i$
    multiplied by the volume element:
      
    $$
@@ -580,7 +580,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    
 *** Exercise
      #+begin_exercise
-    Compute a numerical estimate of the energy in a grid of
+    Compute a numerical estimate of the energy using a grid of
     $50\times50\times50$ points in the range $(-5,-5,-5) \le
     \mathbf{r} \le (5,5,5)$.
      #+end_exercise
@@ -783,7 +783,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 *** Exercise
    #+begin_exercise
    Add the calculation of the variance to the previous code, and
-   compute a numerical estimate of the variance of the local energy in
+   compute a numerical estimate of the variance of the local energy using
    a grid of $50\times50\times50$ points in the range $(-5,-5,-5) \le
    \mathbf{r} \le (5,5,5)$ for different values of $a$.
    #+end_exercise
