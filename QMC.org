@@ -33,7 +33,7 @@
 
 * Introduction
 
-  This web site contains the QMC tutorial of the 2021 LTTC winter school
+  This website contains the QMC tutorial of the 2021 LTTC winter school
   [[https://www.irsamc.ups-tlse.fr/lttc/Luchon][Tutorials in Theoretical Chemistry]].
 
   We propose different exercises to understand quantum Monte Carlo (QMC)
@@ -45,7 +45,8 @@
   associated with a given wave function, and apply this approach to the
   hydrogen atom.
   Finally, we present the diffusion Monte Carlo (DMC) method which
-  we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule. 
+  we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule, 
+  starting from an approximate wave function. 
 
   Code examples will be given in Python and Fortran. You can use
   whatever language you prefer to write the program.
@@ -61,41 +62,29 @@
   
 * Numerical evaluation of the energy
 
-  In this section we consider the Hydrogen atom with the following
+  In this section, we consider the hydrogen atom with the following
   wave function:
 
   $$
   \Psi(\mathbf{r}) = \exp(-a |\mathbf{r}|)
   $$
 
-  We will first verify that, for a given value of $a$, $\Psi$ is an
+  We will first verify that, for a particular value of $a$, $\Psi$ is an
   eigenfunction of the Hamiltonian
 
   $$
   \hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
   $$
 
-  To do that, we will check if the local energy, defined as
+  To do that, we will compute the local energy, defined as
 
   $$
   E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
   $$
 
-  is constant.
+  and check whether it is constant.
 
-
-  The probabilistic /expected value/ of an arbitrary function $f(x)$
-  with respect to a probability density function $p(x)$ is given by
-
-  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx. $$
-
-  Recall that a probability density function $p(x)$ is non-negative
-  and integrates to one:
-
-  $$ \int_{-\infty}^\infty p(x)\,dx = 1. $$
-
-    
-  The electronic energy of a system is the expectation value of the
+  In general, the electronic energy of a system, $E$, can be rewritten as the expectation value of the
   local energy $E(\mathbf{r})$ with respect to the 3N-dimensional
   electron density given by the square of the wave function:
 
@@ -104,8 +93,24 @@
       =   \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
     & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
       =   \frac{\int \left[\Psi(\mathbf{r})\right]^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
-      =   \langle E_L \rangle_{\Psi^2}
+      =   \langle E_L \rangle_{\Psi^2}\,,
   \end{eqnarray*}
+  where $\mathbf{r}$ is the vector of the 3N-dimensional electronic coordinates ($N=1$ for the hydrogen atom).
+  
+  For a small number of dimensions, one can compute $E$ by evaluating the integrals on a grid. However, 
+  
+  The probabilistic /expected value/ of an arbitrary function $f(x)$
+  with respect to a probability density function $p(x)$ is given by
+
+  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx, $$
+
+  where probability density function $p(x)$ is non-negative
+  and integrates to one:
+
+  $$ \int_{-\infty}^\infty p(x)\,dx = 1. $$
+
+    
+  
 
 ** Local energy
    :PROPERTIES:
