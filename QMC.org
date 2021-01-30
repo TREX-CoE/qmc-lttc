@@ -59,8 +59,8 @@
 
   All the quantities are expressed in /atomic units/ (energies,
   coordinates, etc).
-  
- ** Energy and local energy
+
+** Energy and local energy
 
   For a given system with Hamiltonian $\hat{H}$ and wave function $\Psi$, we define the local energy as
   
@@ -105,7 +105,7 @@
   
   $$ E \approx \frac{1}{M} \sum_{i=1}^M E_L(\mathbf{r}_i} \,.
   
-  * Numerical evaluation of the energy of the hydrogen atoms
+* Numerical evaluation of the energy of the hydrogen atom
 
   In this section, we consider the hydrogen atom with the following
   wave function:
@@ -121,10 +121,7 @@
   \hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
   $$
 
-  To do that, we will compute the local energy, defined as
-
-  
-  and check whether it is constant.
+  To do that, we will compute the local energy and check whether it is constant.
 
 ** Local energy
    :PROPERTIES:
@@ -132,6 +129,8 @@
    :header-args:f90: :tangle hydrogen.f90
    :END:
 
+   You will now program all quantities needed to compute the local energy of the H atom for the given wave function.
+   
    Write all the functions of this section in a single file :
    ~hydrogen.py~ if you use Python, or ~hydrogen.f90~ is you use
    Fortran.
@@ -207,7 +206,7 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
-*** Exercise 2 
+*** Exercise 2
     #+begin_exercise
     Write a function which computes the wave function at $\mathbf{r}$.
     The function accepts a scalar =a= and a 3-dimensional vector =r= as
