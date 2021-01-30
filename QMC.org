@@ -33,18 +33,19 @@
 
 * Introduction
 
-  This web site is the QMC tutorial of the LTTC winter school 
+  This web site contains the QMC tutorial of the 2021 LTTC winter school
   [[https://www.irsamc.ups-tlse.fr/lttc/Luchon][Tutorials in Theoretical Chemistry]].
 
   We propose different exercises to understand quantum Monte Carlo (QMC)
-  methods. In the first section, we propose to compute the energy of a
+  methods. In the first section, we start with the computation of the energy of a
   hydrogen atom using numerical integration. The goal of this section is
-  to introduce the /local energy/.
-  Then we introduce the variational Monte Carlo (VMC) method which
+  to familarize yourself with the concept of /local energy/.
+  Then, we introduce the variational Monte Carlo (VMC) method which
   computes a statistical estimate of the expectation value of the energy
-  associated with a given wave function.
-  Finally, we introduce the diffusion Monte Carlo (DMC) method which
-  gives the exact energy of the hydrogen atom and of the H_2 molecule. 
+  associated with a given wave function, and apply this approach to the
+  hydrogen atom.
+  Finally, we present the diffusion Monte Carlo (DMC) method which
+  we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule. 
 
   Code examples will be given in Python and Fortran. You can use
   whatever language you prefer to write the program.
@@ -53,7 +54,7 @@
   the wave functions considered here are real: for an $N$ electron
   system where the electrons move in the 3-dimensional space,
   $\Psi : \mathbb{R}^{3N} \rightarrow \mathbb{R}$. In addition, $\Psi$
-  is defined everywhere, continuous and infinitely differentiable.
+  is defined everywhere, continuous, and infinitely differentiable.
 
   All the quantities are expressed in /atomic units/ (energies,
   coordinates, etc).
