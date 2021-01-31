@@ -1332,11 +1332,11 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    
    $$ \mathbf{r}_0 \rightarrow \mathbf{r}_1 \rightarrow \mathbf{r}_2 \ldots \mathbf{r}_{N_{\rm MC}}\,, $$
    
-   according to the following algorithm.
+   following the following algorithm.
    
-   At every step, we propose a new move according to a transition probability $T(\mathbf{r}_{n+1},\mathbf{r}_n)$ of our choice.
+   At every step, we propose a new move according to a transition probability $T(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1})$ of our choice.
    
-   For simplicity, let us move the electron in a 3-dimensional box of side $2\delta L$ centered at the current position
+   For simplicity, we will move the electron in a 3-dimensional box of side $2\delta L$ centered at the current position
    of the electron:
 
    $$
@@ -1347,19 +1347,19 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    $\mathbf{u}$ is a uniform random number in a 3-dimensional box
    $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. 
    
-   After having moved the electron, add the
+   After having moved the electron, we add the
    accept/reject step that guarantees that the distribution of the
    $\mathbf{r}_n$ is $\Psi^2$. This amounts to accepting the move with
    probability
    
    $$
-   A{\mathbf{r}_{n+1},\mathbf{r}_n) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
+   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
    $$
    
    which, for our choice of transition probability, becomes
    
    $$
-   A{\mathbf{r}_{n+1},\mathbf{r}_n) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}
+   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}
    $$
    
    Explain why the transition probability cancels out in the expression of $A$. Also note that we do not need to compute the norm of the wave function!
@@ -1394,7 +1394,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    possible, keeping the number of accepted steps not too small. To
    achieve that, we define the acceptance rate as the number of
    accepted steps over the total number of steps. Adjusting the time
-   step such that the acceptance rate is close to 0.5 is a good compromise for the current problem.
+   step such that the acceptance rate is close to 0.5 is a good 
+   compromise for the current problem.
    
    
 *** Exercise
@@ -1697,18 +1698,18 @@ end subroutine random_gauss
    probability of transition from $\mathbf{r}_n$ to
    $\mathbf{r}_{n+1}$.
 
-   In the previous example, we were using uniform random
-   numbers. Hence, the transition probability was
+   In the previous example, we were using uniform sampling in a box centered
+   at the current position. Hence, the transition probability was symmetric
 
    \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n})
    \text{constant}\,,
    \]
 
    so the expression of $A$ was simplified to the ratios of the squared
    wave functions.
     
-   Now, if instead of drawing uniform random numbers we
+   Now, if instead of drawing uniform random numbers, we
    choose to draw Gaussian random numbers with zero mean and variance
    $\delta t$, the transition probability becomes:
     
@@ -1718,10 +1719,10 @@ end subroutine random_gauss
    \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\delta t} \right]\,.
    \]
 
-    
-   To sample even better the density, we can "push" the electrons
+
+   Furthermore, to sample the density even better, we can "push" the electrons
    into in the regions of high probability, and "pull" them away from
-   the low-probability regions. This will mechanically increase the
+   the low-probability regions. This will ncrease the
    acceptance ratios and improve the sampling.
 
    To do this, we can use the gradient of the probability density
@@ -1730,8 +1731,18 @@ end subroutine random_gauss
    \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}\,,
    \]
     
-   and add the so-called drift vector, so that the numerical scheme becomes a drifted diffusion:
+   and add the so-called drift vector, so that the numerical scheme becomes a 
+   drifted diffusion with transition probability:
+   
+    \[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
+   \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
+   \]
 
+   and the corrsponding move is proposed as
+   
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
    \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi \,,
@@ -1739,18 +1750,11 @@ end subroutine random_gauss
 
    where $\chi$ is a Gaussian random variable with zero mean and
    variance $\delta t$.
-   The transition probability becomes:
-    
-   \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
-   \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
-   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
-   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
-   \]
    
-   The algorithm of the previous exercise is only slighlty modified summarized:
+
    
-   0) For the starting position compute $\Psi$ and the drif-vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$
+   The algorithm of the previous exercise is only slighlty modified as:
+   
    1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
       
@@ -1813,8 +1817,8 @@ end subroutine drift
 *** Exercise 2
 
     #+begin_exercise
-    Modify the previous program to introduce the drifted diffusion scheme.
-    (This is a necessary step for the next section).
+    Modify the previous program to introduce the drift-diffusion scheme.
+    (This is a necessary step for the next section on diffusion Monte Carlo).
     #+end_exercise
    
     *Python*
@@ -2076,10 +2080,10 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     Consider the time-dependent Schrödinger equation:
 
     \[
-    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = \hat{H} \Psi(\mathbf{r},t) 
+    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = \hat{H} \Psi(\mathbf{r},t)\,.
     \]
 
-    We can expand $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
+    We can expand a given starting wave function, $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
     of the time-independent Hamiltonian:
 
     \[
@@ -2092,17 +2096,17 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, E_k\, t \right) \Phi_k(\mathbf{r}).
     \]
 
-    Now, let's replace the time variable $t$ by an imaginary time variable
+    Now, if we replace the time variable $t$ by an imaginary time variable
     $\tau=i\,t$, we obtain
 
     \[
     -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, \tau) 
     \]
 
-    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\tau) = \Psi(\mathbf{r},t)$
+    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
     \[
-   \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
+    \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
     \]
     For large positive values of $\tau$, $\psi$ is dominated by the
     $k=0$ term, namely the lowest eigenstate.
