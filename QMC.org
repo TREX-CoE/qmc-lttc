@@ -2110,10 +2110,11 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 
     where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
+    
     \begin{eqnarray*}
     \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r})\\
                           &=& \exp(-(E_0-E_T)\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
-    \begin{eqnarray*}
+    \end{eqnarray*}
     
     For large positive values of $\tau$, $\psi$ is dominated by the
     $k=0$ term, namely, the lowest eigenstate. If we adjust $E_T$ to the running estimate of $E_0$,
@@ -2133,7 +2134,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     We can simulate this differential equation as a diffusion-branching process.
 
 
-    To this this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
+    To see this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
 
     \[
     \frac{\partial \phi(\mathbf{r},t)}{\partial t} = D\, \Delta \phi(\mathbf{r},t).
@@ -2167,6 +2168,11 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     system by simulating the Schrödinger equation in imaginary time, by
     the combination of a diffusion process and a branching process. 
     
+    We note here that the ground-state wave function of a Fermionic system is
+    antisymmetric and changes sign. 
+    
+    I AM HERE
+    
 ** Importance sampling
    
     In a molecular system, the potential is far from being constant
@@ -2189,18 +2195,18 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   -\frac{\partial \Pi(\mathbf{r},\tau)}{\partial \tau}
   = -\frac{1}{2} \Delta \Pi(\mathbf{r},\tau) +
   \nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
-  \right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
+  \right] + (E_L(\mathbf{r})-E_T)\Pi(\mathbf{r},\tau) 
   \]
 
-  The new "kinetic energy" can be simulated by the drifted diffusion
+  The new "kinetic energy" can be simulated by the drift-diffusion
   scheme presented in the previous section (VMC).
   The new "potential" is the local energy, which has smaller fluctuations
   when $\Psi_T$ gets closer to the exact wave function. It can be simulated by
   changing the number of particles according to $\exp\left[ -\delta t\,
-  \left(E_L(\mathbf{r}) - E_\text{ref}\right)\right]$
-  where $E_{\text{ref}}$ is a constant introduced so that the average
-  of this term is close to one, keeping the number of particles rather
-  constant.
+  \left(E_L(\mathbf{r}) - E_T\right)\right]$
+  where $E_T$ is the constant we had introduced above, which is adjusted to
+  the running average energy and is introduced to keep the number of particles 
+  reasonably constant.
 
   This equation generates the /N/-electron density $\Pi$, which is the
   product of the ground state with the trial wave function. It
