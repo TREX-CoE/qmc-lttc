@@ -1397,6 +1397,9 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    step such that the acceptance rate is close to 0.5 is a good 
    compromise for the current problem.
    
+   NOTE: below, we use the symbol dt for dL for reasons which will
+   become clear later.
+   
    
 *** Exercise
     
@@ -2080,11 +2083,13 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     Consider the time-dependent Schrödinger equation:
 
     \[
-    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = \hat{H} \Psi(\mathbf{r},t)\,.
+    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = (\hat{H} -E_T) \Psi(\mathbf{r},t)\,.
     \]
 
+    where we introduced a shift in the energy, $E_T$, which will come useful below.
+    
     We can expand a given starting wave function, $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
-    of the time-independent Hamiltonian:
+    of the time-independent Hamiltonian, $\Phi_k$, with energies $E_k$:
 
     \[
     \Psi(\mathbf{r},0) = \sum_k a_k\, \Phi_k(\mathbf{r}).
@@ -2093,36 +2098,48 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     The solution of the Schrödinger equation at time $t$ is 
 
     \[
-    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, E_k\, t \right) \Phi_k(\mathbf{r}).
+    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, (E_k-E_T)\, t \right) \Phi_k(\mathbf{r}).
     \]
 
     Now, if we replace the time variable $t$ by an imaginary time variable
     $\tau=i\,t$, we obtain
 
     \[
-    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, \tau) 
+    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_T) \psi(\mathbf{r}, \tau) 
     \]
 
     where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
-    \[
-    \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
-    \]
+    \begin{eqnarray*}
+    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r})\\
+                          &=& \exp(-(E_0-E_T)\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
+    \begin{eqnarray*}
+    
     For large positive values of $\tau$, $\psi$ is dominated by the
-    $k=0$ term, namely the lowest eigenstate.
-    So we can expect that simulating the differetial equation in
+    $k=0$ term, namely, the lowest eigenstate. If we adjust $E_T$ to the running estimate of $E_0$,
+    we can expect that simulating the differetial equation in
     imaginary time will converge to the exact ground state of the
     system.
 
 ** Diffusion and branching
 
-    The [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
+    The imaginary-time Schrödinger equation can be explicitly written in terms of the kinetic and
+    potential energies as
+    
+    \[
+    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_T]\right) \psi(\mathbf{r}, \tau)\,. 
+    \]
+    
+    We can simulate this differential equation as a diffusion-branching process.
+
+
+    To this this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
 
     \[
     \frac{\partial \phi(\mathbf{r},t)}{\partial t} = D\, \Delta \phi(\mathbf{r},t).
     \]
 
-    The [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
+    Furthermore, the [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
     takes place. In a solution, the rate is given as a function of the
     concentration $[A]$ by
 
@@ -2139,7 +2156,9 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     - a rate equation for the potential.
 
     The diffusion equation can be simulated by a Brownian motion:
+    
     \[ \mathbf{r}_{n+1} = \mathbf{r}_{n} + \sqrt{\delta t}\, \chi \]
+    
     where $\chi$ is a Gaussian random variable, and the rate equation
     can be simulated by creating or destroying particles over time (a
     so-called branching process).
@@ -2150,7 +2169,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     
 ** Importance sampling
    
-    In a molecular system, the potential is far from being constant,
+    In a molecular system, the potential is far from being constant
     and diverges at inter-particle coalescence points. Hence, when the
     rate equation is simulated, it results in very large fluctuations
     in the numbers of particles, making the calculations impossible in
