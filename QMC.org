@@ -1099,12 +1099,12 @@ end subroutine ave_error
    Clearly, the square of the wave function is a good choice of probability density to sample but we will start with something simpler and rewrite the energy as 
    
    \begin{eqnarray*}
-   E & = & \frac{\int E_L(\mathbf{r})\frac{|\Psi(\mathbf{r})|^2}{p(\mathbf{r})}p(\mathbf{r})\, \,d\mathbf{r}}{\int \frac{|\Psi(\mathbf{r})|^2 }{p(\mathbf{r})}p(\mathbf{r})d\mathbf{r}}\,. 
+   E & = & \frac{\int E_L(\mathbf{r})\frac{|\Psi(\mathbf{r})|^2}{P(\mathbf{r})}P(\mathbf{r})\, \,d\mathbf{r}}{\int \frac{|\Psi(\mathbf{r})|^2 }{P(\mathbf{r})}P(\mathbf{r})d\mathbf{r}}\,. 
    \end{eqnarray*}
    
-   Here, we will sample a uniform probability $p(\mathbf{r})$ in a cube of volume $L^3$ centered at the origin:
+   Here, we will sample a uniform probability $P(\mathbf{r})$ in a cube of volume $L^3$ centered at the origin:
    
-   $$ p(\mathbf{r}) = \frac{1}{L^3}\,, $$
+   $$ P(\mathbf{r}) = \frac{1}{L^3}\,, $$
    
    and zero outside the cube.
    
@@ -1328,23 +1328,49 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 
    To sample a chosen probability density, an efficient method is the 
    [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings sampling algorithm]]. Starting from a random
-   initial position $\mathbf{r}_0$, we will realize a random walk as follows:
+   initial position $\mathbf{r}_0$, we will realize a random walk:
+   
+   $$ \mathbf{r}_0 \rightarrow \mathbf{r}_1 \rightarrow \mathbf{r}_2 \ldots \mathbf{r}_{N_{\rm MC}}\,, $$
+   
+   according to the following algorithm.
+   
+   At every step, we propose a new move according to a transition probability $T(\mathbf{r}_{n+1},\mathbf{r}_n)$ of our choice.
+   
+   For simplicity, let us move the electron in a 3-dimensional box of side $2\delta L$ centered at the current position
+   of the electron:
 
    $$
-   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \mathbf{u}
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta L \, \mathbf{u}
    $$
 
-   where $\delta t$ is a fixed constant (the so-called /time-step/), and
+   where $\delta L$ is a fixed constant, and
    $\mathbf{u}$ is a uniform random number in a 3-dimensional box
-   $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. We will then add the
+   $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. 
+   
+   After having moved the electron, add the
    accept/reject step that guarantees that the distribution of the
-   $\mathbf{r}_n$ is $\Psi^2$:
-
+   $\mathbf{r}_n$ is $\Psi^2$. This amounts to accepting the move with
+   probability
+   
+   $$
+   A{\mathbf{r}_{n+1},\mathbf{r}_n) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
+   $$
+   
+   which, for our choice of transition probability, becomes
+   
+   $$
+   A{\mathbf{r}_{n+1},\mathbf{r}_n) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}
+   $$
+   
+   Explain why the transition probability cancels out in the expression of $A$. Also note that we do not need to compute the norm of the wave function!
+   
+   The algorithm is summarized as follows:
+   
    1) Compute $\Psi$ at a new position $\mathbf{r'} = \mathbf{r}_n +
-      \delta t\, \mathbf{u}$
-   2) Compute the ratio $R = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
+      \delta L\, \mathbf{u}$
+   2) Compute the ratio $A = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
    3) Draw a uniform random number $v \in [0,1]$
-   4) if $v \le R$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
    6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
    
@@ -1355,20 +1381,20 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     All samples should be kept, from both accepted and rejected moves.
    #+end_note
    
-   If the time step is infinitely small, the ratio will be very close
-   to one and all the steps will be accepted. But the trajectory will
-   be infinitely too short to have statistical significance.
+   If the box is infinitely small, the ratio will be very close
+   to one and all the steps will be accepted. However, the moves will be 
+   very correlated and you will visit the configurational space very slowly.
 
-   On the other hand, as the time step increases, the number of
+   On the other hand, if you propose too large moves, the number of
    accepted steps will decrease because the ratios might become
    small. If the number of accepted steps is close to zero, then the
    space is not well sampled either.
 
-   The time step should be adjusted so that it is as large as
+   The size of the move should be adjusted so that it is as large as
    possible, keeping the number of accepted steps not too small. To
    achieve that, we define the acceptance rate as the number of
    accepted steps over the total number of steps. Adjusting the time
-   step such that the acceptance rate is close to 0.5 is a good compromise.
+   step such that the acceptance rate is close to 0.5 is a good compromise for the current problem.
    
    
 *** Exercise
@@ -1378,7 +1404,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     sampled with $\Psi^2$.
 
     Compute also the acceptance rate, so that you can adapt the time
-    step in order to have an acceptance rate close to 0.5 .
+    step in order to have an acceptance rate close to 0.5.
 
     Can you observe a reduction in the statistical error?
     #+end_exercise
@@ -1648,16 +1674,17 @@ end subroutine random_gauss
    #+END_SRC
 
    In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
+   
 ** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
    :header-args:f90: :tangle vmc_metropolis.f90
    :END:
 
-   One can use more efficient numerical schemes to move the electrons,
-   but the Metropolis accepation step has to be adapted accordingly:
-   the acceptance
-   probability $A$ is chosen so that it is consistent with the
+   One can use more efficient numerical schemes to move the electrons by choosing a smarter expression for the transition probability.
+   
+   The Metropolis acceptance step has to be adapted accordingly to ensure that the detailed balance condition is satisfied. This means that
+   the acceptance probability $A$ is chosen so that it is consistent with the
    probability of leaving $\mathbf{r}_n$ and the probability of
    entering $\mathbf{r}_{n+1}$:
 
@@ -1675,7 +1702,7 @@ end subroutine random_gauss
 
    \[
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
-   \text{constant}
+   \text{constant}\,,
    \]
 
    so the expression of $A$ was simplified to the ratios of the squared
@@ -1688,7 +1715,7 @@ end subroutine random_gauss
    \[
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
-   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\delta t} \right]
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\delta t} \right]\,.
    \]
 
     
@@ -1697,17 +1724,17 @@ end subroutine random_gauss
    the low-probability regions. This will mechanically increase the
    acceptance ratios and improve the sampling.
 
-   To do this, we can add the drift vector
+   To do this, we can use the gradient of the probability density
 
    \[
-   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}.
+   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}\,,
    \]
     
-   The numerical scheme becomes a drifted diffusion:
+   and add the so-called drift vector, so that the numerical scheme becomes a drifted diffusion:
 
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
-   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi \,,
    \]
 
    where $\chi$ is a Gaussian random variable with zero mean and
@@ -1718,9 +1745,23 @@ end subroutine random_gauss
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
    \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
-   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
    \]
-    
+   
+   The algorithm of the previous exercise is only slighlty modified summarized:
+   
+   0) For the starting position compute $\Psi$ and the drif-vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$
+   1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+      
+      Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
+   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
+   3) Draw a uniform random number $v \in [0,1]$
+   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
+
 
 *** Exercise 1
     
