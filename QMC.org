@@ -83,27 +83,27 @@
   For few dimensions, one can easily compute $E$ by evaluating the integrals on a grid but, for a high number of dimensions, one can resort to Monte Carlo techniques to compute $E$.
   
   To this aim, recall that the probabilistic /expected value/ of an arbitrary function $f(x)$
-  with respect to a probability density function $p(x)$ is given by
+  with respect to a probability density function $P(x)$ is given by
 
-  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx, $$
+  $$ \langle f \rangle_p = \int_{-\infty}^\infty P(x)\, f(x)\,dx, $$
 
   where a probability density function $p(x)$ is non-negative
   and integrates to one:
 
-  $$ \int_{-\infty}^\infty p(x)\,dx = 1. $$
+  $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
 
   Similarly, we can view the the energy of a system, $E$, as the expected value of the local energy with respect to 
-  a probability density $p(\mathbf{r}}$ defined in 3$N$ dimensions:
+  a probability density $P(\mathbf{r}}$ defined in 3$N$ dimensions:
   
-  $$ E =  \int E_L(\mathbf{r}) p(\mathbf{r})\,d\mathbf{r}} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
+  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r}} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
   
   where the probability density is given by the square of the wave function:
   
-  $$ p(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
+  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
   
-  If we can sample configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
+  If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
   
-  $$ E \approx \frac{1}{M} \sum_{i=1}^M E_L(\mathbf{r}_i} \,.
+  $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i} \,.
   
 * Numerical evaluation of the energy of the hydrogen atom
 
@@ -971,9 +971,9 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
   Numerical integration with deterministic methods is very efficient
   in low dimensions. When the number of dimensions becomes large,
   instead of computing the average energy as a numerical integration
-  on a grid, it is usually more efficient to do a Monte Carlo sampling.
+  on a grid, it is usually more efficient to use Monte Carlo sampling.
 
-  Moreover, a Monte Carlo sampling will alow us to remove the bias due
+  Moreover, Monte Carlo sampling will alow us to remove the bias due
   to the discretization of space, and compute a statistical confidence
   interval.
 
@@ -986,7 +986,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    To compute the statistical error, you need to perform $M$
    independent Monte Carlo calculations. You will obtain $M$ different
    estimates of the energy, which are expected to have a Gaussian
-   distribution according to the [[https://en.wikipedia.org/wiki/Central_limit_theorem][Central Limit Theorem]].
+   distribution for large $M$, according to the [[https://en.wikipedia.org/wiki/Central_limit_theorem][Central Limit Theorem]].
 
    The estimate of the energy is
 
@@ -1087,10 +1087,28 @@ end subroutine ave_error
    :header-args:f90: :tangle qmc_uniform.f90
    :END:
 
-   We will now do our first Monte Carlo calculation to compute the
-   energy of the hydrogen atom.
+   We will now perform our first Monte Carlo calculation to compute the
+   energy of the hydrogen atom. 
    
-   At every Monte Carlo iteration:
+   Consider again the expression of the energy
+   
+   \begin{eqnarray*}
+   E & = & \frac{\int E_L(\mathbf{r})\left[\Psi(\mathbf{r})\right]^2\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}\,. 
+   \end{eqnarray*}
+   
+   Clearly, the square of the wave function is a good choice of probability density to sample but we will start with something simpler and rewrite the energy as 
+   
+   \begin{eqnarray*}
+   E & = & \frac{\int E_L(\mathbf{r})\frac{|\Psi(\mathbf{r})|^2}{p(\mathbf{r})}p(\mathbf{r})\, \,d\mathbf{r}}{\int \frac{|\Psi(\mathbf{r})|^2 }{p(\mathbf{r})}p(\mathbf{r})d\mathbf{r}}\,. 
+   \end{eqnarray*}
+   
+   Here, we will sample a uniform probability $p(\mathbf{r})$ in a cube of volume $L^3$ centered at the origin:
+   
+   $$ p(\mathbf{r}) = \frac{1}{L^3}\,, $$
+   
+   and zero outside the cube.
+   
+   One Monte Carlo run will consist of $N_{\rm MC}$ Monte Carlo iterations. At every Monte Carlo iteration:
 
    - Draw a random point $\mathbf{r}_i$ in the box $(-5,-5,-5) \le
      (x,y,z) \le (5,5,5)$
@@ -1099,9 +1117,8 @@ end subroutine ave_error
    - Compute $[\Psi(\mathbf{r}_i)]^2 \times E_L(\mathbf{r}_i)$, and accumulate the
      result in a variable =energy=
 
-   One Monte Carlo run will consist of $N$ Monte Carlo iterations. Once all the
-   iterations have been computed, the run returns the average energy
-   $\bar{E}_k$ over the $N$ iterations of the run.
+   Once all the iterations have been computed, the run returns the average energy
+   $\bar{E}_k$ over the $N_{\rm MC}$ iterations of the run.
 
    To compute the statistical error, perform $M$ independent runs. The
    final estimate of the energy will be the average over the
@@ -1298,17 +1315,16 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    We will now use the square of the wave function to sample random
    points distributed with the probability density
    \[
-   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
+   P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}
    \]
 
    The expression of the average energy is now simplified as the average of
    the local energies, since the weights are taken care of by the
-   sampling :
+   sampling:
 
    $$
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
+   E \approx \frac{1}{N_{\rm MC}}\sum_{i=1}^{N_{\rm MC} E_L(\mathbf{r}_i)
    $$
-   
 
    To sample a chosen probability density, an efficient method is the 
    [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings sampling algorithm]]. Starting from a random
