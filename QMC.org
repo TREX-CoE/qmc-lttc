@@ -33,18 +33,20 @@
 
 * Introduction
 
-  This web site is the QMC tutorial of the LTTC winter school 
+  This website contains the QMC tutorial of the 2021 LTTC winter school
   [[https://www.irsamc.ups-tlse.fr/lttc/Luchon][Tutorials in Theoretical Chemistry]].
 
   We propose different exercises to understand quantum Monte Carlo (QMC)
-  methods. In the first section, we propose to compute the energy of a
+  methods. In the first section, we start with the computation of the energy of a
   hydrogen atom using numerical integration. The goal of this section is
-  to introduce the /local energy/.
-  Then we introduce the variational Monte Carlo (VMC) method which
+  to familarize yourself with the concept of /local energy/.
+  Then, we introduce the variational Monte Carlo (VMC) method which
   computes a statistical estimate of the expectation value of the energy
-  associated with a given wave function.
-  Finally, we introduce the diffusion Monte Carlo (DMC) method which
-  gives the exact energy of the hydrogen atom and of the H_2 molecule. 
+  associated with a given wave function, and apply this approach to the
+  hydrogen atom.
+  Finally, we present the diffusion Monte Carlo (DMC) method which
+  we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule, 
+  starting from an approximate wave function. 
 
   Code examples will be given in Python and Fortran. You can use
   whatever language you prefer to write the program.
@@ -53,58 +55,73 @@
   the wave functions considered here are real: for an $N$ electron
   system where the electrons move in the 3-dimensional space,
   $\Psi : \mathbb{R}^{3N} \rightarrow \mathbb{R}$. In addition, $\Psi$
-  is defined everywhere, continuous and infinitely differentiable.
+  is defined everywhere, continuous, and infinitely differentiable.
 
   All the quantities are expressed in /atomic units/ (energies,
   coordinates, etc).
-  
-* Numerical evaluation of the energy
 
-  In this section we consider the Hydrogen atom with the following
+** Energy and local energy
+
+  For a given system with Hamiltonian $\hat{H}$ and wave function $\Psi$, we define the local energy as
+  
+  $$
+  E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
+  $$
+
+  where $\mathbf{r}$ denotes the 3N-dimensional electronic coordinates.
+  
+  The electronic energy of a system, $E$, can be rewritten in terms of the 
+  local energy $E_L(\mathbf{r})$ as
+
+  \begin{eqnarray*}
+  E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} 
+      =   \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
+    & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
+      =   \frac{\int \left[\Psi(\mathbf{r})\right]^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}  
+  \end{eqnarray*}
+   
+  For few dimensions, one can easily compute $E$ by evaluating the integrals on a grid but, for a high number of dimensions, one can resort to Monte Carlo techniques to compute $E$.
+  
+  To this aim, recall that the probabilistic /expected value/ of an arbitrary function $f(x)$
+  with respect to a probability density function $P(x)$ is given by
+
+  $$ \langle f \rangle_p = \int_{-\infty}^\infty P(x)\, f(x)\,dx, $$
+
+  where a probability density function $p(x)$ is non-negative
+  and integrates to one:
+
+  $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
+
+  Similarly, we can view the the energy of a system, $E$, as the expected value of the local energy with respect to 
+  a probability density $P(\mathbf{r}}$ defined in 3$N$ dimensions:
+  
+  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r}} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
+  
+  where the probability density is given by the square of the wave function:
+  
+  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
+  
+  If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
+  
+  $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i} \,.
+  
+* Numerical evaluation of the energy of the hydrogen atom
+
+  In this section, we consider the hydrogen atom with the following
   wave function:
 
   $$
   \Psi(\mathbf{r}) = \exp(-a |\mathbf{r}|)
   $$
 
-  We will first verify that, for a given value of $a$, $\Psi$ is an
+  We will first verify that, for a particular value of $a$, $\Psi$ is an
   eigenfunction of the Hamiltonian
 
   $$
   \hat{H} = \hat{T} + \hat{V} = - \frac{1}{2} \Delta - \frac{1}{|\mathbf{r}|}
   $$
 
-  To do that, we will check if the local energy, defined as
-
-  $$
-  E_L(\mathbf{r}) = \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})},
-  $$
-
-  is constant.
-
-
-  The probabilistic /expected value/ of an arbitrary function $f(x)$
-  with respect to a probability density function $p(x)$ is given by
-
-  $$ \langle f \rangle_p = \int_{-\infty}^\infty p(x)\, f(x)\,dx. $$
-
-  Recall that a probability density function $p(x)$ is non-negative
-  and integrates to one:
-
-  $$ \int_{-\infty}^\infty p(x)\,dx = 1. $$
-
-    
-  The electronic energy of a system is the expectation value of the
-  local energy $E(\mathbf{r})$ with respect to the 3N-dimensional
-  electron density given by the square of the wave function:
-
-  \begin{eqnarray*}
-  E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} 
-      =   \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
-    & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
-      =   \frac{\int \left[\Psi(\mathbf{r})\right]^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
-      =   \langle E_L \rangle_{\Psi^2}
-  \end{eqnarray*}
+  To do that, we will compute the local energy and check whether it is constant.
 
 ** Local energy
    :PROPERTIES:
@@ -112,6 +129,8 @@
    :header-args:f90: :tangle hydrogen.f90
    :END:
 
+   You will now program all quantities needed to compute the local energy of the H atom for the given wave function.
+   
    Write all the functions of this section in a single file :
    ~hydrogen.py~ if you use Python, or ~hydrogen.f90~ is you use
    Fortran.
@@ -187,7 +206,7 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
-*** Exercise 2 
+*** Exercise 2
     #+begin_exercise
     Write a function which computes the wave function at $\mathbf{r}$.
     The function accepts a scalar =a= and a 3-dimensional vector =r= as
@@ -257,10 +276,10 @@ end function psi
     applied to the wave function gives:
 
     $$
-    \Delta \Psi (\mathbf{r}) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(\mathbf{r})
+    \Delta \Psi (\mathbf{r}) = \left(a^2 - \frac{2a}{\mathbf{|r|}} \right) \Psi(\mathbf{r})\,.
     $$
 
-    So the local kinetic energy is
+    Therefore, the local kinetic energy is
     $$
     -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
     $$
@@ -544,7 +563,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    If the space is discretized in small volume elements $\mathbf{r}_i$
    of size $\delta \mathbf{r}$, the expression of $\langle E_L \rangle_{\Psi^2}$
    becomes a weighted average of the local energy, where the weights
-   are the values of the probability density at $\mathbf{r}_i$
+   are the values of the wave function square at $\mathbf{r}_i$
    multiplied by the volume element:
      
    $$
@@ -561,7 +580,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
    
 *** Exercise
      #+begin_exercise
-    Compute a numerical estimate of the energy in a grid of
+    Compute a numerical estimate of the energy using a grid of
     $50\times50\times50$ points in the range $(-5,-5,-5) \le
     \mathbf{r} \le (5,5,5)$.
      #+end_exercise
@@ -764,7 +783,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 *** Exercise
    #+begin_exercise
    Add the calculation of the variance to the previous code, and
-   compute a numerical estimate of the variance of the local energy in
+   compute a numerical estimate of the variance of the local energy using
    a grid of $50\times50\times50$ points in the range $(-5,-5,-5) \le
    \mathbf{r} \le (5,5,5)$ for different values of $a$.
    #+end_exercise
@@ -952,9 +971,9 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
   Numerical integration with deterministic methods is very efficient
   in low dimensions. When the number of dimensions becomes large,
   instead of computing the average energy as a numerical integration
-  on a grid, it is usually more efficient to do a Monte Carlo sampling.
+  on a grid, it is usually more efficient to use Monte Carlo sampling.
 
-  Moreover, a Monte Carlo sampling will alow us to remove the bias due
+  Moreover, Monte Carlo sampling will alow us to remove the bias due
   to the discretization of space, and compute a statistical confidence
   interval.
 
@@ -967,7 +986,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    To compute the statistical error, you need to perform $M$
    independent Monte Carlo calculations. You will obtain $M$ different
    estimates of the energy, which are expected to have a Gaussian
-   distribution according to the [[https://en.wikipedia.org/wiki/Central_limit_theorem][Central Limit Theorem]].
+   distribution for large $M$, according to the [[https://en.wikipedia.org/wiki/Central_limit_theorem][Central Limit Theorem]].
 
    The estimate of the energy is
 
@@ -1068,10 +1087,28 @@ end subroutine ave_error
    :header-args:f90: :tangle qmc_uniform.f90
    :END:
 
-   We will now do our first Monte Carlo calculation to compute the
-   energy of the hydrogen atom.
+   We will now perform our first Monte Carlo calculation to compute the
+   energy of the hydrogen atom. 
    
-   At every Monte Carlo iteration:
+   Consider again the expression of the energy
+   
+   \begin{eqnarray*}
+   E & = & \frac{\int E_L(\mathbf{r})\left[\Psi(\mathbf{r})\right]^2\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}\,. 
+   \end{eqnarray*}
+   
+   Clearly, the square of the wave function is a good choice of probability density to sample but we will start with something simpler and rewrite the energy as 
+   
+   \begin{eqnarray*}
+   E & = & \frac{\int E_L(\mathbf{r})\frac{|\Psi(\mathbf{r})|^2}{P(\mathbf{r})}P(\mathbf{r})\, \,d\mathbf{r}}{\int \frac{|\Psi(\mathbf{r})|^2 }{P(\mathbf{r})}P(\mathbf{r})d\mathbf{r}}\,. 
+   \end{eqnarray*}
+   
+   Here, we will sample a uniform probability $P(\mathbf{r})$ in a cube of volume $L^3$ centered at the origin:
+   
+   $$ P(\mathbf{r}) = \frac{1}{L^3}\,, $$
+   
+   and zero outside the cube.
+   
+   One Monte Carlo run will consist of $N_{\rm MC}$ Monte Carlo iterations. At every Monte Carlo iteration:
 
    - Draw a random point $\mathbf{r}_i$ in the box $(-5,-5,-5) \le
      (x,y,z) \le (5,5,5)$
@@ -1080,9 +1117,8 @@ end subroutine ave_error
    - Compute $[\Psi(\mathbf{r}_i)]^2 \times E_L(\mathbf{r}_i)$, and accumulate the
      result in a variable =energy=
 
-   One Monte Carlo run will consist of $N$ Monte Carlo iterations. Once all the
-   iterations have been computed, the run returns the average energy
-   $\bar{E}_k$ over the $N$ iterations of the run.
+   Once all the iterations have been computed, the run returns the average energy
+   $\bar{E}_k$ over the $N_{\rm MC}$ iterations of the run.
 
    To compute the statistical error, perform $M$ independent runs. The
    final estimate of the energy will be the average over the
@@ -1279,37 +1315,62 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    We will now use the square of the wave function to sample random
    points distributed with the probability density
    \[
-   P(\mathbf{r}) = \left[\Psi(\mathbf{r})\right]^2
+   P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}
    \]
 
    The expression of the average energy is now simplified as the average of
    the local energies, since the weights are taken care of by the
-   sampling :
+   sampling:
 
    $$
-   E \approx \frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r}_i)
+   E \approx \frac{1}{N_{\rm MC}}\sum_{i=1}^{N_{\rm MC} E_L(\mathbf{r}_i)
    $$
-   
 
    To sample a chosen probability density, an efficient method is the 
    [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings sampling algorithm]]. Starting from a random
-   initial position $\mathbf{r}_0$, we will realize a random walk as follows:
+   initial position $\mathbf{r}_0$, we will realize a random walk:
+   
+   $$ \mathbf{r}_0 \rightarrow \mathbf{r}_1 \rightarrow \mathbf{r}_2 \ldots \mathbf{r}_{N_{\rm MC}}\,, $$
+   
+   following the following algorithm.
+   
+   At every step, we propose a new move according to a transition probability $T(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1})$ of our choice.
+   
+   For simplicity, we will move the electron in a 3-dimensional box of side $2\delta L$ centered at the current position
+   of the electron:
 
    $$
-   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \mathbf{u}
+   \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta L \, \mathbf{u}
    $$
 
-   where $\delta t$ is a fixed constant (the so-called /time-step/), and
+   where $\delta L$ is a fixed constant, and
    $\mathbf{u}$ is a uniform random number in a 3-dimensional box
-   $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. We will then add the
+   $(-1,-1,-1) \le \mathbf{u} \le (1,1,1)$. 
+   
+   After having moved the electron, we add the
    accept/reject step that guarantees that the distribution of the
-   $\mathbf{r}_n$ is $\Psi^2$:
-
+   $\mathbf{r}_n$ is $\Psi^2$. This amounts to accepting the move with
+   probability
+   
+   $$
+   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
+   $$
+   
+   which, for our choice of transition probability, becomes
+   
+   $$
+   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}
+   $$
+   
+   Explain why the transition probability cancels out in the expression of $A$. Also note that we do not need to compute the norm of the wave function!
+   
+   The algorithm is summarized as follows:
+   
    1) Compute $\Psi$ at a new position $\mathbf{r'} = \mathbf{r}_n +
-      \delta t\, \mathbf{u}$
-   2) Compute the ratio $R = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
+      \delta L\, \mathbf{u}$
+   2) Compute the ratio $A = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
    3) Draw a uniform random number $v \in [0,1]$
-   4) if $v \le R$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
    6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
    
@@ -1320,20 +1381,24 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     All samples should be kept, from both accepted and rejected moves.
    #+end_note
    
-   If the time step is infinitely small, the ratio will be very close
-   to one and all the steps will be accepted. But the trajectory will
-   be infinitely too short to have statistical significance.
+   If the box is infinitely small, the ratio will be very close
+   to one and all the steps will be accepted. However, the moves will be 
+   very correlated and you will visit the configurational space very slowly.
 
-   On the other hand, as the time step increases, the number of
+   On the other hand, if you propose too large moves, the number of
    accepted steps will decrease because the ratios might become
    small. If the number of accepted steps is close to zero, then the
    space is not well sampled either.
 
-   The time step should be adjusted so that it is as large as
+   The size of the move should be adjusted so that it is as large as
    possible, keeping the number of accepted steps not too small. To
    achieve that, we define the acceptance rate as the number of
    accepted steps over the total number of steps. Adjusting the time
-   step such that the acceptance rate is close to 0.5 is a good compromise.
+   step such that the acceptance rate is close to 0.5 is a good 
+   compromise for the current problem.
+   
+   NOTE: below, we use the symbol dt to denote dL since we will use
+   the same variable later on to store a time step.
    
    
 *** Exercise
@@ -1343,7 +1408,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
     sampled with $\Psi^2$.
 
     Compute also the acceptance rate, so that you can adapt the time
-    step in order to have an acceptance rate close to 0.5 .
+    step in order to have an acceptance rate close to 0.5.
 
     Can you observe a reduction in the statistical error?
     #+end_exercise
@@ -1613,16 +1678,17 @@ end subroutine random_gauss
    #+END_SRC
 
    In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
+   
 ** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
    :header-args:f90: :tangle vmc_metropolis.f90
    :END:
 
-   One can use more efficient numerical schemes to move the electrons,
-   but the Metropolis accepation step has to be adapted accordingly:
-   the acceptance
-   probability $A$ is chosen so that it is consistent with the
+   One can use more efficient numerical schemes to move the electrons by choosing a smarter expression for the transition probability.
+   
+   The Metropolis acceptance step has to be adapted accordingly to ensure that the detailed balance condition is satisfied. This means that
+   the acceptance probability $A$ is chosen so that it is consistent with the
    probability of leaving $\mathbf{r}_n$ and the probability of
    entering $\mathbf{r}_{n+1}$:
 
@@ -1635,57 +1701,74 @@ end subroutine random_gauss
    probability of transition from $\mathbf{r}_n$ to
    $\mathbf{r}_{n+1}$.
 
-   In the previous example, we were using uniform random
-   numbers. Hence, the transition probability was
+   In the previous example, we were using uniform sampling in a box centered
+   at the current position. Hence, the transition probability was symmetric
 
    \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
-   \text{constant}
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n})
+   \text{constant}\,,
    \]
 
    so the expression of $A$ was simplified to the ratios of the squared
    wave functions.
     
-   Now, if instead of drawing uniform random numbers we
+   Now, if instead of drawing uniform random numbers, we
    choose to draw Gaussian random numbers with zero mean and variance
    $\delta t$, the transition probability becomes:
     
    \[
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
-   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\delta t} \right]
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} \right)^2}{2\delta t} \right]\,.
    \]
 
-    
-   To sample even better the density, we can "push" the electrons
+
+   Furthermore, to sample the density even better, we can "push" the electrons
    into in the regions of high probability, and "pull" them away from
-   the low-probability regions. This will mechanically increase the
+   the low-probability regions. This will ncrease the
    acceptance ratios and improve the sampling.
 
-   To do this, we can add the drift vector
+   To do this, we can use the gradient of the probability density
 
    \[
-   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}.
+   \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}\,,
    \]
     
-   The numerical scheme becomes a drifted diffusion:
+   and add the so-called drift vector, so that the numerical scheme becomes a 
+   drifted diffusion with transition probability:
+   
+    \[
+   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
+   \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
+   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
+   \]
 
+   and the corrsponding move is proposed as
+   
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
-   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi 
+   \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi \,,
    \]
 
    where $\chi$ is a Gaussian random variable with zero mean and
    variance $\delta t$.
-   The transition probability becomes:
-    
-   \[
-   T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
-   \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
-   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
-   \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]
-   \]
-    
+   
+
+   
+   The algorithm of the previous exercise is only slighlty modified as:
+   
+   1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+      
+      Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
+   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
+   3) Draw a uniform random number $v \in [0,1]$
+   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
+
 
 *** Exercise 1
     
@@ -1737,8 +1820,8 @@ end subroutine drift
 *** Exercise 2
 
     #+begin_exercise
-    Modify the previous program to introduce the drifted diffusion scheme.
-    (This is a necessary step for the next section).
+    Modify the previous program to introduce the drift-diffusion scheme.
+    (This is a necessary step for the next section on diffusion Monte Carlo).
     #+end_exercise
    
     *Python*
@@ -2000,11 +2083,13 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     Consider the time-dependent Schrödinger equation:
 
     \[
-    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = \hat{H} \Psi(\mathbf{r},t) 
+    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = (\hat{H} -E_T) \Psi(\mathbf{r},t)\,.
     \]
 
-    We can expand $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
-    of the time-independent Hamiltonian:
+    where we introduced a shift in the energy, $E_T$, which will come useful below.
+    
+    We can expand a given starting wave function, $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
+    of the time-independent Hamiltonian, $\Phi_k$, with energies $E_k$:
 
     \[
     \Psi(\mathbf{r},0) = \sum_k a_k\, \Phi_k(\mathbf{r}).
@@ -2013,36 +2098,49 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     The solution of the Schrödinger equation at time $t$ is 
 
     \[
-    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, E_k\, t \right) \Phi_k(\mathbf{r}).
+    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, (E_k-E_T)\, t \right) \Phi_k(\mathbf{r}).
     \]
 
-    Now, let's replace the time variable $t$ by an imaginary time variable
+    Now, if we replace the time variable $t$ by an imaginary time variable
     $\tau=i\,t$, we obtain
 
     \[
-    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \hat{H} \psi(\mathbf{r}, \tau) 
+    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_T) \psi(\mathbf{r}, \tau) 
     \]
 
-    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\tau) = \Psi(\mathbf{r},t)$
+    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
-    \[
-   \psi(\mathbf{r},\tau) = \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r}).
-    \]
+    
+    \begin{eqnarray*}
+    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r})\\
+                          &=& \exp(-(E_0-E_T)\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
+    \end{eqnarray*}
+    
     For large positive values of $\tau$, $\psi$ is dominated by the
-    $k=0$ term, namely the lowest eigenstate.
-    So we can expect that simulating the differetial equation in
+    $k=0$ term, namely, the lowest eigenstate. If we adjust $E_T$ to the running estimate of $E_0$,
+    we can expect that simulating the differetial equation in
     imaginary time will converge to the exact ground state of the
     system.
 
 ** Diffusion and branching
 
-    The [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
+    The imaginary-time Schrödinger equation can be explicitly written in terms of the kinetic and
+    potential energies as
+    
+    \[
+    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_T]\right) \psi(\mathbf{r}, \tau)\,. 
+    \]
+    
+    We can simulate this differential equation as a diffusion-branching process.
+
+
+    To see this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
 
     \[
     \frac{\partial \phi(\mathbf{r},t)}{\partial t} = D\, \Delta \phi(\mathbf{r},t).
     \]
 
-    The [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
+    Furthermore, the [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
     takes place. In a solution, the rate is given as a function of the
     concentration $[A]$ by
 
@@ -2059,7 +2157,9 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     - a rate equation for the potential.
 
     The diffusion equation can be simulated by a Brownian motion:
+    
     \[ \mathbf{r}_{n+1} = \mathbf{r}_{n} + \sqrt{\delta t}\, \chi \]
+    
     where $\chi$ is a Gaussian random variable, and the rate equation
     can be simulated by creating or destroying particles over time (a
     so-called branching process).
@@ -2068,9 +2168,23 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     system by simulating the Schrödinger equation in imaginary time, by
     the combination of a diffusion process and a branching process. 
     
+    We note that the ground-state wave function of a Fermionic system is
+    antisymmetric and changes sign. Therefore, it is interpretation as a probability 
+    distribution is somewhat problematic. In fact, mathematically, since
+    the Bosonic ground state is lower in energy than the Fermionic one, for
+    large $\tau$, the system will evolve towards the Bosonic solution.
+    
+    For the systems you will study this is not an issue:
+    
+    - Hydrogen atom: You only have one electron! 
+    - Two-electron system ($H_2$ or He): The ground-wave function is antisymmetric
+    in the spin variables but symmetric in the space ones.
+    
+    Therefore, in both cases, you are dealing with a "Bosonic" ground state.
+    
 ** Importance sampling
    
-    In a molecular system, the potential is far from being constant,
+    In a molecular system, the potential is far from being constant
     and diverges at inter-particle coalescence points. Hence, when the
     rate equation is simulated, it results in very large fluctuations
     in the numbers of particles, making the calculations impossible in
@@ -2090,28 +2204,55 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   -\frac{\partial \Pi(\mathbf{r},\tau)}{\partial \tau}
   = -\frac{1}{2} \Delta \Pi(\mathbf{r},\tau) +
   \nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
-  \right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
+  \right] + (E_L(\mathbf{r})-E_T)\Pi(\mathbf{r},\tau) 
   \]
 
-  The new "kinetic energy" can be simulated by the drifted diffusion
+  The new "kinetic energy" can be simulated by the drift-diffusion
   scheme presented in the previous section (VMC).
   The new "potential" is the local energy, which has smaller fluctuations
   when $\Psi_T$ gets closer to the exact wave function. It can be simulated by
   changing the number of particles according to $\exp\left[ -\delta t\,
-  \left(E_L(\mathbf{r}) - E_\text{ref}\right)\right]$
-  where $E_{\text{ref}}$ is a constant introduced so that the average
-  of this term is close to one, keeping the number of particles rather
-  constant.
+  \left(E_L(\mathbf{r}) - E_T\right)\right]$
+  where $E_T$ is the constant we had introduced above, which is adjusted to
+  the running average energy to keep the number of particles 
+  reasonably constant.
 
   This equation generates the /N/-electron density $\Pi$, which is the
-  product of the ground state with the trial wave function. It
-  introduces the constraint that $\Pi(\mathbf{r},\tau)=0$ where
-  $\Psi_T(\mathbf{r})=0$. In the few cases where the wave function has no nodes,
-  such as in the hydrogen atom or the H_2 molecule, this
-  constraint is harmless and we can obtain the exact energy. But for
-  systems where the wave function has nodes, this scheme introduces an
-  error known as the /fixed node error/.
+  product of the ground state with the trial wave function. You may then ask: how
+  can we compute the total energy of the system?
+  
+  To this aim, we use the mixed estimator of the energy:
+  
+  \begin{eqnarray*}
+   E(\tau)  &=&  \frac{\langle \psi(tau) | \hat{H} | \Psi_T \rangle}{\frac{\langle \psi(tau) | \Psi_T \rangle}\\
+            &=& \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
+                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \\
+            &=&  \int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
+                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
+   \end{eqnarray*}
+  
+   Since, for large $\tau$, we have that 
+   
+   \[ 
+   \Pi(\mathbf{r},\tau) =\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \rightarrow \Phi_0(\mathbf{r}) \Psi_T(\mathbf{r})\,,
+   \]
+   
+   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an eigenstate of the Hamiltonian, we obtain
 
+   \[
+   E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
+            {\langle  \psi_\tau | \Psi_T \rangle}  
+     = \frac{\langle \Psi_T | \hat{H} | \psi_\tau \rangle}
+            {\langle  \Psi_T | \psi_\tau \rangle}  
+     \rightarrow E_0 \frac{\langle  \Psi_T | \psi_\tau \rangle}  
+            {\langle  \Psi_T | \psi_\tau \rangle} 
+     = E_0 
+   \]
+
+   Therefore, we can compute the energy within DMC by generating the
+   density $\Pi$ with random walks, and simply averaging the local
+   energies computed with the trial wave function.
+  
 *** Appendix : Details of the Derivation
     
   \[
@@ -2157,52 +2298,12 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   \nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
   \right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
   \]
-
-  
-** Fixed-node DMC energy
-
-   Now that we have a process to sample $\Pi(\mathbf{r},\tau) =
-   \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r})$, we can compute the exact
-   energy of the system, within the fixed-node constraint, as:
-
-   \[
-   E = \lim_{\tau \to \infty} \frac{\int \Pi(\mathbf{r},\tau) E_L(\mathbf{r}) d\mathbf{r}}
-            {\int \Pi(\mathbf{r},\tau) d\mathbf{r}} = \lim_{\tau \to
-   \infty} E(\tau).
-   \]
-   
-
-   \[
-   E(\tau)   =   \frac{\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
-                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
-       =   \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
-                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
-       =   \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
-                {\langle  \psi_\tau | \Psi_T \rangle} 
-   \]
-
-   As $\hat{H}$ is Hermitian, 
-
-   \[
-   E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
-            {\langle  \psi_\tau | \Psi_T \rangle}  
-     = \frac{\langle \Psi_T | \hat{H} | \psi_\tau \rangle}
-            {\langle  \Psi_T | \psi_\tau \rangle}  
-     = E[\psi_\tau] \frac{\langle  \Psi_T | \psi_\tau \rangle}  
-            {\langle  \Psi_T | \psi_\tau \rangle} 
-     = E[\psi_\tau] 
-   \]
-
-   So computing the energy within DMC consists in generating the
-   density $\Pi$ with random walks, and simply averaging the local
-   energies computed with the trial wave function.
    
 ** Pure Diffusion Monte Carlo (PDMC)
 
    Instead of having a variable number of particles to simulate the
-   branching process, one can choose to sample $[\Psi_T(\mathbf{r})]^2$ instead of
-   $\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r})$, and consider the term
-   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_{\text{ref}}  \right)$ as a
+   branching process, one can consider the term
+   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_T}  \right)$ as a
    cumulative product of weights:
 
    \[
