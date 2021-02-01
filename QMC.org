@@ -99,7 +99,7 @@
   
   where the probability density is given by the square of the wave function:
   
-  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2)}{\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
+  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2)}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
   
   If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
   
@@ -763,7 +763,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 *** Exercise (optional)
    #+begin_exercise
    Prove that :
-   $$\left( \langle E - \langle E \rangle_{\Psi^2} \rangle_{\Psi^2} \right)^2 = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
+   $$\langle \left( E - \langle E \rangle_{\Psi^2} \right)^2\rangle_{\Psi^2}  = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
    #+end_exercise
    
 **** Solution                                                      :solution:
@@ -772,7 +772,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    \rangle = \bar{E}$ .
    
    \begin{eqnarray*}
-   \langle E - \bar{E} \rangle^2 & = & 
+   \langle (E - \bar{E})^2 \rangle & = & 
    \langle E^2 - 2 E \bar{E} + \bar{E}^2 \rangle \\
    &=& \langle E^2 \rangle - 2 \langle E \bar{E} \rangle + \langle \bar{E}^2 \rangle \\
    &=& \langle E^2 \rangle - 2 \langle E \rangle \bar{E}  + \bar{E}^2 \\
@@ -991,13 +991,13 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
    The estimate of the energy is
 
    $$
-   E = \frac{1}{M} \sum_{i=1}^M E_M
+   E = \frac{1}{M} \sum_{i=1}^M E_i
    $$
 
    The variance of the average energies can be computed as
 
    $$
-   \sigma^2 = \frac{1}{M-1} \sum_{i=1}^{M} (E_M - E)^2
+   \sigma^2 = \frac{1}{M-1} \sum_{i=1}^{M} (E_i - E)^2
    $$
 
    And the confidence interval is given by
@@ -1315,7 +1315,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    We will now use the square of the wave function to sample random
    points distributed with the probability density
    \[
-   P(\mathbf{r}) = \frac{|Psi(\mathbf{r})|^2)}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,.
+   P(\mathbf{r}) = \frac{|\Psi(\mathbf{r})|^2}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,.
    \]
 
    The expression of the average energy is now simplified as the average of
@@ -1353,7 +1353,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    probability
    
    $$
-   A(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
+   A(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n+1}\rightarrow\mathbf{r}_{n}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1})P(\mathbf{r}_{n})}\right)\,,
    $$
    
    which, for our choice of transition probability, becomes
@@ -2083,10 +2083,10 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     Consider the time-dependent Schrödinger equation:
 
     \[
-    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = (\hat{H} -E_T) \Psi(\mathbf{r},t)\,.
+    i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = (\hat{H} -E_{\rm ref}) \Psi(\mathbf{r},t)\,.
     \]
 
-    where we introduced a shift in the energy, $E_T$, which will come useful below.
+    where we introduced a shift in the energy, $E_{\rm ref}$, which will come useful below.
     
     We can expand a given starting wave function, $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
     of the time-independent Hamiltonian, $\Phi_k$, with energies $E_k$:
@@ -2098,26 +2098,26 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     The solution of the Schrödinger equation at time $t$ is 
 
     \[
-    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, (E_k-E_T)\, t \right) \Phi_k(\mathbf{r}).
+    \Psi(\mathbf{r},t) = \sum_k a_k \exp \left( -i\, (E_k-E_{\rm ref})\, t \right) \Phi_k(\mathbf{r}).
     \]
 
     Now, if we replace the time variable $t$ by an imaginary time variable
     $\tau=i\,t$, we obtain
 
     \[
-    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_T) \psi(\mathbf{r}, \tau) 
+    -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_{\rm ref}) \psi(\mathbf{r}, \tau) 
     \]
 
-    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
+    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,t)$
     and
     
     \begin{eqnarray*}
-    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -E_k\, \tau) \phi_k(\mathbf{r})\\
-                          &=& \exp(-(E_0-E_T)\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
+    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -(E_k-E_{\rm ref})\, \tau) \phi_k(\mathbf{r})\\
+                          &=& \exp(-(E_0-E_{\rm ref})\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
     \end{eqnarray*}
     
     For large positive values of $\tau$, $\psi$ is dominated by the
-    $k=0$ term, namely, the lowest eigenstate. If we adjust $E_T$ to the running estimate of $E_0$,
+    $k=0$ term, namely, the lowest eigenstate. If we adjust $E_{\rm ref}$ to the running estimate of $E_0$,
     we can expect that simulating the differetial equation in
     imaginary time will converge to the exact ground state of the
     system.
@@ -2128,7 +2128,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     potential energies as
     
     \[
-    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_T]\right) \psi(\mathbf{r}, \tau)\,. 
+    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_{\rm ref}]\right) \psi(\mathbf{r}, \tau)\,. 
     \]
     
     We can simulate this differential equation as a diffusion-branching process.
@@ -2137,7 +2137,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     To see this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
 
     \[
-    \frac{\partial \phi(\mathbf{r},t)}{\partial t} = D\, \Delta \phi(\mathbf{r},t).
+    \frac{\partial \psi(\mathbf{r},t)}{\partial t} = D\, \Delta \psi(\mathbf{r},t).
     \]
 
     Furthermore, the [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
@@ -2203,7 +2203,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   -\frac{\partial \Pi(\mathbf{r},\tau)}{\partial \tau}
   = -\frac{1}{2} \Delta \Pi(\mathbf{r},\tau) +
   \nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
-  \right] + (E_L(\mathbf{r})-E_T)\Pi(\mathbf{r},\tau) 
+  \right] + (E_L(\mathbf{r})-E_{\rm ref})\Pi(\mathbf{r},\tau) 
   \]
 
   The new "kinetic energy" can be simulated by the drift-diffusion
@@ -2211,8 +2211,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   The new "potential" is the local energy, which has smaller fluctuations
   when $\Psi_T$ gets closer to the exact wave function. It can be simulated by
   changing the number of particles according to $\exp\left[ -\delta t\,
-  \left(E_L(\mathbf{r}) - E_T\right)\right]$
-  where $E_T$ is the constant we had introduced above, which is adjusted to
+  \left(E_L(\mathbf{r}) - E_{\rm ref}\right)\right]$
+  where $E_{\rm ref}$ is the constant we had introduced above, which is adjusted to
   the running average energy to keep the number of particles 
   reasonably constant.
 
@@ -2223,28 +2223,28 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   To this aim, we use the mixed estimator of the energy:
   
   \begin{eqnarray*}
-   E(\tau)  &=&  \frac{\langle \psi(tau) | \hat{H} | \Psi_T \rangle}{\frac{\langle \psi(tau) | \Psi_T \rangle}\\
+   E(\tau)  &=&  \frac{\langle \psi(tau) | \hat{H} | \Psi_T \rangle}{\langle \psi(tau) | \Psi_T \rangle}\\
             &=& \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
                 {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \\
-            &=&  \int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
-                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
+            &=& \frac{\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
+                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \,.
    \end{eqnarray*}
   
-   Since, for large $\tau$, we have that 
+   For large $\tau$, we have that 
    
    \[ 
    \Pi(\mathbf{r},\tau) =\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \rightarrow \Phi_0(\mathbf{r}) \Psi_T(\mathbf{r})\,,
    \]
    
-   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an eigenstate of the Hamiltonian, we obtain
+   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an eigenstate of the Hamiltonian, we obtain for large $\tau$
 
    \[
    E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
             {\langle  \psi_\tau | \Psi_T \rangle}  
      = \frac{\langle \Psi_T | \hat{H} | \psi_\tau \rangle}
             {\langle  \Psi_T | \psi_\tau \rangle}  
-     \rightarrow E_0 \frac{\langle  \Psi_T | \psi_\tau \rangle}  
-            {\langle  \Psi_T | \psi_\tau \rangle} 
+     \rightarrow E_0 \frac{\langle  \Psi_T | \Phi_0 \rangle}  
+            {\langle  \Psi_T | \Phi_0 \rangle} 
      = E_0 
    \]
 
@@ -2302,7 +2302,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 
    Instead of having a variable number of particles to simulate the
    branching process, one can consider the term
-   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_T}  \right)$ as a
+   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_{\rm ref})  \right)$ as a
    cumulative product of weights:
 
    \[
