@@ -1744,7 +1744,7 @@ end subroutine random_gauss
    \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
    \]
 
-   and the corrsponding move is proposed as
+   The corrsponding move is proposed as
    
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
@@ -2108,7 +2108,6 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_T) \psi(\mathbf{r}, \tau) 
     \]
 
-# TODO Should we put 't' after i ?
     where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
     
@@ -2170,16 +2169,15 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     the combination of a diffusion process and a branching process. 
     
     We note that the ground-state wave function of a Fermionic system is
-    antisymmetric and changes sign. Therefore, it is interpretation as a probability 
+    antisymmetric and changes sign. Therefore, its interpretation as a probability 
     distribution is somewhat problematic. In fact, mathematically, since
     the Bosonic ground state is lower in energy than the Fermionic one, for
     large $\tau$, the system will evolve towards the Bosonic solution.
     
-    For the systems you will study this is not an issue:
+    For the systems you will study, this is not an issue:
     
     - Hydrogen atom: You only have one electron! 
-    - Two-electron system ($H_2$ or He): The ground-wave function is antisymmetric
-    in the spin variables but symmetric in the space ones.
+    - Two-electron system ($H_2$ or He): The ground-wave function is antisymmetric in the spin variables but symmetric in the space ones.
     
     Therefore, in both cases, you are dealing with a "Bosonic" ground state.
     
@@ -2315,7 +2313,42 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    \prod_{i=1}^{n} w(\mathbf{r}_i)
    \]
 
-   where $\mathbf{r}_i$ are the coordinates along the trajectory.
+   where $\mathbf{r}_i$ are the coordinates along the trajectory and we introduced a time-step $\delta t$.
+   
+   The algorithm can be rather easily built on top of your VMC code:
+   
+   1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+      \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
+      
+      Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
+   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
+   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
+   3) Draw a uniform random number $v \in [0,1]$
+   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
+   7) compute the weight $w(\mathbf{r}_i)$
+   8) update $W$
+   
+   Some comments are needed:
+   
+   - You estimate the energy as 
+   
+   \begin{eqnarray*}
+   E = \frac{\sum_{i=1}{N_{\rm MC}} E_L(\mathbf{r}_i) W(\mathbf{r}_i, i\delta t)}{\sum_{i=1}{N_{\rm MC}} W(\mathbf{r}_i, i\delta t)}
+   \end{eqnarray}
+   
+   - The result will be affected by a time-step error (the finite size of $\delta t$) and one
+   has in principle to extrapolate to the limit $\delta t \rightarrow 0$. This amounts to fitting 
+   the energy computed for multiple values of $\delta t$.
+   - The accept/reject step (steps 2-5 in the algorithm) is not in principle needed for the correctness of 
+   the DMC algorithm. However, its use reduces si
+   
+   
+   
+
+
+   
    The wave function becomes
 
    \[
@@ -2356,7 +2389,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 from hydrogen  import *
 from qmc_stats import *
 
-def MonteCarlo(a, nmax, dt, tau, Eref):
+def MonteCarlo(a, nmax, dt, Eref):
     # TODO
 
 # Run simulation
@@ -2365,7 +2398,7 @@ nmax  = 100000
 dt    = 0.01
 E_ref = -0.5
 
-X0 = [ MonteCarlo(a, nmax, dt, tau, E_ref) for i in range(30)]
+X0 = [ MonteCarlo(a, nmax, dt, E_ref) for i in range(30)]
 
 # Energy
 X = [ x for (x, _) in X0 ]
