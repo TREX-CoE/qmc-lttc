@@ -75,9 +75,9 @@
 
   \begin{eqnarray*}
   E & = & \frac{\langle \Psi| \hat{H} | \Psi\rangle}{\langle \Psi |\Psi \rangle} 
-      =   \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} \\
-    & = & \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}} 
-      =   \frac{\int \left[\Psi(\mathbf{r})\right]^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}  
+      =   \frac{\int \Psi(\mathbf{r})\, \hat{H} \Psi(\mathbf{r})\, d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}} \\
+    & = & \frac{\int |\Psi(\mathbf{r})|^2\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}} 
+      =   \frac{\int |\Psi(\mathbf{r})|^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}}  
   \end{eqnarray*}
    
   For few dimensions, one can easily compute $E$ by evaluating the integrals on a grid but, for a high number of dimensions, one can resort to Monte Carlo techniques to compute $E$.
@@ -93,17 +93,17 @@
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
 
   Similarly, we can view the the energy of a system, $E$, as the expected value of the local energy with respect to 
-  a probability density $P(\mathbf{r}}$ defined in 3$N$ dimensions:
+  a probability density $P(\mathbf{r})$ defined in 3$N$ dimensions:
   
-  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r}} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
+  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
   
   where the probability density is given by the square of the wave function:
   
-  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
+  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2)}{\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
   
   If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
   
-  $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i} \,.
+  $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i) \,. $$
   
 * Numerical evaluation of the energy of the hydrogen atom
 
@@ -399,7 +399,7 @@ end function e_loc
   -\frac{1}{2} a^2 + \frac{a-1}{\mathbf{|r|}} 
   \end{eqnarray*}
 
-  $a=1$ cancels the $1/|r|$ term, and makes the energy constant,
+  $a=1$ cancels the $1/|r|$ term, and makes the energy constant and
   equal to -0.5 atomic units.
 
 ** Plot of the local energy along the $x$ axis
@@ -749,8 +749,8 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    energy associated with $\Psi$ around its average:
 
    $$
-   \sigma^2(E_L) = \frac{\int \left[\Psi(\mathbf{r})\right]^2\, \left[
-   E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}
+   \sigma^2(E_L) = \frac{\int |\Psi(\mathbf{r})|^2\, \left[
+   E_L(\mathbf{r}) - E \right]^2 \, d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}}
    $$
    which can be simplified as
    
@@ -1093,7 +1093,7 @@ end subroutine ave_error
    Consider again the expression of the energy
    
    \begin{eqnarray*}
-   E & = & \frac{\int E_L(\mathbf{r})\left[\Psi(\mathbf{r})\right]^2\,d\mathbf{r}}{\int \left[\Psi(\mathbf{r}) \right]^2 d\mathbf{r}}\,. 
+   E & = & \frac{\int E_L(\mathbf{r})|\Psi(\mathbf{r})|^2\,d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}}\,. 
    \end{eqnarray*}
    
    Clearly, the square of the wave function is a good choice of probability density to sample but we will start with something simpler and rewrite the energy as 
@@ -1315,7 +1315,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    We will now use the square of the wave function to sample random
    points distributed with the probability density
    \[
-   P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2){\int \left |\Psi(\mathbf{r})|^2 d\mathbf{r}}
+   P(\mathbf{r}) = \frac{|Psi(\mathbf{r})|^2)}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,.
    \]
 
    The expression of the average energy is now simplified as the average of
@@ -1323,16 +1323,16 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    sampling:
 
    $$
-   E \approx \frac{1}{N_{\rm MC}}\sum_{i=1}^{N_{\rm MC} E_L(\mathbf{r}_i)
+   E \approx \frac{1}{N_{\rm MC}}\sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i)\,.
    $$
 
    To sample a chosen probability density, an efficient method is the 
    [[https://en.wikipedia.org/wiki/Metropolis%E2%80%93Hastings_algorithm][Metropolis-Hastings sampling algorithm]]. Starting from a random
    initial position $\mathbf{r}_0$, we will realize a random walk:
    
-   $$ \mathbf{r}_0 \rightarrow \mathbf{r}_1 \rightarrow \mathbf{r}_2 \ldots \mathbf{r}_{N_{\rm MC}}\,, $$
+   $$ \mathbf{r}_0 \rightarrow \mathbf{r}_1 \rightarrow \mathbf{r}_2 \ldots \rightarrow \mathbf{r}_{N_{\rm MC}}\,, $$
    
-   following the following algorithm.
+   according to the following algorithm.
    
    At every step, we propose a new move according to a transition probability $T(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1})$ of our choice.
    
@@ -1353,13 +1353,13 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    probability
    
    $$
-   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
+   A(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{T(\mathbf{r}_{n},\mathbf{r}_{n+1}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n+1},\mathbf{r}_n)P(\mathbf{r}_{n})}\right)\,,
    $$
    
    which, for our choice of transition probability, becomes
    
    $$
-   A{\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}
+   A(\mathbf{r}_{n}\rightarrow\mathbf{r}_{n+1}) = \min\left(1,\frac{P(\mathbf{r}_{n+1})}{P(\mathbf{r}_{n})}\right)= \min\left(1,\frac{\Psi(\mathbf{r}_{n+1})^2}{\Psi(\mathbf{r}_{n})^2}\right)\,.
    $$
    
    Explain why the transition probability cancels out in the expression of $A$. Also note that we do not need to compute the norm of the wave function!
@@ -1734,13 +1734,13 @@ end subroutine random_gauss
    \frac{\nabla [ \Psi^2 ]}{\Psi^2} = 2 \frac{\nabla \Psi}{\Psi}\,,
    \]
     
-   and add the so-called drift vector, so that the numerical scheme becomes a 
+   and add the so-called drift vector, $\frac{\nabla \Psi}{\Psi}$, so that the numerical scheme becomes a 
    drifted diffusion with transition probability:
    
     \[
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = 
    \frac{1}{(2\pi\,\delta t)^{3/2}} \exp \left[ - \frac{\left(
-   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \frac{\nabla
+   \mathbf{r}_{n+1} - \mathbf{r}_{n} - \delta t\frac{\nabla
    \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
    \]
 
