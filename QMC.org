@@ -2108,6 +2108,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_T) \psi(\mathbf{r}, \tau) 
     \]
 
+# TODO Should we put 't' after i ?
     where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,)$
     and
     
