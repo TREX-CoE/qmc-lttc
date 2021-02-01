@@ -2254,7 +2254,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 from hydrogen  import *
 from qmc_stats import *
 
-def MonteCarlo(a, nmax, dt, Eref):
+def MonteCarlo(a, nmax, dt, tau, Eref):
     # TODO
 
 # Run simulation
@@ -2263,7 +2263,7 @@ nmax  = 100000
 dt    = 0.01
 E_ref = -0.5
 
-X0 = [ MonteCarlo(a, nmax, dt, E_ref) for i in range(30)]
+X0 = [ MonteCarlo(a, nmax, dt, tau, E_ref) for i in range(30)]
 
 # Energy
 X = [ x for (x, _) in X0 ]
