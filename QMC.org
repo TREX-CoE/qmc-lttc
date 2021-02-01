@@ -1397,8 +1397,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    step such that the acceptance rate is close to 0.5 is a good 
    compromise for the current problem.
    
-   NOTE: below, we use the symbol dt for dL for reasons which will
-   become clear later.
+   NOTE: below, we use the symbol dt to denote dL since we will use
+   the same variable later on to store a time step.
    
    
 *** Exercise
@@ -2168,10 +2168,19 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     system by simulating the Schrödinger equation in imaginary time, by
     the combination of a diffusion process and a branching process. 
     
-    We note here that the ground-state wave function of a Fermionic system is
-    antisymmetric and changes sign. 
+    We note that the ground-state wave function of a Fermionic system is
+    antisymmetric and changes sign. Therefore, it is interpretation as a probability 
+    distribution is somewhat problematic. In fact, mathematically, since
+    the Bosonic ground state is lower in energy than the Fermionic one, for
+    large $\tau$, the system will evolve towards the Bosonic solution.
     
-    I AM HERE
+    For the systems you will study this is not an issue:
+    
+    - Hydrogen atom: You only have one electron! 
+    - Two-electron system ($H_2$ or He): The ground-wave function is antisymmetric
+    in the spin variables but symmetric in the space ones.
+    
+    Therefore, in both cases, you are dealing with a "Bosonic" ground state.
     
 ** Importance sampling
    
@@ -2205,18 +2214,45 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   changing the number of particles according to $\exp\left[ -\delta t\,
   \left(E_L(\mathbf{r}) - E_T\right)\right]$
   where $E_T$ is the constant we had introduced above, which is adjusted to
-  the running average energy and is introduced to keep the number of particles 
+  the running average energy to keep the number of particles 
   reasonably constant.
 
   This equation generates the /N/-electron density $\Pi$, which is the
-  product of the ground state with the trial wave function. It
-  introduces the constraint that $\Pi(\mathbf{r},\tau)=0$ where
-  $\Psi_T(\mathbf{r})=0$. In the few cases where the wave function has no nodes,
-  such as in the hydrogen atom or the H_2 molecule, this
-  constraint is harmless and we can obtain the exact energy. But for
-  systems where the wave function has nodes, this scheme introduces an
-  error known as the /fixed node error/.
+  product of the ground state with the trial wave function. You may then ask: how
+  can we compute the total energy of the system?
+  
+  To this aim, we use the mixed estimator of the energy:
+  
+  \begin{eqnarray*}
+   E(\tau)  &=&  \frac{\langle \psi(tau) | \hat{H} | \Psi_T \rangle}{\frac{\langle \psi(tau) | \Psi_T \rangle}\\
+            &=& \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
+                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \\
+            &=&  \int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
+                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
+   \end{eqnarray*}
+  
+   Since, for large $\tau$, we have that 
+   
+   \[ 
+   \Pi(\mathbf{r},\tau) =\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \rightarrow \Phi_0(\mathbf{r}) \Psi_T(\mathbf{r})\,,
+   \]
+   
+   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an eigenstate of the Hamiltonian, we obtain
 
+   \[
+   E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
+            {\langle  \psi_\tau | \Psi_T \rangle}  
+     = \frac{\langle \Psi_T | \hat{H} | \psi_\tau \rangle}
+            {\langle  \Psi_T | \psi_\tau \rangle}  
+     \rightarrow E_0 \frac{\langle  \Psi_T | \psi_\tau \rangle}  
+            {\langle  \Psi_T | \psi_\tau \rangle} 
+     = E_0 
+   \]
+
+   Therefore, we can compute the energy within DMC by generating the
+   density $\Pi$ with random walks, and simply averaging the local
+   energies computed with the trial wave function.
+  
 *** Appendix : Details of the Derivation
     
   \[
@@ -2262,52 +2298,12 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   \nabla \left[ \Pi(\mathbf{r},\tau) \frac{\nabla \Psi_T(\mathbf{r})}{\Psi_T(\mathbf{r})}
   \right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
   \]
-
-  
-** Fixed-node DMC energy
-
-   Now that we have a process to sample $\Pi(\mathbf{r},\tau) =
-   \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r})$, we can compute the exact
-   energy of the system, within the fixed-node constraint, as:
-
-   \[
-   E = \lim_{\tau \to \infty} \frac{\int \Pi(\mathbf{r},\tau) E_L(\mathbf{r}) d\mathbf{r}}
-            {\int \Pi(\mathbf{r},\tau) d\mathbf{r}} = \lim_{\tau \to
-   \infty} E(\tau).
-   \]
-   
-
-   \[
-   E(\tau)   =   \frac{\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
-                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
-       =   \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
-                {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} 
-       =   \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
-                {\langle  \psi_\tau | \Psi_T \rangle} 
-   \]
-
-   As $\hat{H}$ is Hermitian, 
-
-   \[
-   E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
-            {\langle  \psi_\tau | \Psi_T \rangle}  
-     = \frac{\langle \Psi_T | \hat{H} | \psi_\tau \rangle}
-            {\langle  \Psi_T | \psi_\tau \rangle}  
-     = E[\psi_\tau] \frac{\langle  \Psi_T | \psi_\tau \rangle}  
-            {\langle  \Psi_T | \psi_\tau \rangle} 
-     = E[\psi_\tau] 
-   \]
-
-   So computing the energy within DMC consists in generating the
-   density $\Pi$ with random walks, and simply averaging the local
-   energies computed with the trial wave function.
    
 ** Pure Diffusion Monte Carlo (PDMC)
 
    Instead of having a variable number of particles to simulate the
-   branching process, one can choose to sample $[\Psi_T(\mathbf{r})]^2$ instead of
-   $\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r})$, and consider the term
-   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_{\text{ref}}  \right)$ as a
+   branching process, one can consider the term
+   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_T}  \right)$ as a
    cumulative product of weights:
 
    \[
