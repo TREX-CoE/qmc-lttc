@@ -2222,7 +2222,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   To this aim, we use the mixed estimator of the energy:
   
   \begin{eqnarray*}
-   E(\tau)  &=&  \frac{\langle \psi(tau) | \hat{H} | \Psi_T \rangle}{\langle \psi(tau) | \Psi_T \rangle}\\
+   E(\tau)  &=&  \frac{\langle \psi(\tau) | \hat{H} | \Psi_T \rangle}{\langle \psi(\tau) | \Psi_T \rangle}\\
             &=& \frac{\int \psi(\mathbf{r},\tau) \hat{H} \Psi_T(\mathbf{r}) d\mathbf{r}}
                 {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \\
             &=& \frac{\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
@@ -2332,19 +2332,19 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    
    - You estimate the energy as 
    
-   \begin{eqnarray*}
-   E = \frac{\sum_{k=1}{N_{\rm MC}} E_L(\mathbf{r}_k) W(\mathbf{r}_k, k\delta t)}{\sum_{k=1}{N_{\rm MC}} W(\mathbf{r}_k, k\delta t)}
-   \end{eqnarray*}
+     \begin{eqnarray*}
+     E = \frac{\sum_{k=1}^{N_{\rm MC}} E_L(\mathbf{r}_k) W(\mathbf{r}_k, k\delta t)}{\sum_{k=1}^{N_{\rm MC}} W(\mathbf{r}_k, k\delta t)}
+     \end{eqnarray*}
    
    - The result will be affected by a time-step error (the finite size of $\delta t$) and one
-   has in principle to extrapolate to the limit $\delta t \rightarrow 0$. This amounts to fitting 
-   the energy computed for multiple values of $\delta t$. 
+     has in principle to extrapolate to the limit $\delta t \rightarrow 0$. This amounts to fitting 
+     the energy computed for multiple values of $\delta t$. 
    
-   Here, you will be using a small enough time-step and you should not worry about the extrapolation.
+     Here, you will be using a small enough time-step and you should not worry about the extrapolation.
    - The accept/reject step (steps 2-5 in the algorithm) is in principle not needed for the correctness of 
-   the DMC algorithm. However, its use reduces significantly the time-step error.
+     the DMC algorithm. However, its use reduces significantly the time-step error.
    
-   PDMC algorithm is less stable than the branching algorithm: it 
+   The PDMC algorithm is less stable than the branching algorithm: it 
    requires to have a value of $E_\text{ref}$ which is close to the
    fixed-node energy, and a good trial wave function. Its big
    advantage is that it is very easy to program starting from a VMC
