@@ -99,7 +99,7 @@
   
   where the probability density is given by the square of the wave function:
   
-  $$ P(\mathbf{r}) = \frac{|Psi(\mathbf{r}|^2)}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
+  $$ P(\mathbf{r}) = \frac{|\Psi(\mathbf{r})|^2}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
   
   If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
   
@@ -1397,7 +1397,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    step such that the acceptance rate is close to 0.5 is a good 
    compromise for the current problem.
    
-   NOTE: below, we use the symbol dt to denote dL since we will use
+   NOTE: below, we use the symbol $\delta t$ to denote $\delta L$ since we will use
    the same variable later on to store a time step.
    
    
@@ -1762,8 +1762,7 @@ end subroutine random_gauss
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
       
       Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
-   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
+   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
    3) Draw a uniform random number $v \in [0,1]$
    4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
@@ -2086,7 +2085,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     i\frac{\partial \Psi(\mathbf{r},t)}{\partial t} = (\hat{H} -E_{\rm ref}) \Psi(\mathbf{r},t)\,.
     \]
 
-    where we introduced a shift in the energy, $E_{\rm ref}$, which will come useful below.
+    where we introduced a shift in the energy, $E_{\rm ref}$, for reasons which will become apparent below.
     
     We can expand a given starting wave function, $\Psi(\mathbf{r},0)$, in the basis of the eigenstates
     of the time-independent Hamiltonian, $\Phi_k$, with energies $E_k$:
@@ -2108,12 +2107,12 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     -\frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = (\hat{H} -E_{\rm ref}) \psi(\mathbf{r}, \tau) 
     \]
 
-    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,t)$
+    where $\psi(\mathbf{r},\tau) = \Psi(\mathbf{r},-i\,\tau)$
     and
     
     \begin{eqnarray*}
-    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -(E_k-E_{\rm ref})\, \tau) \phi_k(\mathbf{r})\\
-                          &=& \exp(-(E_0-E_{\rm ref})\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \phi_k(\mathbf{r})\,.
+    \psi(\mathbf{r},\tau) &=& \sum_k a_k \exp( -(E_k-E_{\rm ref})\, \tau) \Phi_k(\mathbf{r})\\
+                          &=& \exp(-(E_0-E_{\rm ref})\, \tau)\sum_k a_k \exp( -(E_k-E_0)\, \tau) \Phi_k(\mathbf{r})\,.
     \end{eqnarray*}
     
     For large positive values of $\tau$, $\psi$ is dominated by the
@@ -2164,8 +2163,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     can be simulated by creating or destroying particles over time (a
     so-called branching process).
 
-    /Diffusion Monte Carlo/ (DMC) consists in obtaining the ground state of a
-    system by simulating the Schrödinger equation in imaginary time, by
+    In /Diffusion Monte Carlo/ (DMC), one onbtains the ground state of a
+    system by simulating the Schrödinger equation in imaginary time via 
     the combination of a diffusion process and a branching process. 
     
     We note that the ground-state wave function of a Fermionic system is
@@ -2184,7 +2183,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 ** Importance sampling
    
     In a molecular system, the potential is far from being constant
-    and diverges at inter-particle coalescence points. Hence, when the
+    and, in fact, diverges at the inter-particle coalescence points. Hence, when the
     rate equation is simulated, it results in very large fluctuations
     in the numbers of particles, making the calculations impossible in
     practice.
@@ -2209,7 +2208,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   The new "kinetic energy" can be simulated by the drift-diffusion
   scheme presented in the previous section (VMC).
   The new "potential" is the local energy, which has smaller fluctuations
-  when $\Psi_T$ gets closer to the exact wave function. It can be simulated by
+  when $\Psi_T$ gets closer to the exact wave function. This term can be simulated by
   changing the number of particles according to $\exp\left[ -\delta t\,
   \left(E_L(\mathbf{r}) - E_{\rm ref}\right)\right]$
   where $E_{\rm ref}$ is the constant we had introduced above, which is adjusted to
@@ -2321,8 +2320,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
       
       Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
-   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}
-   {T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
+   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
    3) Draw a uniform random number $v \in [0,1]$
    4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
@@ -2335,36 +2333,18 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    - You estimate the energy as 
    
    \begin{eqnarray*}
-   E = \frac{\sum_{i=1}{N_{\rm MC}} E_L(\mathbf{r}_i) W(\mathbf{r}_i, i\delta t)}{\sum_{i=1}{N_{\rm MC}} W(\mathbf{r}_i, i\delta t)}
-   \end{eqnarray}
+   E = \frac{\sum_{k=1}{N_{\rm MC}} E_L(\mathbf{r}_k) W(\mathbf{r}_k, k\delta t)}{\sum_{k=1}{N_{\rm MC}} W(\mathbf{r}_k, k\delta t)}
+   \end{eqnarray*}
    
    - The result will be affected by a time-step error (the finite size of $\delta t$) and one
    has in principle to extrapolate to the limit $\delta t \rightarrow 0$. This amounts to fitting 
-   the energy computed for multiple values of $\delta t$.
-   - The accept/reject step (steps 2-5 in the algorithm) is not in principle needed for the correctness of 
-   the DMC algorithm. However, its use reduces si
+   the energy computed for multiple values of $\delta t$. 
    
+   Here, you will be using a small enough time-step and you should not worry about the extrapolation.
+   - The accept/reject step (steps 2-5 in the algorithm) is in principle not needed for the correctness of 
+   the DMC algorithm. However, its use reduces significantly the time-step error.
    
-   
-
-
-   
-   The wave function becomes
-
-   \[
-   \psi(\mathbf{r},\tau) = \Psi_T(\mathbf{r}) W(\mathbf{r},\tau)
-   \]
-   
-   and the expression of the fixed-node DMC energy is
-
-   \begin{eqnarray*}
-   E(\tau) & = & \frac{\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) E_L(\mathbf{r}) d\mathbf{r}}
-                      {\int \psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) d\mathbf{r}} \\
-           & = & \frac{\int \left[ \Psi_T(\mathbf{r}) \right]^2 W(\mathbf{r},\tau) E_L(\mathbf{r}) d\mathbf{r}}
-                      {\int \left[ \Psi_T(\mathbf{r}) \right]^2 W(\mathbf{r},\tau) d\mathbf{r}} \\
-   \end{eqnarray*}
-   
-   This algorithm is less stable than the branching algorithm: it 
+   PDMC algorithm is less stable than the branching algorithm: it 
    requires to have a value of $E_\text{ref}$ which is close to the
    fixed-node energy, and a good trial wave function. Its big
    advantage is that it is very easy to program starting from a VMC
