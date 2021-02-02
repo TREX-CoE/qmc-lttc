@@ -2763,7 +2763,7 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 
   Change your PDMC code for one of the following:
   - the Helium atom, or
-  - the H$_2$ molecule at $R$=1.401 bohr.
+  - the H_2 molecule at $R$ =1.401 bohr.
     
   And compute the ground state energy.
   
