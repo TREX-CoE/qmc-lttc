@@ -48,7 +48,7 @@
   we use here to estimate the exact energy of the hydrogen atom and of the H_2 molecule, 
   starting from an approximate wave function. 
 
-  Code examples will be given in Python and Fortran. You can use
+  Code examples will be given in Python3 and Fortran. You can use
   whatever language you prefer to write the programs.
 
   We consider the stationary solution of the Schrödinger equation, so
@@ -164,6 +164,7 @@
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
+#!/usr/bin/env python3
 import numpy as np
 
 def potential(r):
@@ -184,6 +185,7 @@ end function potential
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
+#!/usr/bin/env python3
 import numpy as np
 
 def potential(r):
@@ -263,7 +265,7 @@ end function psi
      
     We differentiate $\Psi$ with respect to $x$:
      
-    \[\Psi(\mathbf{r})  =  \exp(-a\,|\mathbf{r}|) \]
+    \[ \Psi(\mathbf{r})  =  \exp(-a\,|\mathbf{r}|) \]
     \[\frac{\partial \Psi}{\partial x}
       = \frac{\partial \Psi}{\partial |\mathbf{r}|} \frac{\partial |\mathbf{r}|}{\partial x}   
       =  - \frac{a\,x}{|\mathbf{r}|} \Psi(\mathbf{r}) \]
@@ -434,6 +436,8 @@ end function e_loc
 
    In Python, you should put at the beginning of the file
    #+BEGIN_SRC python :results none :tangle none
+#!/usr/bin/env python3
+
 from hydrogen import e_loc
    #+END_SRC
    to be able to use the ~e_loc~ function of the ~hydrogen.py~ file.
@@ -461,6 +465,8 @@ gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
+#!/usr/bin/env python3
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -519,6 +525,8 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
+#!/usr/bin/env python3
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -605,7 +613,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      
    $$
    \langle E \rangle_{\Psi^2} \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \left[\Psi(\mathbf{r}_i)\right]^2 \delta \mathbf{r}
+   w_i = \left|\Psi(\mathbf{r}_i)\right|^2 \delta \mathbf{r}
    $$
      
    #+begin_note
@@ -624,6 +632,8 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
+#!/usr/bin/env python3
+
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -673,6 +683,8 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none :exports both
+#!/usr/bin/env python3
+
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -827,6 +839,8 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
      
     *Python*
      #+begin_src python :results none :tangle none
+#!/usr/bin/env python3
+
 import numpy as np from hydrogen import e_loc, psi
 
 interval = np.linspace(-5,5,num=50)
@@ -880,6 +894,8 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none :exports both
+#!/usr/bin/env python3
+
 import numpy as np
 from hydrogen import e_loc, psi
 
@@ -1010,7 +1026,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
   instead of computing the average energy as a numerical integration
   on a grid, it is usually more efficient to use Monte Carlo sampling.
 
-  Moreover, Monte Carlo sampling will alow us to remove the bias due
+  Moreover, Monte Carlo sampling will allow us to remove the bias due
   to the discretization of space, and compute a statistical confidence
   interval.
 
@@ -1051,6 +1067,8 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
+#!/usr/bin/env python3
+
 from math import sqrt
 def ave_error(arr):
     #TODO
@@ -1073,6 +1091,8 @@ end subroutine ave_error
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none :exports code
+#!/usr/bin/env python3
+
 from math import sqrt
 def ave_error(arr):
     M = len(arr)
@@ -1149,9 +1169,9 @@ end subroutine ave_error
 
    - Draw a random point $\mathbf{r}_i$ in the box $(-5,-5,-5) \le
      (x,y,z) \le (5,5,5)$
-   - Compute $[\Psi(\mathbf{r}_i)]^2$ and accumulate the result in a
+   - Compute $|\Psi(\mathbf{r}_i)|^2$ and accumulate the result in a
      variable =normalization=
-   - Compute $[\Psi(\mathbf{r}_i)]^2 \times E_L(\mathbf{r}_i)$, and accumulate the
+   - Compute $|\Psi(\mathbf{r}_i)|^2 \times E_L(\mathbf{r}_i)$, and accumulate the
      result in a variable =energy=
 
    Once all the iterations have been computed, the run returns the average energy
@@ -1178,6 +1198,8 @@ end subroutine ave_error
      #+end_note
 
      #+BEGIN_SRC python :tangle none :exports code
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1245,6 +1267,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1405,7 +1429,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    
    1) Compute $\Psi$ at a new position $\mathbf{r'} = \mathbf{r}_n +
       \delta L\, \mathbf{u}$
-   2) Compute the ratio $A = \frac{\left[\Psi(\mathbf{r'})\right]^2}{\left[\Psi(\mathbf{r}_{n})\right]^2}$
+   2) Compute the ratio $A = \frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}$
    3) Draw a uniform random number $v \in [0,1]$
    4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
@@ -1452,6 +1476,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 
     *Python*
      #+BEGIN_SRC python :results output :tangle none
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1533,6 +1559,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1862,6 +1890,8 @@ end subroutine drift
    
     *Python*
      #+BEGIN_SRC python :results output :tangle none
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -1939,6 +1969,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 **** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -2485,6 +2517,8 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 
      *Python*
      #+BEGIN_SRC python :results output
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -2730,7 +2764,9 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
    Now the sampling probability can be inserted into the equation of the energy:
    
    \[
-   E = \frac{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r})\right]^2}{P(\mathbf{r})}\, \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left[\Psi(\mathbf{r}) \right]^2}{P(\mathbf{r})} d\mathbf{r}}
+   E = \frac{\int P(\mathbf{r})
+   \frac{\left|\Psi(\mathbf{r})\right|^2}{P(\mathbf{r})}\,
+   \frac{\hat{H} \Psi(\mathbf{r})}{\Psi(\mathbf{r})}\,d\mathbf{r}}{\int P(\mathbf{r}) \frac{\left|\Psi(\mathbf{r}) \right|^2}{P(\mathbf{r})} d\mathbf{r}}
    \]
 
    with the Gaussian probability
@@ -2744,7 +2780,7 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 
    $$
    E \approx \frac{\sum_i w_i E_L(\mathbf{r}_i)}{\sum_i w_i}, \;\;
-   w_i = \frac{\left[\Psi(\mathbf{r}_i)\right]^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
+   w_i = \frac{\left|\Psi(\mathbf{r}_i)\right|^2}{P(\mathbf{r}_i)} \delta \mathbf{r}
    $$
 
    
@@ -2758,6 +2794,8 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
 
 **** Python
      #+BEGIN_SRC python :results output
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -2856,13 +2894,12 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
 
     To generate the probability density $\Psi^2$, we consider a
     diffusion process characterized by a time-dependent density
-    $[\Psi(\mathbf{r},t)]^2$, which obeys the Fokker-Planck equation:
+    $|\Psi(\mathbf{r},t)|^2$, which obeys the Fokker-Planck equation:
 
     \[
     \frac{\partial \Psi^2}{\partial t} = \sum_i D
     \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-    [\Psi(\mathbf{r},t)]^2.
+    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right) |\Psi(\mathbf{r},t)|^2.
     \]
    
     $D$ is the diffusion constant and $F_i$ is the i-th component of a
@@ -2872,23 +2909,21 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
     \begin{eqnarray*}
     0 & = & \sum_i D
     \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right)
-    [\Psi(\mathbf{r})]^2 \\
+    \frac{\partial}{\partial \mathbf{r}_i} - F_i(\mathbf{r}) \right) |\Psi(\mathbf{r})|^2 \\
     0 & = & \sum_i D
     \frac{\partial}{\partial \mathbf{r}_i} \left(
-    \frac{\partial [\Psi(\mathbf{r})]^2}{\partial \mathbf{r}_i} -
-    F_i(\mathbf{r})\,[\Psi(\mathbf{r})]^2 \right) \\
+    \frac{\partial |\Psi(\mathbf{r})|^2}{\partial \mathbf{r}_i} -
+    F_i(\mathbf{r})\,|\Psi(\mathbf{r})|^2 \right) \\
     0 & = &
     \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} -
-    \frac{\partial   F_i   }{\partial \mathbf{r}_i}[\Psi(\mathbf{r})]^2  - 
+    \frac{\partial   F_i   }{\partial \mathbf{r}_i}|\Psi(\mathbf{r})|^2  - 
     \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
     \end{eqnarray*}
 
     we search for a drift function which satisfies 
 
     \[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} = |\Psi(\mathbf{r})|^2 \frac{\partial   F_i   }{\partial \mathbf{r}_i} + 
     \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} F_i(\mathbf{r})
     \]
 
@@ -2899,19 +2934,19 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
     \]
 
     \[
-    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} =
-    [\Psi(\mathbf{r})]^2 \frac{\partial
-    g(\mathbf{r})}{\partial \mathbf{r}_i}\frac{\partial \Psi^2}{\partial \mathbf{r}_i} + 
-    [\Psi(\mathbf{r})]^2 g(\mathbf{r}) \frac{\partial^2
-    \Psi^2}{\partial \mathbf{r}_i^2} + 
-    \frac{\partial   \Psi^2}{\partial \mathbf{r}_i} 
-    g(\mathbf{r}) \frac{\partial \Psi^2}{\partial \mathbf{r}_i}
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2}
+    = |\Psi(\mathbf{r})|^2 \frac{\partial g(\mathbf{r})}{\partial
+    \mathbf{r}_i}\frac{\partial \Psi^2}{\partial
+    \mathbf{r}_i} + |\Psi(\mathbf{r})|^2 g(\mathbf{r})
+    \frac{\partial^2 \Psi^2}{\partial \mathbf{r}_i^2} + \frac{\partial
+    \Psi^2}{\partial \mathbf{r}_i} g(\mathbf{r}) \frac{\partial
+    \Psi^2}{\partial \mathbf{r}_i}
     \]
    
     $g = 1 / \Psi^2$ satisfies this equation, so 
 
     \[
-    F(\mathbf{r}) = \frac{\nabla [\Psi(\mathbf{r})]^2}{[\Psi(\mathbf{r})]^2} = 2 \frac{\nabla
+    F(\mathbf{r}) = \frac{\nabla |\Psi(\mathbf{r})|^2}{|\Psi(\mathbf{r})|^2} = 2 \frac{\nabla
     \Psi(\mathbf{r})}{\Psi(\mathbf{r})} = 2 \nabla \left( \log \Psi(\mathbf{r}) \right)
     \]
 
@@ -2945,6 +2980,8 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_gaussian.f90 -o qmc_gaussian
    
       *Python*
       #+BEGIN_SRC python :results output
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -3055,4 +3092,5 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
  | <2021-02-04 Thu 11:30-12:15> |     2.3 |
  | <2021-02-04 Thu 12:15-12:30> |     2.4 |
  |------------------------------+---------|
- |                              |         |
+ | <2021-02-04 Thu 14:00-14:10> |     3.1 |
+ |------------------------------+---------|
