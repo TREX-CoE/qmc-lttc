@@ -2392,18 +2392,19 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    where $\mathbf{r}_i$ are the coordinates along the trajectory and we introduced a time-step $\delta t$.
    
    The algorithm can be rather easily built on top of your VMC code:
-   
-   1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+
+   0) Start with $W=1$
+   1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
+   2) Compute the weight $w(\mathbf{r}_n)$
+   3) Update $W$
+   4) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
-      
-      Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
-   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
-   3) Draw a uniform random number $v \in [0,1]$
-   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
-   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
-   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
-   7) compute the weight $w(\mathbf{r}_i)$
-   8) update $W$
+   5) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
+   6) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
+   7) Draw a uniform random number $v \in [0,1]$
+   8) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   9) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+
    
    Some comments are needed:
    
