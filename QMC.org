@@ -2235,7 +2235,11 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     where $\chi$ is a Gaussian random variable, and the potential term 
     can be simulated by creating or destroying particles over time (a
     so-called branching process) or by simply considering it as a
-    cumulative multiplicative weight along the diffusion trajectory.
+    cumulative multiplicative weight along the diffusion trajectory:
+
+   \[
+   \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right)
+   \]
 
     
     We note that the ground-state wave function of a Fermionic system is
