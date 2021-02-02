@@ -45,7 +45,7 @@ def MonteCarlo(a,nmax,dt):
 # Run simulation
 a    = 1.2
 nmax = 100000
-dt   = 1.3
+dt   = 1.0
 
 X0 = [ MonteCarlo(a,nmax,dt) for i in range(30)]
 

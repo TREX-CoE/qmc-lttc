@@ -1424,13 +1424,13 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    
    The algorithm is summarized as follows:
    
-   1) Compute $\Psi$ at a new position $\mathbf{r'} = \mathbf{r}_n +
-      \delta L\, \mathbf{u}$
-   2) Compute the ratio $A = \frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}$
-   3) Draw a uniform random number $v \in [0,1]$
-   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
-   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
-   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
+   1) Evaluate the local energy at $\mathbf{r}_n$ and accumulate it
+   2) Compute a new position $\mathbf{r'} = \mathbf{r}_n + \delta L\, \mathbf{u}$
+   3) Evaluate $\Psi(\mathbf{r}')$ at the new position
+   4) Compute the ratio $A = \frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}$
+   5) Draw a uniform random number $v \in [0,1]$
+   6) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   7) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
    
    #+begin_note
     A common error is to remove the rejected samples from the
@@ -1742,7 +1742,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
 
    Furthermore, to sample the density even better, we can "push" the electrons
    into in the regions of high probability, and "pull" them away from
-   the low-probability regions. This will ncrease the
+   the low-probability regions. This will increase the
    acceptance ratios and improve the sampling.
 
    To do this, we can use the gradient of the probability density
@@ -1761,7 +1761,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
    \Psi(\mathbf{r}_n)}{\Psi(\mathbf{r}_n)} \right)^2}{2\,\delta t} \right]\,.
    \]
 
-   The corrsponding move is proposed as
+   The corresponding move is proposed as
    
    \[
    \mathbf{r}_{n+1} = \mathbf{r}_{n} + \delta t\, \frac{\nabla
@@ -1775,15 +1775,14 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
    
    The algorithm of the previous exercise is only slighlty modified as:
    
-   1) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+   1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
+   2) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
-      
-      Evaluate $\Psi$ and $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$ at the new position
-   2) Compute the ratio $A = \frac{T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) P(\mathbf{r}_{n+1})}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) P(\mathbf{r}_{n})}$
-   3) Draw a uniform random number $v \in [0,1]$
-   4) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
-   5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
-   6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
+   3) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
+   4) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
+   5) Draw a uniform random number $v \in [0,1]$
+   6) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+   7) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
 
 *** Gaussian random number generator
    
@@ -1840,6 +1839,11 @@ end subroutine random_gauss
 
 *** Exercise 1
     
+     #+begin_exercise
+     If you use Fortran, copy/paste the ~random_gauss~ function in
+     a Fortran file.
+     #+end_exercise
+     
      #+begin_exercise
      Write a function to compute the drift vector $\frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})}$.
      #+end_exercise
@@ -2014,13 +2018,13 @@ def MonteCarlo(a,nmax,dt):
             d2_old  = d2_new
             psi_old = psi_new
 
-    return energy/nmax, accep_rate/nmax
+    return energy/nmax, N_accep/nmax
 
 
 # Run simulation
 a    = 1.2
 nmax = 100000
-dt   = 1.3
+dt   = 1.0
 
 X0 = [ MonteCarlo(a,nmax,dt) for i in range(30)]
 
@@ -2036,8 +2040,6 @@ print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
      #+RESULTS:
-     : E = -0.4951317910667116 +/- 0.00014045774335059988
-     : A = 0.7200673333333333 +/- 0.00045942791345632793
    
     *Fortran*
      #+BEGIN_SRC f90
@@ -2144,8 +2146,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.49497258331144794      +/-   1.0973395750688713E-004
-     :  A =   0.78839866666666658      +/-   3.2503783452043152E-004
+     :  E =  -0.47940635575542706      +/-   5.5613594433433764E-004
+     :  A =   0.62037333333333333      +/-   4.8970160591451110E-004
      
 * Diffusion Monte Carlo                                            :solution:
 
@@ -3099,4 +3101,5 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
  | <2021-02-04 Thu 14:00-14:10> |     3.1 |
  | <2021-02-04 Thu 14:10-14:30> |     3.2 |
  | <2021-02-04 Thu 14:30-15:30> |     3.3 |
+ | <2021-02-04 Thu 15:30-16:30> |     3.4 |
  |------------------------------+---------|
