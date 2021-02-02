@@ -2040,6 +2040,8 @@ print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
      #+RESULTS:
+     : E = -0.48034171558629885 +/- 0.0005286038561061781
+     : A = 0.6210380000000001 +/- 0.0005457375900937905
    
     *Fortran*
      #+BEGIN_SRC f90
@@ -2379,13 +2381,13 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_{\rm ref})  \right)$ as a
    cumulative product of weights:
 
-   \[
+   \begin{eqnarray*}
    W(\mathbf{r}_n, \tau)
-   = \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right)
-   \approx \prod_{i=1}^{n} \exp \left( -\delta t\,
+   & = & \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right) \\
+   & \approx &  \prod_{i=1}^{n} \exp \left( -\delta t\,
    (E_L(\mathbf{r}_i) - E_{\text{ref}}) \right) = 
    \prod_{i=1}^{n} w(\mathbf{r}_i)
-   \]
+   \end{eqnarray*}
 
    where $\mathbf{r}_i$ are the coordinates along the trajectory and we introduced a time-step $\delta t$.
    
