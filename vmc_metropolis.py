@@ -39,7 +39,7 @@ def MonteCarlo(a,nmax,dt):
             d2_old  = d2_new
             psi_old = psi_new
 
-    return energy/nmax, accep_rate/nmax
+    return energy/nmax, N_accep/nmax
 
 
 # Run simulation
