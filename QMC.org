@@ -1297,16 +1297,9 @@ print(f"E = {E} +/- {deltaE}")
      #+END_SRC
 
      #+RESULTS:
-     : E = -0.4773221805255284 +/- 0.0022489426510479975
+     : E = -0.48363807880008725 +/- 0.002330876047368999
 
     *Fortran*
-     #+begin_note
-     When running Monte Carlo calculations, the number of steps is
-     usually very large. We expect =nmax= to be possibly larger than 2
-     billion, so we use 8-byte integers (=integer*8=) to represent it, as
-     well as the index of the current step.
-     #+end_note
-
      #+BEGIN_SRC f90 :exports code
 subroutine uniform_montecarlo(a,nmax,energy)
   implicit none
@@ -1703,58 +1696,6 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
      :  E =  -0.47948142754168033      +/-   4.8410177863919307E-004
      :  A =   0.50762633333333318      +/-   3.4601756760043725E-004
 
-** Gaussian random number generator
-   
-   To obtain Gaussian-distributed random numbers, you can apply the
-   [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
-
-   \begin{eqnarray*}
-   z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
-   z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
-   \end{eqnarray*}
-
-   Below is a Fortran implementation returning a Gaussian-distributed
-   n-dimensional vector $\mathbf{z}$. This will be useful for the
-   following sections.
-
-   *Fortran*
-   #+BEGIN_SRC f90 :tangle qmc_stats.f90
-subroutine random_gauss(z,n)
-  implicit none
-  integer, intent(in) :: n
-  double precision, intent(out) :: z(n)
-  double precision :: u(n+1)
-  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
-  integer :: i
-
-  call random_number(u)
-
-  if (iand(n,1) == 0) then
-     ! n is even
-     do i=1,n,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-
-  else
-     ! n is odd
-     do i=1,n-1,2
-        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
-        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
-        z(i)   = z(i) * dcos( two_pi*u(i+1) )
-     end do
-
-     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
-     z(n)   = z(n) * dcos( two_pi*u(n+1) )
-
-  end if
-
-end subroutine random_gauss
-   #+END_SRC
-
-   In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
-   
 ** Generalized Metropolis algorithm
    :PROPERTIES:
    :header-args:python: :tangle vmc_metropolis.py
@@ -1782,7 +1723,7 @@ end subroutine random_gauss
 
    \[
    T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1})  = T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n})
-   \text{constant}\,,
+   = \text{constant}\,,
    \]
 
    so the expression of $A$ was simplified to the ratios of the squared
@@ -1844,6 +1785,58 @@ end subroutine random_gauss
    5) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
    6) evaluate the local energy at $\mathbf{r}_{n+1}$ 
 
+*** Gaussian random number generator
+   
+    To obtain Gaussian-distributed random numbers, you can apply the
+    [[https://en.wikipedia.org/wiki/Box%E2%80%93Muller_transform][Box Muller transform]] to uniform random numbers:
+
+    \begin{eqnarray*}
+    z_1 &=& \sqrt{-2 \ln u_1} \cos(2 \pi u_2) \\
+    z_2 &=& \sqrt{-2 \ln u_1} \sin(2 \pi u_2) 
+    \end{eqnarray*}
+
+    Below is a Fortran implementation returning a Gaussian-distributed
+    n-dimensional vector $\mathbf{z}$. This will be useful for the
+    following sections.
+
+    *Fortran*
+    #+BEGIN_SRC f90 :tangle qmc_stats.f90
+subroutine random_gauss(z,n)
+  implicit none
+  integer, intent(in) :: n
+  double precision, intent(out) :: z(n)
+  double precision :: u(n+1)
+  double precision, parameter :: two_pi = 2.d0*dacos(-1.d0)
+  integer :: i
+
+  call random_number(u)
+
+  if (iand(n,1) == 0) then
+     ! n is even
+     do i=1,n,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+
+  else
+     ! n is odd
+     do i=1,n-1,2
+        z(i)   = dsqrt(-2.d0*dlog(u(i))) 
+        z(i+1) = z(i) * dsin( two_pi*u(i+1) )
+        z(i)   = z(i) * dcos( two_pi*u(i+1) )
+     end do
+
+     z(n)   = dsqrt(-2.d0*dlog(u(n))) 
+     z(n)   = z(n) * dcos( two_pi*u(n+1) )
+
+  end if
+
+end subroutine random_gauss
+    #+END_SRC
+
+    In Python, you can use the [[https://numpy.org/doc/stable/reference/random/generated/numpy.random.normal.html][~random.normal~]] function of Numpy.
+   
 
 *** Exercise 1
     
