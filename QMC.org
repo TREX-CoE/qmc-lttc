@@ -49,7 +49,7 @@
   starting from an approximate wave function. 
 
   Code examples will be given in Python and Fortran. You can use
-  whatever language you prefer to write the program.
+  whatever language you prefer to write the programs.
 
   We consider the stationary solution of the Schrödinger equation, so
   the wave functions considered here are real: for an $N$ electron
@@ -80,14 +80,17 @@
       =   \frac{\int |\Psi(\mathbf{r})|^2\, E_L(\mathbf{r})\,d\mathbf{r}}{\int |\Psi(\mathbf{r}) |^2 d\mathbf{r}}  
   \end{eqnarray*}
    
-  For few dimensions, one can easily compute $E$ by evaluating the integrals on a grid but, for a high number of dimensions, one can resort to Monte Carlo techniques to compute $E$.
+  For few dimensions, one can easily compute $E$ by evaluating the
+  integrals on a grid but, for a high number of dimensions, one can
+  resort to Monte Carlo techniques to compute $E$.
   
-  To this aim, recall that the probabilistic /expected value/ of an arbitrary function $f(x)$
-  with respect to a probability density function $P(x)$ is given by
+  To this aim, recall that the probabilistic /expected value/ of an
+  arbitrary function $f(x)$ with respect to a probability density
+  function $P(x)$ is given by
 
-  $$ \langle f \rangle_p = \int_{-\infty}^\infty P(x)\, f(x)\,dx, $$
+  $$ \langle f \rangle_P = \int_{-\infty}^\infty P(x)\, f(x)\,dx, $$
 
-  where a probability density function $p(x)$ is non-negative
+  where a probability density function $P(x)$ is non-negative
   and integrates to one:
 
   $$ \int_{-\infty}^\infty P(x)\,dx = 1. $$
@@ -95,13 +98,15 @@
   Similarly, we can view the the energy of a system, $E$, as the expected value of the local energy with respect to 
   a probability density $P(\mathbf{r})$ defined in 3$N$ dimensions:
   
-  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{\Psi^2}\,, $$
+  $$ E =  \int E_L(\mathbf{r}) P(\mathbf{r})\,d\mathbf{r} \equiv  \langle E_L \rangle_{P}\,, $$
   
   where the probability density is given by the square of the wave function:
   
   $$ P(\mathbf{r}) = \frac{|\Psi(\mathbf{r})|^2}{\int |\Psi(\mathbf{r})|^2 d\mathbf{r}}\,. $$
   
-  If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$ distributed as $p$, we can estimate $E$ as the average of the local energy computed over these configurations:
+  If we can sample $N_{\rm MC}$ configurations $\{\mathbf{r}\}$
+  distributed as $P$, we can estimate $E$ as the average of the local
+  energy computed over these configurations:
   
   $$ E \approx \frac{1}{N_{\rm MC}} \sum_{i=1}^{N_{\rm MC}} E_L(\mathbf{r}_i) \,. $$
   
@@ -148,7 +153,7 @@
 
     #+begin_exercise
     Write a function which computes the potential at $\mathbf{r}$.
-    The function accepts a 3-dimensional vector =r= as input arguments
+    The function accepts a 3-dimensional vector =r= as input argument
     and returns the potential.
     #+end_exercise
 
@@ -254,7 +259,7 @@ end function psi
     local kinetic energy.
     #+end_exercise
 
-    The local kinetic energy is defined as $$-\frac{1}{2}\frac{\Delta \Psi}{\Psi}.$$
+    The local kinetic energy is defined as $$T_L(\mathbf{r}) = -\frac{1}{2}\frac{\Delta \Psi(\mathbf{r})}{\Psi(\mathbf{r})}.$$
      
     We differentiate $\Psi$ with respect to $x$:
      
@@ -281,7 +286,7 @@ end function psi
 
     Therefore, the local kinetic energy is
     $$
-    -\frac{1}{2} \frac{\Delta \Psi}{\Psi} (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
+    T_L (\mathbf{r}) = -\frac{1}{2}\left(a^2 - \frac{2a}{\mathbf{|r|}} \right) 
     $$
      
     *Python*
@@ -352,15 +357,28 @@ def e_loc(a,r):
      #+END_SRC
 
     *Fortran*
-     #+BEGIN_SRC f90 :tangle none
+
+    #+begin_note
+    When you call a function in Fortran, you need to declare its
+    return type.
+    You might by accident choose a function name which is the
+    same as an internal function of Fortran. So it is recommended to
+    *always* use the keyword ~external~ to make sure the function you
+    are calling is yours.
+    #+end_note
+
+    #+BEGIN_SRC f90 :tangle none
 double precision function e_loc(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
 
+  double precision, external :: kinetic
+  double precision, external :: potential
+
   ! TODO
 
 end function e_loc
-     #+END_SRC
+    #+END_SRC
    
 **** Solution                                                      :solution:
     *Python*
@@ -375,7 +393,8 @@ double precision function e_loc(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
 
-  double precision, external   :: kinetic, potential
+  double precision, external :: kinetic
+  double precision, external :: potential
 
   e_loc = kinetic(a,r) + potential(r)
 
@@ -408,19 +427,37 @@ end function e_loc
    :header-args:f90: :tangle plot_hydrogen.f90
    :END:
    
-   #+begin_note
-   The potential and the kinetic energy both diverge at $r=0$, so we
-   choose a grid which does not contain the origin.
-   #+end_note
+   The program you will write in this section will be written in
+   another file (~plot_hydrogen.py~ or ~plot_hydrogen.f90~ for
+   example).
+   It will use the functions previously defined.
+
+   In Python, you should put at the beginning of the file
+   #+BEGIN_SRC python :results none :tangle none
+from hydrogen import e_loc
+   #+END_SRC
+   to be able to use the ~e_loc~ function of the ~hydrogen.py~ file.
+   
+   In Fortran, you will need to compile all the source files together:
+   #+begin_src sh :exports both
+gfortran hydrogen.f90 plot_hydrogen.f90 -o plot_hydrogen
+   #+end_src
 
 *** Exercise
+
     #+begin_exercise
     For multiple values of $a$ (0.1, 0.2, 0.5, 1., 1.5, 2.), plot the
     local energy along the $x$ axis. In Python, you can use matplotlib
     for example. In Fortran, it is convenient to write in a text file
     the values of $x$ and $E_L(\mathbf{r})$ for each point, and use
-    Gnuplot to plot the files.
+    Gnuplot to plot the files. With Gnuplot, you will need 2 blank
+    lines to separate the data corresponding to different values of $a$.
     #+end_exercise
+
+   #+begin_note
+   The potential and the kinetic energy both diverge at $r=0$, so we
+   choose a grid which does not contain the origin to avoid numerical issues.
+   #+end_note
 
     *Python*
      #+BEGIN_SRC python :results none :tangle none
@@ -3007,3 +3044,15 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
   - [ ] Propose a project for the students to continue the
     programs. Idea: Modify the program to compute the exact energy of
     the H$_2$ molecule at $R$=1.4010 bohr. Answer: 0.17406 a.u.
+
+* Schedule
+
+ |------------------------------+---------|
+ | <2021-02-04 Thu 09:00-10:30> | Lecture |
+ |------------------------------+---------|
+ | <2021-02-04 Thu 10:45-11:10> |     2.1 |
+ | <2021-02-04 Thu 11:10-11:30> |     2.2 |
+ | <2021-02-04 Thu 11:30-12:15> |     2.3 |
+ | <2021-02-04 Thu 12:15-12:30> |     2.4 |
+ |------------------------------+---------|
+ |                              |         |
