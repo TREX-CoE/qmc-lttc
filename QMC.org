@@ -2559,7 +2559,7 @@ def MonteCarlo(a, nmax, dt, tau, Eref):
     N_accep       = 0
     normalization = 0.
 
-    w = 1.
+    w           = 1.
     tau_current = 0.
 
     r_old   = np.random.normal(loc=0., scale=1.0, size=(3))
@@ -2577,8 +2577,8 @@ def MonteCarlo(a, nmax, dt, tau, Eref):
         tau_current += dt
 
         # Reset when tau is reached
-        if tau_current >= tau:
-            w = 1.
+        if tau_current > tau:
+            w           = 1.
             tau_current = 0.
 
         chi = np.random.normal(loc=0., scale=1.0, size=(3))
@@ -2608,8 +2608,8 @@ def MonteCarlo(a, nmax, dt, tau, Eref):
 # Run simulation
 a     = 1.2
 nmax  = 100000
-dt    = 0.1
-tau   = 10.
+dt    = 0.05
+tau   = 100.
 E_ref = -0.5
 
 X0 = [ MonteCarlo(a, nmax, dt, tau, E_ref) for i in range(30)]
@@ -2626,8 +2626,8 @@ print(f"A = {A} +/- {deltaA}")
      #+END_SRC
 
      #+RESULTS:
-     : E = -0.5006126340155459 +/- 0.00042555955652480285
-     : A = 0.9878509999999998 +/- 6.920791596475006e-05
+     : E = -0.500188803288012 +/- 0.0010615739297642462
+     : A = 0.9896496666666668 +/- 7.688845979106312e-05
 
      *Fortran* 
      #+BEGIN_SRC f90
@@ -2671,14 +2671,14 @@ subroutine pdmc(a, dt, nmax, energy, accep, tau, E_ref)
      e = e_loc(a,r_old)
      w = w * dexp(-dt*(e - E_ref))
 
-     energy = energy + w*e
      norm   = norm + w
+     energy = energy + w*e
      
      tau_current = tau_current + dt
 
      ! Reset when tau is reached
-     if (tau_current >= tau) then
-        w = 1.d0
+     if (tau_current > tau) then
+        w           = 1.d0
         tau_current = 0.d0
      endif
 
@@ -2725,9 +2725,9 @@ end subroutine pdmc
 program qmc
   implicit none
   double precision, parameter :: a     = 1.2d0
-  double precision, parameter :: dt    = 0.1d0
+  double precision, parameter :: dt    = 0.05d0
   double precision, parameter :: E_ref = -0.5d0
-  double precision, parameter :: tau   = 10.d0
+  double precision, parameter :: tau   = 100.d0
   integer*8       , parameter :: nmax  = 100000
   integer         , parameter :: nruns = 30
 
@@ -2754,11 +2754,11 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
      #+end_src
 
      #+RESULTS:
-     :  E =  -0.50067519934141380      +/-   7.9390940184720371E-004
-     :  A =   0.98788066666666663      +/-   7.2889356133441110E-005
+     :  E =  -0.49963953547336709      +/-   6.8755513992017491E-004
+     :  A =   0.98963533333333342      +/-   6.3052128284666221E-005
 
 
-** TODO H_2
+** H_2
 
    We will now consider the H_2 molecule in a minimal basis composed of the
    $1s$ orbitals of the hydrogen atoms:
@@ -3102,15 +3102,20 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
       :  E =  -0.48584030499187431      +/-   1.0411743995438257E-004
      
       
-* TODO [0/3] Last things to do
+* Project
 
-  - [ ] Give some hints of how much time is required for each section
+  Change your PDMC code for one of the following:
+  - the Helium atom, or
+  - the H$_2$ molecule at $R$=1.401 bohr.
+    
+  And compute the ground state energy.
+  
+      
+* TODO Last things to do                                           :noexport:
+
   - [ ] Prepare 4 questions for the exam: multiple-choice questions
     with 4 possible answers. Questions should be independent because
     they will be asked in a random order.
-  - [ ] Propose a project for the students to continue the
-    programs. Idea: Modify the program to compute the exact energy of
-    the H$_2$ molecule at $R$=1.4010 bohr. Answer: 0.17406 a.u.
 
 * Schedule
 
@@ -3126,4 +3131,5 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc.f90 -o vmc
  | <2021-02-04 Thu 14:10-14:30> |     3.2 |
  | <2021-02-04 Thu 14:30-15:30> |     3.3 |
  | <2021-02-04 Thu 15:30-16:30> |     3.4 |
+ | <2021-02-04 Thu 16:30-18:30> |     4.5 |
  |------------------------------+---------|
