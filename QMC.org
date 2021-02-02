@@ -2457,7 +2457,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      Modify the Metropolis VMC program into a PDMC program.
      In the limit $\delta t \rightarrow 0$, you should recover the exact
      energy of H for any value of $a$, as long as the simulation is stable. 
-     We choose here a fixed projection time $\tau=10$ a.u. 
+     We choose here a time step of 0.05 a.u. and a fixed projection
+     time $\tau$ =100 a.u. 
      #+end_exercise
    
     *Python*
