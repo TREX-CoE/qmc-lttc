@@ -2153,6 +2153,15 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      
 * Diffusion Monte Carlo                                            :solution:
 
+  As we have seen, Variational Monte Carlo is a powerful method to
+  compute integrals in large dimensions. It is often used in cases
+  where the expression of the wave function is such that the integrals
+  can't be evaluated (multi-centered Slater-type orbitals, correlation
+  factors, etc).
+
+  Diffusion Monte Carlo is different. It goes beyond the computation
+  of the integrals associated with an input wave function, and aims at
+  finding a near-exact numerical solution to the Schrödinger equation.
    
 ** Schrödinger equation in imaginary time
    
@@ -2198,51 +2207,36 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     imaginary time will converge to the exact ground state of the
     system.
 
-** Diffusion and branching
+** Relation to diffusion
 
-    The imaginary-time Schrödinger equation can be explicitly written in terms of the kinetic and
-    potential energies as
+    The [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
+
+    \[
+    \frac{\partial \psi(\mathbf{r},t)}{\partial t} = D\, \Delta \psi(\mathbf{r},t)
+    \]
+
+    where $D$ is the diffusion coefficient. When the imaginary-time
+    Schrödinger equation is written in terms of the kinetic energy and
+    potential,
     
     \[
-    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} = \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_{\rm ref}]\right) \psi(\mathbf{r}, \tau)\,. 
+    \frac{\partial \psi(\mathbf{r}, \tau)}{\partial \tau} =
+    \left(\frac{1}{2}\Delta - [V(\mathbf{r}) -E_{\rm ref}]\right) \psi(\mathbf{r}, \tau)\,, 
     \]
     
-    We can simulate this differential equation as a diffusion-branching process.
-
-
-    To see this, recall that the [[https://en.wikipedia.org/wiki/Diffusion_equation][diffusion equation]] of particles is given by
-
-    \[
-    \frac{\partial \psi(\mathbf{r},t)}{\partial t} = D\, \Delta \psi(\mathbf{r},t).
-    \]
-
-    Furthermore, the [[https://en.wikipedia.org/wiki/Reaction_rate][rate of reaction]] $v$ is the speed at which a chemical reaction
-    takes place. In a solution, the rate is given as a function of the
-    concentration $[A]$ by
-
-    \[
-    v = \frac{d[A]}{dt},
-    \]
-
-    where the concentration $[A]$ is proportional to the number of particles.
-
-    These two equations allow us to interpret the Schrödinger equation
-    in imaginary time as the combination of:
-    - a diffusion equation with a diffusion coefficient $D=1/2$ for the
-      kinetic energy, and
-    - a rate equation for the potential.
+    it can be identified as the combination of:
+    - a diffusion equation (Laplacian)
+    - an equation whose solution is an exponential (potential)
 
     The diffusion equation can be simulated by a Brownian motion:
     
     \[ \mathbf{r}_{n+1} = \mathbf{r}_{n} + \sqrt{\delta t}\, \chi \]
     
-    where $\chi$ is a Gaussian random variable, and the rate equation
+    where $\chi$ is a Gaussian random variable, and the potential term 
     can be simulated by creating or destroying particles over time (a
-    so-called branching process).
+    so-called branching process) or by simply considering it as a
+    cumulative multiplicative weight along the diffusion trajectory.
 
-    In /Diffusion Monte Carlo/ (DMC), one onbtains the ground state of a
-    system by simulating the Schrödinger equation in imaginary time via 
-    the combination of a diffusion process and a branching process. 
     
     We note that the ground-state wave function of a Fermionic system is
     antisymmetric and changes sign. Therefore, its interpretation as a probability 
@@ -2253,17 +2247,17 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     For the systems you will study, this is not an issue:
     
     - Hydrogen atom: You only have one electron! 
-    - Two-electron system ($H_2$ or He): The ground-wave function is antisymmetric in the spin variables but symmetric in the space ones.
+    - Two-electron system ($H_2$ or He): The ground-wave function is
+      antisymmetric in the spin variables but symmetric in the space ones.
     
     Therefore, in both cases, you are dealing with a "Bosonic" ground state.
     
 ** Importance sampling
    
     In a molecular system, the potential is far from being constant
-    and, in fact, diverges at the inter-particle coalescence points. Hence, when the
-    rate equation is simulated, it results in very large fluctuations
-    in the numbers of particles, making the calculations impossible in
-    practice.
+    and, in fact, diverges at the inter-particle coalescence points. Hence,
+    it results in very large fluctuations of the term associated with
+    the potental, making the calculations impossible in practice.
     Fortunately, if we multiply the Schrödinger equation by a chosen
     /trial wave function/ $\Psi_T(\mathbf{r})$ (Hartree-Fock, Kohn-Sham
     determinant, CI wave function, /etc/), one obtains
@@ -2285,8 +2279,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   The new "kinetic energy" can be simulated by the drift-diffusion
   scheme presented in the previous section (VMC).
   The new "potential" is the local energy, which has smaller fluctuations
-  when $\Psi_T$ gets closer to the exact wave function. This term can be simulated by
-  changing the number of particles according to $\exp\left[ -\delta t\,
+  when $\Psi_T$ gets closer to the exact wave function.
+  This term can be simulated by t particles according to $\exp\left[ -\delta t\,
   \left(E_L(\mathbf{r}) - E_{\rm ref}\right)\right]$
   where $E_{\rm ref}$ is the constant we had introduced above, which is adjusted to
   the running average energy to keep the number of particles 
