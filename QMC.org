@@ -2235,10 +2235,11 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     where $\chi$ is a Gaussian random variable, and the potential term 
     can be simulated by creating or destroying particles over time (a
     so-called branching process) or by simply considering it as a
-    cumulative multiplicative weight along the diffusion trajectory:
+    cumulative multiplicative weight along the diffusion trajectory
+    (pure Diffusion Monte Carlo):
 
    \[
-   \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right)
+   \exp \left( \int_0^\tau - (V(\mathbf{r}_t) - E_{\text{ref}}) dt \right).
    \]
 
     
@@ -2260,7 +2261,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    
     In a molecular system, the potential is far from being constant
     and, in fact, diverges at the inter-particle coalescence points. Hence,
-    it results in very large fluctuations of the term associated with
+    it results in very large fluctuations of the erm weight associated with
     the potental, making the calculations impossible in practice.
     Fortunately, if we multiply the Schrödinger equation by a chosen
     /trial wave function/ $\Psi_T(\mathbf{r})$ (Hartree-Fock, Kohn-Sham
@@ -2284,17 +2285,19 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   scheme presented in the previous section (VMC).
   The new "potential" is the local energy, which has smaller fluctuations
   when $\Psi_T$ gets closer to the exact wave function.
-  This term can be simulated by t particles according to $\exp\left[ -\delta t\,
-  \left(E_L(\mathbf{r}) - E_{\rm ref}\right)\right]$
+  This term can be simulated by
+   \[
+   \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right).
+   \]
   where $E_{\rm ref}$ is the constant we had introduced above, which is adjusted to
-  the running average energy to keep the number of particles 
-  reasonably constant.
+  an estimate of the average energy to keep the weights close to one.
 
   This equation generates the /N/-electron density $\Pi$, which is the
-  product of the ground state with the trial wave function. You may then ask: how
-  can we compute the total energy of the system?
+  product of the ground state solution with the trial wave
+  function. You may then ask: how can we compute the total energy of
+  the system?
   
-  To this aim, we use the mixed estimator of the energy:
+  To this aim, we use the /mixed estimator/ of the energy:
   
   \begin{eqnarray*}
    E(\tau)  &=&  \frac{\langle \psi(\tau) | \hat{H} | \Psi_T \rangle}{\langle \psi(\tau) | \Psi_T \rangle}\\
@@ -2310,7 +2313,8 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    \Pi(\mathbf{r},\tau) =\psi(\mathbf{r},\tau) \Psi_T(\mathbf{r}) \rightarrow \Phi_0(\mathbf{r}) \Psi_T(\mathbf{r})\,,
    \]
    
-   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an eigenstate of the Hamiltonian, we obtain for large $\tau$
+   and, using that $\hat{H}$ is Hermitian and that $\Phi_0$ is an
+   eigenstate of the Hamiltonian, we obtain for large $\tau$
 
    \[
    E(\tau) = \frac{\langle \psi_\tau | \hat{H} | \Psi_T \rangle}
@@ -2372,12 +2376,12 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   \right] + E_L(\mathbf{r}) \Pi(\mathbf{r},\tau) 
   \]
    
-** Pure Diffusion Monte Carlo (PDMC)
+** Pure Diffusion Monte Carlo
 
    Instead of having a variable number of particles to simulate the
-   branching process, one can consider the term
-   $\exp \left( -\delta t\,(  E_L(\mathbf{r}) - E_{\rm ref})  \right)$ as a
-   cumulative product of weights:
+   branching process as in the /Diffusion Monte Carlo/ (DMC) algorithm, we
+   use variant called /pure Diffusion Monte Carlo/ (PDMC) where
+   the potential term is considered as a cumulative product of weights:
 
    \begin{eqnarray*}
    W(\mathbf{r}_n, \tau)
@@ -2387,21 +2391,39 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    \prod_{i=1}^{n} w(\mathbf{r}_i)
    \end{eqnarray*}
 
-   where $\mathbf{r}_i$ are the coordinates along the trajectory and we introduced a time-step $\delta t$.
-   
-   The algorithm can be rather easily built on top of your VMC code:
+   where $\mathbf{r}_i$ are the coordinates along the trajectory and
+   we introduced a /time-step variable/ $\delta t$ to discretize the
+   integral.
 
-   0) Start with $W=1$
-   1) Evaluate the local energy at $\mathbf{r}_{n}$ and accumulate it
-   2) Compute the weight $w(\mathbf{r}_n)$
-   3) Update $W$
-   4) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
+   The PDMC algorithm is less stable than the DMC algorithm: it 
+   requires to have a value of $E_\text{ref}$ which is close to the
+   fixed-node energy, and a good trial wave function. Moreover, we
+   can't let $\tau$ become too large because the weight whether
+   explode or vanish: we need to have a fixed value of $\tau$
+   (projection time).
+   The big advantage of PDMC is that it is rather simple to implement
+   starting from a VMC code:
+   
+   0) Start with $W(\mathbf{r}_0)=1, \tau_0 = 0$
+   1) Evaluate the local energy at $\mathbf{r}_{n}$
+   2) Compute the contribution to the weight $w(\mathbf{r}_n) =
+      \exp(-\delta t(E_L(\mathbf{r}_n)-E_\text{ref}))$
+   3) Update $W(\mathbf{r}_{n}) = W(\mathbf{r}_{n-1}) \times w(\mathbf{r}_n)$
+   4) Accumulate the weighted energy $W(\mathbf{r}_n) \times
+      E_L(\mathbf{r}_n)$,
+      and the weight $W(\mathbf{r}_n)$ for the normalization
+   5) Update $\tau_n = \tau_{n-1} + \delta t$
+   6) If $\tau_{n} > \tau_\text{max}$, the long projection time has
+      been reached and we can start an new trajectory from the current
+      position: reset $W(r_n) = 1$ and $\tau_n
+      = 0$
+   7) Compute a new position $\mathbf{r'} = \mathbf{r}_n +
       \delta t\, \frac{\nabla \Psi(\mathbf{r})}{\Psi(\mathbf{r})} + \chi$
-   5) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
-   6) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
-   7) Draw a uniform random number $v \in [0,1]$
-   8) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
-   9) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
+   8) Evaluate $\Psi(\mathbf{r}')$ and $\frac{\nabla \Psi(\mathbf{r'})}{\Psi(\mathbf{r'})}$ at the new position
+   9) Compute the ratio $A = \frac{T(\mathbf{r}' \rightarrow \mathbf{r}_{n}) P(\mathbf{r}')}{T(\mathbf{r}_{n} \rightarrow \mathbf{r}') P(\mathbf{r}_{n})}$
+  10) Draw a uniform random number $v \in [0,1]$
+  11) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
+  12) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
 
    
    Some comments are needed:
@@ -2412,19 +2434,16 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
      E = \frac{\sum_{k=1}^{N_{\rm MC}} E_L(\mathbf{r}_k) W(\mathbf{r}_k, k\delta t)}{\sum_{k=1}^{N_{\rm MC}} W(\mathbf{r}_k, k\delta t)}
      \end{eqnarray*}
    
-   - The result will be affected by a time-step error (the finite size of $\delta t$) and one
-     has in principle to extrapolate to the limit $\delta t \rightarrow 0$. This amounts to fitting 
-     the energy computed for multiple values of $\delta t$. 
+   - The result will be affected by a time-step error
+     (the finite size of $\delta t$) due to the discretization of the
+     integral, and one has in principle to extrapolate to the limit
+     $\delta t \rightarrow 0$. This amounts to fitting the energy
+     computed for multiple values of $\delta t$.
    
      Here, you will be using a small enough time-step and you should not worry about the extrapolation.
-   - The accept/reject step (steps 2-5 in the algorithm) is in principle not needed for the correctness of 
+   - The accept/reject step (steps 9-12 in the algorithm) is in principle not needed for the correctness of 
      the DMC algorithm. However, its use reduces significantly the time-step error.
    
-   The PDMC algorithm is less stable than the branching algorithm: it 
-   requires to have a value of $E_\text{ref}$ which is close to the
-   fixed-node energy, and a good trial wave function. Its big
-   advantage is that it is very easy to program starting from a VMC
-   code, so this is what we will do in the next section.
    
 ** Hydrogen atom
   :PROPERTIES:
@@ -2435,9 +2454,10 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 *** Exercise 
 
      #+begin_exercise
-     Modify the Metropolis VMC program to introduce the PDMC weight.
+     Modify the Metropolis VMC program into a PDMC program.
      In the limit $\delta t \rightarrow 0$, you should recover the exact
-     energy of H for any value of $a$.
+     energy of H for any value of $a$, as long as the simulation is stable. 
+     We choose here a fixed projection time $\tau=10$ a.u. 
      #+end_exercise
    
     *Python*
@@ -2452,6 +2472,7 @@ def MonteCarlo(a, nmax, dt, Eref):
 a     = 1.2
 nmax  = 100000
 dt    = 0.01
+tau   = 10.
 E_ref = -0.5
 
 X0 = [ MonteCarlo(a, nmax, dt, E_ref) for i in range(30)]
@@ -2466,6 +2487,8 @@ X = [ x for (_, x) in X0 ]
 A, deltaA = ave_error(X)
 print(f"A = {A} +/- {deltaA}")
          #+END_SRC
+
+         #+RESULTS:
 
     *Fortran*
      #+BEGIN_SRC f90 :tangle none
