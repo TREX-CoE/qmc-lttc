@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -16,7 +18,7 @@ def MonteCarlo(a, nmax):
 
      return energy / normalization
 
-a    = 0.9
+a    = 1.2
 nmax = 100000
 
 X = [MonteCarlo(a,nmax) for i in range(30)]

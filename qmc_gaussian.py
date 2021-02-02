@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -16,7 +18,7 @@ def MonteCarlo(a,nmax):
         E += w * e_loc(a,r)
     return E/N
 
-a = 0.9
+a = 1.2
 nmax = 100000
 X = [MonteCarlo(a,nmax) for i in range(30)]
 E, deltaE = ave_error(X)

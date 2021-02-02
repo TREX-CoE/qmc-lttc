@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -19,7 +21,7 @@ def MonteCarlo(a,dt,nmax):
     return E/N
 
 
-a = 0.9
+a = 1.2
 nmax = 100000
 dt = 0.2
 X = [MonteCarlo(a,dt,nmax) for i in range(30)]

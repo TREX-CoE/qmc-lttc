@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -41,7 +43,7 @@ def MonteCarlo(a,nmax,dt):
 
 
 # Run simulation
-a    = 0.9
+a    = 1.2
 nmax = 100000
 dt   = 1.3
 

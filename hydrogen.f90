@@ -43,7 +43,8 @@ double precision function e_loc(a,r)
   implicit none
   double precision, intent(in) :: a, r(3)
 
-  double precision, external   :: kinetic, potential
+  double precision, external :: kinetic
+  double precision, external :: potential
 
   e_loc = kinetic(a,r) + potential(r)
 

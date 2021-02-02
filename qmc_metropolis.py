@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from hydrogen  import *
 from qmc_stats import *
 
@@ -25,9 +27,9 @@ def MonteCarlo(a,nmax,dt):
     return energy/nmax, N_accep/nmax
 
 # Run simulation
-a    = 0.9
+a    = 1.2
 nmax = 100000
-dt   = 1.3
+dt   = 1.0
 
 X0 = [ MonteCarlo(a,nmax,dt) for i in range(30)]
 

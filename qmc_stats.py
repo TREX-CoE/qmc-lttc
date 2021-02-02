@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from math import sqrt
 def ave_error(arr):
     M = len(arr)

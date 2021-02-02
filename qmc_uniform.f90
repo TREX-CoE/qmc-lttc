@@ -31,7 +31,7 @@ end subroutine uniform_montecarlo
 
 program qmc
   implicit none
-  double precision, parameter :: a     = 0.9
+  double precision, parameter :: a     = 1.2d0
   integer*8       , parameter :: nmax  = 100000
   integer         , parameter :: nruns = 30
 
