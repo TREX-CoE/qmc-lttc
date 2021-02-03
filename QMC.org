@@ -9,7 +9,7 @@
 
 #+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
-#+EXCLUDE_TAGS: solution
+#+EXCLUDE_TAGS: solution noexport
 
   #+BEGIN_SRC elisp :output none :exports none
 (setq org-latex-listings 'minted
@@ -2767,13 +2767,7 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
   And compute the ground state energy.
   
       
-* TODO Last things to do                                           :noexport:
-
-  - [ ] Prepare 4 questions for the exam: multiple-choice questions
-    with 4 possible answers. Questions should be independent because
-    they will be asked in a random order.
-
-* Schedule
+* Schedule                                                         :noexport:
 
  |------------------------------+---------|
  | <2021-02-04 Thu 09:00-10:30> | Lecture |
@@ -2789,3 +2783,14 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
  | <2021-02-04 Thu 15:30-16:30> |     3.4 |
  | <2021-02-04 Thu 16:30-18:30> |     4.5 |
  |------------------------------+---------|
+
+* Acknowledgments
+
+[[https://trex-coe.eu/sites/default/files/inline-images/euflag.jpg]]
+
+[[https://trex-coe.eu][TREX]] : Targeting Real Chemical Accuracy at the Exascale project
+has received funding from the European Union’s Horizon 2020 - Research and
+Innovation program - under grant agreement no. 952165. The content of this
+document does not represent the opinion of the European Union, and the European
+Union is not responsible for any use that might be made of such content.
+
