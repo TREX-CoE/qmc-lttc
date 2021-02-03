@@ -9,7 +9,7 @@
 
 #+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
-# EXCLUDE_TAGS: solution
+#+EXCLUDE_TAGS: solution
 
   #+BEGIN_SRC elisp :output none :exports none
 (setq org-latex-listings 'minted
@@ -2239,7 +2239,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
     (pure Diffusion Monte Carlo):
 
    \[
-   \exp \left( \int_0^\tau - (V(\mathbf{r}_t) - E_{\text{ref}}) dt \right).
+    \prod_i \exp \left( - (V(\mathbf{r}_i) - E_{\text{ref}}) \delta t \right).
    \]
 
     
@@ -2287,7 +2287,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
   when $\Psi_T$ gets closer to the exact wave function.
   This term can be simulated by
    \[
-   \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right).
+    \prod_i \exp \left( - (E_L(\mathbf{r}_i) - E_{\text{ref}}) \delta t \right).
    \]
   where $E_{\rm ref}$ is the constant we had introduced above, which is adjusted to
   an estimate of the average energy to keep the weights close to one.
@@ -2384,9 +2384,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
    the potential term is considered as a cumulative product of weights:
 
    \begin{eqnarray*}
-   W(\mathbf{r}_n, \tau)
-   & = & \exp \left( \int_0^\tau - (E_L(\mathbf{r}_t) - E_{\text{ref}}) dt \right) \\
-   & \approx &  \prod_{i=1}^{n} \exp \left( -\delta t\,
+   W(\mathbf{r}_n, \tau) = \prod_{i=1}^{n} \exp \left( -\delta t\,
    (E_L(\mathbf{r}_i) - E_{\text{ref}}) \right) = 
    \prod_{i=1}^{n} w(\mathbf{r}_i)
    \end{eqnarray*}
@@ -2472,8 +2470,8 @@ def MonteCarlo(a, nmax, dt, Eref):
 # Run simulation
 a     = 1.2
 nmax  = 100000
-dt    = 0.01
-tau   = 10.
+dt    = 0.05
+tau   = 100.
 E_ref = -0.5
 
 X0 = [ MonteCarlo(a, nmax, dt, E_ref) for i in range(30)]
@@ -2516,9 +2514,9 @@ end subroutine pdmc
 program qmc
   implicit none
   double precision, parameter :: a     = 1.2d0
-  double precision, parameter :: dt    = 0.1d0
+  double precision, parameter :: dt    = 0.05d0
   double precision, parameter :: E_ref = -0.5d0
-  double precision, parameter :: tau   = 10.d0
+  double precision, parameter :: tau   = 100.d0
   integer*8       , parameter :: nmax  = 100000
   integer         , parameter :: nruns = 30
 
