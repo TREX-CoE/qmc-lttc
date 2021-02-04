@@ -9,6 +9,7 @@
 
 #+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
+# EXCLUDE_TAGS: solution solution2 noexport
 #+EXCLUDE_TAGS: solution noexport
 
   #+BEGIN_SRC elisp :output none :exports none
@@ -182,7 +183,7 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none
 #!/usr/bin/env python3
@@ -237,7 +238,7 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none
 def psi(a, r):
@@ -308,7 +309,7 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
@@ -382,7 +383,7 @@ double precision function e_loc(a,r)
 end function e_loc
     #+END_SRC
    
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none
 def e_loc(a,r):
@@ -409,7 +410,7 @@ end function e_loc
     Find the theoretical value of $a$ for which $\Psi$ is an eigenfunction of $\hat{H}$.
     #+end_exercise
 
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
 
   \begin{eqnarray*}
   E &=& \frac{\hat{H} \Psi}{\Psi} = - \frac{1}{2} \frac{\Delta \Psi}{\Psi} -
@@ -522,7 +523,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
      #+end_src
 
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none
 #!/usr/bin/env python3
