@@ -165,7 +165,8 @@
     }
 
     table {
-	border: 0;
+	border: 1;
+        width: 98%;
     }
 
     thead {
