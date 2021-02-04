@@ -10,7 +10,8 @@
 #+OPTIONS: H:4 num:t toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS: TeX:t LaTeX:t skip:nil d:nil todo:t pri:nil tags:not-in-toc
 # EXCLUDE_TAGS: solution solution2 noexport
-#+EXCLUDE_TAGS: solution noexport
+# EXCLUDE_TAGS: solution noexport
+#+EXCLUDE_TAGS: noexport
 
   #+BEGIN_SRC elisp :output none :exports none
 (setq org-latex-listings 'minted
@@ -183,7 +184,7 @@ double precision function potential(r)
 end function potential
      #+END_SRC
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
 #!/usr/bin/env python3
@@ -238,7 +239,7 @@ double precision function psi(a, r)
 end function psi
      #+END_SRC
      
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
 def psi(a, r):
@@ -309,7 +310,7 @@ double precision function kinetic(a,r)
 end function kinetic
      #+END_SRC
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
 def kinetic(a,r):
@@ -383,7 +384,7 @@ double precision function e_loc(a,r)
 end function e_loc
     #+END_SRC
    
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
 def e_loc(a,r):
@@ -410,7 +411,7 @@ end function e_loc
     Find the theoretical value of $a$ for which $\Psi$ is an eigenfunction of $\hat{H}$.
     #+end_exercise
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
 
   \begin{eqnarray*}
   E &=& \frac{\hat{H} \Psi}{\Psi} = - \frac{1}{2} \frac{\Delta \Psi}{\Psi} -
@@ -523,7 +524,7 @@ plot './data' index 0 using 1:2 with lines title 'a=0.1', \
      './data' index 5 using 1:2 with lines title 'a=2.0'
      #+end_src
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none
 #!/usr/bin/env python3
@@ -681,7 +682,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
@@ -816,7 +817,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    $$\langle \left( E - \langle E \rangle_{\Psi^2} \right)^2\rangle_{\Psi^2}  = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
    #+end_exercise
    
-**** DONE Solution                                                 :solution2:
+**** Solution                                                 :solution:
 
    $\bar{E} = \langle E \rangle$ is a constant, so $\langle \bar{E}
    \rangle = \bar{E}$ .
@@ -892,7 +893,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
 ./variance_hydrogen
      #+end_src
     
-**** Solution                                                     :solution2:
+**** Solution                                                     :solution:
      *Python*
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
@@ -1089,7 +1090,7 @@ subroutine ave_error(x,n,ave,err)
 end subroutine ave_error
     #+END_SRC
    
-**** Solution                                                     :solution2:
+**** Solution                                                     :solution:
     *Python*
      #+BEGIN_SRC python :results none :exports code
 #!/usr/bin/env python3
@@ -1265,7 +1266,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
 ./qmc_uniform
      #+end_src
 
-**** Solution                                                     :solution2:
+**** Solution                                                     :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
@@ -1561,7 +1562,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_metropolis.f90 -o qmc_metropolis
 ./qmc_metropolis
      #+end_src
 
-**** Solution                                                     :solution2:
+**** Solution                                                     :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
@@ -1867,7 +1868,7 @@ subroutine drift(a,r,b)
 end subroutine drift
      #+END_SRC
 
-**** Solution                                                     :solution2:
+**** Solution                                                     :solution:
     *Python*
      #+BEGIN_SRC python :tangle hydrogen.py
 def drift(a,r):
@@ -1975,7 +1976,7 @@ gfortran hydrogen.f90 qmc_stats.f90 vmc_metropolis.f90 -o vmc_metropolis
 ./vmc_metropolis
      #+end_src
 
-**** Solution                                                      :solution2:
+**** Solution                                                      :solution:
     *Python*
      #+BEGIN_SRC python :results output :exports both
 #!/usr/bin/env python3
