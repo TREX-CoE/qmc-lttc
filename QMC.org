@@ -681,7 +681,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
 ./energy_hydrogen 
      #+end_src
 
-**** Solution                                                      :solution:
+**** Solution                                                      :solution2:
     *Python*
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
@@ -816,7 +816,7 @@ gfortran hydrogen.f90 energy_hydrogen.f90 -o energy_hydrogen
    $$\langle \left( E - \langle E \rangle_{\Psi^2} \right)^2\rangle_{\Psi^2}  = \langle E^2 \rangle_{\Psi^2} - \langle E \rangle_{\Psi^2}^2 $$
    #+end_exercise
    
-**** Solution                                                      :solution:
+**** DONE Solution                                                 :solution2:
 
    $\bar{E} = \langle E \rangle$ is a constant, so $\langle \bar{E}
    \rangle = \bar{E}$ .
@@ -893,7 +893,7 @@ gfortran hydrogen.f90 variance_hydrogen.f90 -o variance_hydrogen
      #+end_src
     
 **** Solution                                                      :solution:
-    *Python*
+     *Python*
      #+BEGIN_SRC python :results none :exports both
 #!/usr/bin/env python3
 
@@ -2768,6 +2768,109 @@ gfortran hydrogen.f90 qmc_stats.f90 pdmc.f90 -o pdmc
   And compute the ground state energy.
   
       
+* Exam                                                             :noexport:
+
+  
+** Question 1
+   
+   Consider the hydrogen atom. You are using Monte Carlo sampling to
+   compute the energy associated with a wave function $\Psi(\mathbf{r})$.
+   If you use a Gaussian with mean 0 and variance 1 (centered on the
+   nucleus) to generate the random samples, the correct weight
+   $w(\mathbf{r})$ involved in the expectation value of the energy
+   $\frac{1}{M}\sum_{i=1}^M E_L(\mathbf{r_i}) \times w(\mathbf{r_i})$ is:
+
+   A -  $w(\mathbf{r})= \left|\Psi(\mathbf{r})\right|^2$
+
+   B -  $w(\mathbf{r})= \left( 2 \pi \right)^{3/2} \exp \left( \frac{\mathbf{r}^2}{2} \right) \left|\Psi(\mathbf{r})\right|^2$
+
+   C -  $w(\mathbf{r})= \frac{1}{\left( 2 \pi \right)^{3/2}} \exp \left( -\frac{\mathbf{r}^2}{2} \right) \left|\Psi(\mathbf{r})\right|^2$
+
+   D -  $w(\mathbf{r})= \frac{1}{\left( 2 \pi \right)^{3/2}} \exp \left( -\frac{\mathbf{r}^2}{2} \right)$
+   
+
+
+   
+** Question 2
+
+   In the exercises, you only considered "bosonic" wave functions.
+   Let's assume that you now deal with a system where the wave
+   function has nodes ($\Psi(\mathbf{r})=0$).
+   
+   i ) Does the local energy diverge at the nodes?
+   ii) The drift $\nabla \Psi / \Psi$ diverge at the nodes. Does it
+       push the electrons towards the nodes or away from the nodes?
+
+   A - i) $E_L$ diverges, ii) $\nabla \Psi / \Psi$ pushes in the direction of the nodes
+
+   B - i) $E_L$ diverges, ii) $\nabla \Psi / \Psi$ pushes away from the nodes
+
+   C - i) $E_L$ is finite, ii) $\nabla \Psi / \Psi$ pushes in the direction of the nodes
+
+   D - i) $E_L$ is finite, ii) $\nabla \Psi / \Psi$ pushes away from the nodes
+   
+   *Hint*: You can also think in one dimension if this helps you.
+   
+** Question 3
+
+   Consider the helium atom in its singlet ground state with the wave function
+   \[
+   \Psi(\mathbf{r}_1, \mathbf{r}_2) = \exp \left( - ( \mathbf{r}_1 + 
+   \mathbf{r}_2 ) \right)
+   \].
+
+   When an electron approaches
+     i ) the nucleus or,
+     ii) the other electron,
+
+   the local energy diverges to:
+
+   A - i) $+\infty$ and ii) $-\infty$ 
+   B - i) $+\infty$ and ii) $+\infty$ 
+   C - i) $-\infty$ and ii) $-\infty$ 
+   D - i) $-\infty$ and ii) $+\infty$ 
+
+   *Hint 1* : Recall the expression of the Laplacian for the single
+   electron case (hydrogen).
+
+   *Hint 2* : Helium has $Z=2$.
+   
+** Question 4
+
+  Consider a 2-electron system.
+  We propose a move of the 2-electron configuration according to a uniform
+  distribution $[-\delta L/2, \delta L/2]$ in all directions.
+
+  What is the expression of the transition probability for
+  the i) forward and ii) reverse move?
+  
+  A - i ) Forward : $T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \frac{1}{(\delta L)^3}$
+
+      ii) Reverse : $T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) = -\frac{1}{(\delta L)^3}$
+
+  B - i ) Forward : $T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \frac{1}{(\delta L)^6}$
+
+      ii) Reverse : $T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) = (\delta L)^6$
+
+  C - i ) Forward : $T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = \frac{1}{(\delta L)^6}$
+
+      ii) Reverse : $T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) = \frac{1}{(\delta L)^6}$
+   
+  C - i ) Forward : $T(\mathbf{r}_{n} \rightarrow \mathbf{r}_{n+1}) = -\frac{1}{(\delta L)^3}$
+
+      ii) Reverse : $T(\mathbf{r}_{n+1} \rightarrow \mathbf{r}_{n}) = \frac{1}{(\delta L)^3}$
+   
+** Question 5
+
+   If you run a single DMC calculation on the Li$^+$ ion in the singlet
+   ground state, which approximations impact the final energy:
+
+   - None
+   - The fixed-node approximation
+   - The time-step approximation
+   - The fixed-node approximation and the time-step approximation
+
+
 * Schedule                                                         :noexport:
 
  |------------------------------+---------|
