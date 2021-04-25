@@ -4,6 +4,8 @@ import numpy as np
 from hydrogen import e_loc, psi
 
 interval = np.linspace(-5,5,num=50)
+print(interval
+     )
 
 delta = (interval[1]-interval[0])**3
 
@@ -34,5 +36,5 @@ for a in [0.1, 0.2, 0.5, 0.9, 1., 1.5, 2.]:
     E  = E  / norm
     E2 = E2 / norm
 
-    s2 = E2 - E**2
+    s2 = E2 #- E**2
     print(f"a = {a} \t E = {E:10.8f} \t \sigma^2 = {s2:10.8f}")

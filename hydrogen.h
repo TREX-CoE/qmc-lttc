@@ -12,7 +12,7 @@ double potential(double *r, const int l) {
       if (pot > 0.0) {
 	   return -1.0 / sqrt(pot); 
       }
-      return -1;
+      return 1e6;
 
 }
 
