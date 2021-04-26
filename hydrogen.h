@@ -46,3 +46,17 @@ double kinetic(double a, double *r, const int l) {
 double e_loc(double a, double *r, const int l) {
       return kinetic(a, r, l) + potential(r, l);
 }
+
+void drift(double a, double *r, double *d, const int l) {
+      double rnorm, fact;
+
+      for (int i = 0; i < l; ++i) {
+	    rnorm += r[i]*r[i];
+      }
+      rnorm = sqrt(rnorm);
+
+      fact = -a / rnorm;
+      for (int i = 0; i < l; ++i) {
+	    d[i] = r[i] * fact;
+      }
+}
