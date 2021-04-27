@@ -6,16 +6,20 @@ void variational_montecarlo(double a, const int nmax, double dt,
       int n_accept;
       double r_old[3], r_new[3], psi_old, psi_new;
       double d_old[3], d_new[3], d2_old, d2_new;
-      double rnd[3], aval, fact_a, fact_b, fact_exp, u;
+      double rnd[3], fact_a, fact_b, sq_dt, q, u;
+
+      sq_dt = sqrt(dt);
 
       // Initial position
       random_gauss(r_old, 3);
-      psi_old = psi(a, r_old, 3) * psi(a, r_old, 3);
+
       drift(a, r_old, d_old, 3);
       d2_old = 0.0;
-      for (int i = 0; i < 3; ++i) {
-	    d2_old += d_old[i] * d_old[i];
+      for (int j = 0; j < 3; ++j) {
+	    d2_old += d_old[j] * d_old[j];
       }
+
+      psi_old = psi(a, r_old, 3);
 
       *energy = 0.0;
       *accept = 0.0;
@@ -24,39 +28,41 @@ void variational_montecarlo(double a, const int nmax, double dt,
 	    // Compute and accumulate the local energy
 	    *energy += e_loc(a, r_old, 3);
 
-	    // Compute new position
+	    // Compute new position (correct variance of sampled Gaussian)
 	    random_gauss(rnd, 3);
 	    for (int j = 0; j < 3; ++j) {
-		  r_new[j] = r_old[j] + dt * d_old[j] + rnd[j];
+		  r_new[j] = r_old[j] + dt * d_old[j] + rnd[j] * sq_dt;
 	    }
 
 	    // New WF and acceptance probability
-	    psi_new = psi(a, r_new, 3) * psi(a, r_new, 3);
-
             drift(a, r_new, d_new, 3);
 	    d2_new = 0.0;
-            for (int i = 0; i < 3; ++i) {
-            	    d2_new += d_new[i] * d_new[i];
+            for (int j = 0; j < 3; ++j) {
+		  d2_new += d_new[j] * d_new[j];
             }
 
+	    psi_new = psi(a, r_new, 3);
+
 	    // Compute the ratio of probabilities q
-	    fact_a = 0.5 * dt * (d2_new - d2_old);
 	    fact_b = 0.0;
-	    for (int i = 0; i < 3; ++i) {
-		  fact_b += (d_new[i] + d_old[i]) * (r_new[i] - r_old[i]);
+	    for (int j = 0; j < 3; ++j) {
+		  fact_b += (d_new[j] + d_old[j]) * (r_new[j] - r_old[j]);
 	    }
-	    fact_exp = exp(fact_b - fact_a);
-	    aval = fact_exp * psi_new / psi_old;
+	    fact_a = 0.5 * dt * (d2_new - d2_old) + fact_b;
+
+	    q = psi_new / psi_old;
+	    q = exp(-fact_a) * q * q;
 
 	    u = (double) rand() / RAND_MAX;
 
-	    if (u <= aval) {
+	    if (u <= q) {
+		  n_accept += 1;
 		  for (int j = 0; j < 3; ++j) {
 			r_old[j] = r_new[j];
 			d_old[j] = d_new[j];
 		  }
+		  d2_old = d2_new;
 		  psi_old = psi_new;
-		  n_accept += 1;
 	    }
       }
       *energy /= nmax;

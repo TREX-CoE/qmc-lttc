@@ -33,8 +33,6 @@ void random_gauss(double *z, const int n) {
       const double two_pi = 2.0 * acos(-1.0);
       double u[n + 1];
 
-      srand(time(NULL));
-
       for (int i = 0; i < n + 1; ++i) {
           u[i] = (double) rand() / RAND_MAX;
       }
@@ -44,18 +42,18 @@ void random_gauss(double *z, const int n) {
 	    // n is even
 	    for (int i = 0; i < n; i+=2) {
 		  z[i] = sqrt(-2.0 * log(u[i]));
-		  z[i] = z[i] * cos(two_pi * u[i + 1]);
 		  z[i + 1] = z[i] * sin(two_pi * u[i + 1]);
+		  z[i] = z[i] * cos(two_pi * u[i + 1]);
 	    }
       }
       else {
 	    // n is odd
 	    for (int i = 0; i < n - 1; i+=2) {
 		  z[i] = sqrt(-2.0 * log(u[i]));
-		  z[i] = z[i] * cos(two_pi * u[i + 1]);
 		  z[i + 1] = z[i] * sin(two_pi * u[i + 1]);
+		  z[i] = z[i] * cos(two_pi * u[i + 1]);
 	    }
-	    z[n] = sqrt(-2.0 * log(u[n]));
-	    z[n] = z[n] * cos(two_pi * u[n + 1]);
+	    z[n - 1] = sqrt(-2.0 * log(u[n - 1]));
+	    z[n - 1] = z[n - 1] * cos(two_pi * u[n]);
       }
 }
