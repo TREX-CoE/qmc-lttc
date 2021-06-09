@@ -4,8 +4,6 @@ import numpy as np
 from hydrogen import e_loc, psi
 
 interval = np.linspace(-5,5,num=50)
-print(interval
-     )
 
 delta = (interval[1]-interval[0])**3
 
