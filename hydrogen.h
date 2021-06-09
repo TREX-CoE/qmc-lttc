@@ -34,6 +34,7 @@ double psi(double a, double *r, const int l) {
 double kinetic(double a, double *r, const int l) {
       double rnorm;
 
+      rnorm = 0.0;
       for (int i = 0; i < l; ++i) {
 	    rnorm += r[i]*r[i];
       }
@@ -50,6 +51,7 @@ double e_loc(double a, double *r, const int l) {
 void drift(double a, double *r, double *d, const int l) {
       double rnorm, fact;
 
+      rnorm = 0.0;
       for (int i = 0; i < l; ++i) {
 	    rnorm += r[i]*r[i];
       }
