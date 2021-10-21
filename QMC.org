@@ -1429,7 +1429,7 @@ gfortran hydrogen.f90 qmc_stats.f90 qmc_uniform.f90 -o qmc_uniform
    1) Evaluate the local energy at $\mathbf{r}_n$ and accumulate it
    2) Compute a new position $\mathbf{r'} = \mathbf{r}_n + \delta L\, \mathbf{u}$
    3) Evaluate $\Psi(\mathbf{r}')$ at the new position
-   4) Compute the ratio $A = \frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}$
+   4) Compute the ratio $A = min\{1,\frac{\left|\Psi(\mathbf{r'})\right|^2}{\left|\Psi(\mathbf{r}_{n})\right|^2}\}$
    5) Draw a uniform random number $v \in [0,1]$
    6) if $v \le A$, accept the move : set $\mathbf{r}_{n+1} = \mathbf{r'}$
    7) else, reject the move : set $\mathbf{r}_{n+1} = \mathbf{r}_n$
